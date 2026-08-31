@@ -4,17 +4,37 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0b8043">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="PMG KS">
   <title>PMG KS - FY2027 Performance Portal</title>
+  
   <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3063/3063822.png">
+  
   <style>
-    :root { --primary: #0b8043; --primary-dark: #075e33; --bg: #f8f9fa; --card: #ffffff; --text: #202124; --accent-blue: #1a73e8; }
+    :root {
+      --primary: #0b8043;
+      --primary-dark: #075e33;
+      --bg: #f8f9fa;
+      --card: #ffffff;
+      --text: #202124;
+      --accent-blue: #1a73e8;
+    }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; }
     
+    /* Smart Install Banner */
+    #installBanner { background: #e8f0fe; border: 1px solid #1a73e8; border-radius: 10px; padding: 12px; margin-bottom: 12px; font-size: 0.85rem; }
+    #installBanner h3 { margin: 0 0 4px; color: #1a73e8; font-size: 0.95rem; }
+    
+    /* PIN Modal */
     #pinOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; }
     .pin-box { background: white; border-radius: 16px; padding: 22px; text-align: center; width: 85%; max-width: 300px; }
     .pin-input { font-size: 1.6rem; letter-spacing: 10px; text-align: center; width: 80%; padding: 8px; border: 2px solid #dadce0; border-radius: 8px; margin: 14px 0; }
     
     .btn { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 11px 14px; font-size: 0.9rem; font-weight: 600; cursor: pointer; width: 100%; box-sizing: border-box; margin-top: 8px; }
+    .btn:active { background: var(--primary-dark); }
+    .btn-action { background: #1a73e8; margin-top: 6px; }
     .btn-image { background: #e37400; }
     .btn-copy { background: #137333; }
     
@@ -34,12 +54,13 @@
     table { width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-top: 8px; }
     th, td { padding: 6px 4px; text-align: right; border-bottom: 1px solid #eee; }
     th:first-child, td:first-child { text-align: left; }
+    th { color: #5f6368; }
     #renderCanvas { display: none; }
   </style>
 </head>
 <body>
 
-  <!-- PIN Shield -->
+  <!-- PIN Modal -->
   <div id="pinOverlay">
     <div class="pin-box">
       <h2 style="margin:0; color:var(--primary); font-size:1.15rem;">PMG Kota Sentosa</h2>
@@ -50,9 +71,16 @@
     </div>
   </div>
 
+  <!-- Smart Install Banner -->
+  <div id="installBanner" style="display:none;">
+    <h3 id="installTitle">📲 Install as App</h3>
+    <div id="installBody"></div>
+    <button id="btnAndroidInstall" class="btn btn-action" style="display:none;" onclick="triggerAndroidInstall()">Install App Now</button>
+  </div>
+
   <div style="text-align:center; margin:8px 0 14px;">
     <h1 style="font-size:1.2rem; color:var(--primary); margin:0;">PMG Pharmacy Kota Sentosa</h1>
-    <p id="lastUpdated" style="font-size:0.78rem; color:#5f6368; margin-top:3px;">FY2027 Daily Performance Portal</p>
+    <p id="lastUpdated" style="font-size:0.78rem; color:#5f6368; margin-top:3px;">FY2027 Performance Portal</p>
   </div>
 
   <!-- Teammate View -->
@@ -114,11 +142,56 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbyDXiyZZuYYDN4e6w16HyoTXbKbLwmPCSqoJVAkuRd4iPTYQP7KGtMJZuaQ-NyyXgSZ-w/exec";
     const CORRECT_PIN = "6688";
     let cachedData = null;
+    let deferredPrompt = null;
 
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js');
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const banner = document.getElementById('installBanner');
+      banner.style.display = 'block';
+      document.getElementById('installBody').innerHTML = 'Tap the button below to install this portal on your phone.';
+      document.getElementById('btnAndroidInstall').style.display = 'block';
+    });
+
+    function triggerAndroidInstall() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          document.getElementById('installBanner').style.display = 'none';
+          deferredPrompt = null;
+        });
+      }
+    }
+
+    function checkDeviceInstallGuidance() {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+      if (isStandalone) return;
+
+      const ua = navigator.userAgent || navigator.vendor || window.opera;
+      const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+      const isWhatsAppOrWebview = /FBAN|FBAV|WhatsApp|Line/i.test(ua);
+
+      const banner = document.getElementById('installBanner');
+      const body = document.getElementById('installBody');
+
+      if (isWhatsAppOrWebview) {
+        banner.style.display = 'block';
+        document.getElementById('installTitle').innerText = '⚠️ Opened in WhatsApp / In-App Browser';
+        body.innerHTML = 'To install, tap <b>⋮ (Menu)</b> at top right and select <b>"Open in Chrome"</b> (Android) or <b>"Open in Safari"</b> (iPhone).';
+      } else if (isIOS && !deferredPrompt) {
+        banner.style.display = 'block';
+        document.getElementById('installTitle').innerText = '📲 Install on iPhone (Safari)';
+        body.innerHTML = 'Tap the <b>Share icon ⎋</b> at the bottom of Safari, then tap <b>"Add to Home Screen ➕"</b>.';
+      }
+    }
 
     function verifyPin() {
-      if (document.getElementById("pinCode").value === CORRECT_PIN) {
+      const pin = document.getElementById("pinCode").value;
+      if (pin === CORRECT_PIN) {
         localStorage.setItem("pmg_pin_auth", "true");
         document.getElementById("pinOverlay").style.display = "none";
         loadData();
@@ -193,7 +266,6 @@
       alert("WhatsApp Daily Briefing copied to clipboard!");
     }
 
-    // Exact Replicate of Director's 7-Day Table Screenshot
     function renderDirectorsReportScreenshot() {
       const canvas = document.getElementById("renderCanvas");
       const ctx = canvas.getContext("2d");
@@ -209,7 +281,6 @@
       const s = cachedData ? cachedData.dailySummary : { date: "31 AUG 2026", totalSales: 11160.50, hbSales: 4693.53, hmSales: 891.20, transactions: 298, basketSize: 37.45 };
       ctx.fillText(`PMG PHARMACY KOTA SENTOSA - DIRECTORS' DAILY SALES REPORT (${s.date.toUpperCase()})`, canvas.width / 2, 35);
 
-      // Header Blue Bars
       ctx.fillStyle = "#d0e1fd";
       ctx.fillRect(30, 55, 380, 26);
       ctx.fillRect(430, 55, 690, 26);
@@ -220,7 +291,6 @@
       ctx.fillText("Monthly Sales & LY Comparison", 40, 72);
       ctx.fillText("7-Day Rolling Daily Breakdown", 440, 72);
 
-      // Left Table Grid
       const rows = [
         ["Total Sales (Inc WHM)", `RM ${s.totalSales.toFixed(2)}`, "LY: RM 314,607.72"],
         ["House Brand (HB)", `RM ${s.hbSales.toFixed(2)} (${s.hbRatio.toFixed(1)}%)`, "LY: RM 114,842.68"],
@@ -245,7 +315,6 @@
         ctx.fillText(r, 290, y);
       });
 
-      // Right Side Strategy Comment Box
       ctx.fillStyle = "#e6f4ea";
       ctx.fillRect(430, 90, 690, 180);
       ctx.strokeStyle = "#137333";
@@ -265,7 +334,6 @@
       link.click();
     }
 
-    // 9-Column Teammates Target Gap Screenshot
     function renderTeammatesScreenshot() {
       const canvas = document.getElementById("renderCanvas");
       const ctx = canvas.getContext("2d");
@@ -336,6 +404,7 @@
     }
 
     window.onload = () => {
+      checkDeviceInstallGuidance();
       if (localStorage.getItem("pmg_pin_auth") === "true") {
         document.getElementById("pinOverlay").style.display = "none";
         loadData();
