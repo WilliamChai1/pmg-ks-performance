@@ -3,35 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>PMG KS - Performance Portal</title>
-  <link rel="manifest" href="manifest.json">
+  <title>PMG KS - Management & Performance Portal</title>
   <style>
-    :root { --primary: #0b8043; --accent: #137333; --bg: #f8f9fa; --card: #ffffff; --text: #202124; --gap-red: #d93025; --gap-green: #188038; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 16px; }
-    .header { text-align: center; margin-bottom: 20px; }
+    :root {
+      --primary: #0b8043;
+      --primary-dark: #075e33;
+      --accent: #137333;
+      --bg: #f8f9fa;
+      --card: #ffffff;
+      --text: #202124;
+      --gap-red: #c5221f;
+      --gap-green: #137333;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; }
+    .header { text-align: center; margin: 12px 0 16px; }
     .header h1 { font-size: 1.25rem; color: var(--primary); margin: 0; }
-    .header p { font-size: 0.85rem; color: #5f6368; margin-top: 4px; }
-    .card { background: var(--card); border-radius: 12px; padding: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 16px; }
-    select { width: 100%; padding: 12px; font-size: 1rem; border-radius: 8px; border: 1px solid #dadce0; background: white; margin-bottom: 12px; font-weight: 600; }
-    .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
-    .metric-box { background: #f1f3f4; padding: 12px; border-radius: 8px; text-align: center; }
-    .metric-box .label { font-size: 0.75rem; color: #5f6368; text-transform: uppercase; }
-    .metric-box .val { font-size: 1.15rem; font-weight: 700; color: var(--text); margin-top: 4px; }
-    .ai-banner { background: #e6f4ea; border-left: 4px solid var(--primary); padding: 12px; border-radius: 6px; font-size: 0.9rem; line-height: 1.4; }
-    .target-gap { font-size: 1rem; font-weight: 700; text-align: center; padding: 8px; border-radius: 6px; margin-top: 10px; }
-    .gap-achieved { background: #ceead6; color: var(--gap-green); }
-    .gap-behind { background: #fad2cf; color: var(--gap-red); }
+    .header p { font-size: 0.8rem; color: #5f6368; margin-top: 4px; }
+    
+    /* PIN Modal */
+    #pinOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .pin-box { background: white; border-radius: 16px; padding: 24px; text-align: center; width: 85%; max-width: 320px; }
+    .pin-input { font-size: 1.8rem; letter-spacing: 12px; text-align: center; width: 80%; padding: 8px; border: 2px solid #dadce0; border-radius: 8px; margin: 16px 0; }
+    .btn { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 12px 18px; font-size: 0.95rem; font-weight: 600; cursor: pointer; width: 100%; }
+    .btn:active { background: var(--primary-dark); }
+    .btn-secondary { background: #5f6368; margin-top: 8px; }
+    .btn-copy { background: #1a73e8; }
+    
+    /* Card Styles */
+    .card { background: var(--card); border-radius: 12px; padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 12px; }
+    .card h2 { font-size: 0.95rem; color: var(--primary); margin: 0 0 10px; display: flex; justify-content: space-between; align-items: center; }
+    select { width: 100%; padding: 10px; font-size: 0.95rem; border-radius: 8px; border: 1px solid #dadce0; background: white; margin-bottom: 10px; font-weight: 600; }
+    
+    .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .metric-box { background: #f1f3f4; padding: 10px; border-radius: 8px; text-align: center; }
+    .metric-box .label { font-size: 0.7rem; color: #5f6368; text-transform: uppercase; font-weight: 600; }
+    .metric-box .val { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-top: 2px; }
+    
+    .ai-banner { background: #e6f4ea; border-left: 4px solid var(--primary); padding: 10px; border-radius: 6px; font-size: 0.85rem; line-height: 1.4; color: #137333; font-weight: 500; }
+    
+    /* Table Styles */
+    table { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin-top: 8px; }
+    th, td { padding: 6px 4px; text-align: right; border-bottom: 1px solid #eee; }
+    th:first-child, td:first-child { text-align: left; }
+    th { color: #5f6368; font-weight: 600; }
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <h1>PMG Pharmacy Kota Sentosa</h1>
-    <p>FY2027 Daily Performance & Target Gap</p>
+  <!-- PIN Protection Screen -->
+  <div id="pinOverlay">
+    <div class="pin-box">
+      <h2 style="margin: 0; color: var(--primary); font-size: 1.2rem;">PMG Kota Sentosa</h2>
+      <p style="font-size: 0.85rem; color: #5f6368;">Enter 4-Digit Branch PIN</p>
+      <input type="password" id="pinCode" class="pin-input" maxlength="4" placeholder="••••" autofocus>
+      <button class="btn" onclick="verifyPin()">Unlock Portal</button>
+      <p id="pinError" style="color: red; font-size: 0.8rem; margin-top: 10px; display: none;">Incorrect PIN</p>
+    </div>
   </div>
 
+  <div class="header">
+    <h1>PMG Pharmacy Kota Sentosa</h1>
+    <p id="lastUpdated">FY2027 Management & Daily Performance</p>
+  </div>
+
+  <!-- Teammate Performance Selector -->
   <div class="card">
-    <label for="staffSelect" style="font-size: 0.8rem; font-weight: 600; color: #5f6368;">SELECT YOUR NAME:</label>
+    <h2>👤 Individual Teammate Dashboard</h2>
     <select id="staffSelect" onchange="renderStaffData()">
       <option value="Chai Yee Sian (William)">Chai Yee Sian (William)</option>
       <option value="Jong Pei Choo">Jong Pei Choo</option>
@@ -42,70 +79,131 @@
       <option value="Muhammad Nur Farizin">Muhammad Nur Farizin</option>
       <option value="Kenix Ling">Kenix Ling</option>
     </select>
-
-    <div id="staffMetrics">
-      <div class="metric-grid">
-        <div class="metric-box">
-          <div class="label">Total Sales (TS)</div>
-          <div class="val" id="valTS">RM 0.00</div>
-        </div>
-        <div class="metric-box">
-          <div class="label">House Brand (HB)</div>
-          <div class="val" id="valHB">RM 0.00</div>
-        </div>
-        <div class="metric-box">
-          <div class="label">HB % Ratio</div>
-          <div class="val" id="valHBRatio">0.0%</div>
-        </div>
-        <div class="metric-box">
-          <div class="label">Customers Served</div>
-          <div class="val" id="valCust">0</div>
-        </div>
-      </div>
+    <div class="metric-grid">
+      <div class="metric-box"><div class="label">Total Sales (TS)</div><div class="val" id="valTS">RM 0.00</div></div>
+      <div class="metric-box"><div class="label">House Brand (HB)</div><div class="val" id="valHB">RM 0.00</div></div>
+      <div class="metric-box"><div class="label">HB % Ratio</div><div class="val" id="valHBRatio">0.0%</div></div>
+      <div class="metric-box"><div class="label">Customers Served</div><div class="val" id="valCust">0</div></div>
     </div>
   </div>
 
+  <!-- AI Daily Coaching & Morning Briefing Copy -->
   <div class="card">
-    <h3 style="font-size: 0.95rem; margin-top: 0; color: var(--primary);">🌟 Daily House Brand Coaching</h3>
-    <div class="ai-banner" id="aiCoaching">
-      Loading daily strategic focus...
+    <h2>🌟 AI Morning Sales Coaching</h2>
+    <div class="ai-banner" id="aiCoaching">Loading clinical House Brand guidance...</div>
+    <div style="margin-top: 10px;">
+      <button class="btn btn-copy" onclick="copyWhatsAppBriefing()">📋 Copy WhatsApp Briefing</button>
+    </div>
+  </div>
+
+  <!-- Directors & Teammate Performance Downloads -->
+  <div class="card">
+    <h2>📊 Reports & Direct Downloads</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+      <button class="btn" onclick="downloadDirectorsReport()">📥 Directors Report</button>
+      <button class="btn btn-secondary" onclick="downloadTeammatesCSV()">📥 Teammates CSV</button>
+    </div>
+    <div style="overflow-x: auto; margin-top: 12px;">
+      <table id="teammatesTable">
+        <thead>
+          <tr><th>Name</th><th>TS (RM)</th><th>HB (RM)</th><th>HB %</th><th>Cust</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
   </div>
 
   <script>
-    // Paste your Google Apps Script Web App Deployment URL here:
-    const API_URL = "https://script.google.com/macros/s/AKfycbyDXiyZZuYYDN4e6w16HyoTXbKbLwmPCSqoJVAkuRd4iPTYQP7KGtMJZuaQ-NyyXgSZ-w/exec";
-
+    const API_URL = "YOUR_DEPLOYED_APPS_SCRIPT_WEBAPP_URL";
+    const CORRECT_PIN = "6688";
     let cachedData = null;
+
+    function verifyPin() {
+      const pin = document.getElementById("pinCode").value;
+      if (pin === CORRECT_PIN) {
+        localStorage.setItem("pmg_pin_auth", "true");
+        document.getElementById("pinOverlay").style.display = "none";
+        loadData();
+      } else {
+        document.getElementById("pinError").style.display = "block";
+      }
+    }
 
     async function loadData() {
       try {
         const res = await fetch(API_URL);
         cachedData = await res.json();
-        document.getElementById("aiCoaching").innerText = cachedData.dailySummary.aiComment || "Focus on House Brand consultations.";
+        document.getElementById("lastUpdated").innerText = `Updated: ${cachedData.updatedAt || 'Today'}`;
+        document.getElementById("aiCoaching").innerText = cachedData.dailySummary.aiComment || "Pair OTCs with Citazinc & Suppflora.";
         renderStaffData();
+        renderTeammatesTable();
       } catch (e) {
-        document.getElementById("aiCoaching").innerText = "Pair URTI OTCs with Citazinc & Suppflora to boost HB basket size.";
+        document.getElementById("aiCoaching").innerText = "Focus on House Brand pairings (Citazinc / Progutor / Suppflora).";
       }
     }
 
     function renderStaffData() {
       const selected = document.getElementById("staffSelect").value;
       localStorage.setItem("pmg_user", selected);
-      
       if (!cachedData || !cachedData.teammates || !cachedData.teammates[selected]) return;
       const s = cachedData.teammates[selected];
-      
       document.getElementById("valTS").innerText = "RM " + s.ts.toFixed(2);
       document.getElementById("valHB").innerText = "RM " + s.hb.toFixed(2);
       document.getElementById("valHBRatio").innerText = ((s.hb / (s.ts || 1)) * 100).toFixed(1) + "%";
       document.getElementById("valCust").innerText = s.customers;
     }
 
+    function renderTeammatesTable() {
+      if (!cachedData || !cachedData.teammates) return;
+      const tbody = document.querySelector("#teammatesTable tbody");
+      tbody.innerHTML = "";
+      for (const [name, val] of Object.entries(cachedData.teammates)) {
+        const row = `<tr>
+          <td>${name.split(" ")[0]}</td>
+          <td>${val.ts.toFixed(0)}</td>
+          <td>${val.hb.toFixed(0)}</td>
+          <td>${((val.hb/(val.ts||1))*100).toFixed(0)}%</td>
+          <td>${val.customers}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+      }
+    }
+
+    function copyWhatsAppBriefing() {
+      const summary = cachedData ? cachedData.dailySummary : { totalSales: 0, hbSales: 0, hbRatio: 0, basketSize: 0, aiComment: "Focus on HB basket size." };
+      const text = `*PMG PHARMACY KOTA SENTOSA - DAILY BRIEFING*\n\n*Total Sales:* RM ${summary.totalSales.toFixed(2)}\n*House Brand:* RM ${summary.hbSales.toFixed(2)} (${summary.hbRatio.toFixed(1)}%)\n*HB Basket Size:* RM ${summary.basketSize.toFixed(2)}\n\n*Strategic Focus:*\n${summary.aiComment}\n\n_Let's have a great and productive day!_`;
+      navigator.clipboard.writeText(text);
+      alert("WhatsApp Daily Briefing copied to clipboard!");
+    }
+
+    function downloadDirectorsReport() {
+      const summary = cachedData ? cachedData.dailySummary : { totalSales: 0, hbSales: 0, hmSales: 0, transactions: 0 };
+      const content = `PMG PHARMACY KOTA SENTOSA - DIRECTORS REPORT\nDate: ${summary.date || 'Today'}\nTotal Sales (Inc WHM): RM ${summary.totalSales}\nHouse Brand: RM ${summary.hbSales} (${summary.hbRatio}%)\nHigh Margin: RM ${summary.hmSales}\nTransactions: ${summary.transactions}\nAI Strategy Comment: ${summary.aiComment}`;
+      const blob = new Blob([content], { type: "text/plain" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `Directors_Report_${new Date().toISOString().slice(0,10)}.txt`;
+      a.click();
+    }
+
+    function downloadTeammatesCSV() {
+      if (!cachedData || !cachedData.teammates) return;
+      let csv = "Teammate,Total Sales (RM),House Brand (RM),HB %,Customers\n";
+      for (const [name, val] of Object.entries(cachedData.teammates)) {
+        csv += `"${name}",${val.ts.toFixed(2)},${val.hb.toFixed(2)},${((val.hb/(val.ts||1))*100).toFixed(1)}%,${val.customers}\n`;
+      }
+      const blob = new Blob([csv], { type: "text/csv" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `Teammate_Performance_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+    }
+
     window.onload = () => {
-      const saved = localStorage.getItem("pmg_user");
-      if (saved) document.getElementById("staffSelect").value = saved;
-      loadData();
+      if (localStorage.getItem("pmg_pin_auth") === "true") {
+        document.getElementById("pinOverlay").style.display = "none";
+        loadData();
+      }
     };
   </script>
 </body>
