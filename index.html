@@ -174,23 +174,73 @@
     }
 
     function copyWhatsAppBriefing() {
-      const s = cachedData ? cachedData.dailySummary : { totalSales: 11160.50, hbSales: 4693.53, hbRatio: 42.1, basketSize: 37.45, aiComment: "Drive HB basket size." };
-      let text = `*PMG PHARMACY KOTA SENTOSA - DAILY SALES BRIEFING*\n\n`;
-      text += `*Date:* ${s.date || '1-Sep-2026'}\n`;
-      text += `*Total Sales:* RM ${s.totalSales.toFixed(2)}\n`;
-      text += `*House Brand:* RM ${s.hbSales.toFixed(2)} (${s.hbRatio.toFixed(1)}%)\n`;
-      text += `*HB Basket Size:* RM ${(s.hbBasketSize || 15.75).toFixed(2)} (Target: RM 20.00+)\n`;
-      text += `*Total Customers Served:* ${s.transactions}\n\n`;
-      text += `*Outlet Strategic Priority:*\n${s.aiComment}\n\n`;
-      text += `*Individual Teammate Focus:*\n`;
+      const s = cachedData ? cachedData.dailySummary : { totalSales: 0, hbSales: 0, hmSales: 0, date: "1-Sep-2026" };
+      const targets = { ts: 400000, hb: 184000, hm: 40000 };
       
-      if (cachedData && cachedData.recommendations) {
-        for (const [name, tip] of Object.entries(cachedData.recommendations)) {
-          text += `• *${name.split(" ")[0]}:* ${tip}\n`;
+      const tsPct = ((s.totalSales / targets.ts) * 100).toFixed(1);
+      const hbPct = ((s.hbSales / targets.hb) * 100).toFixed(1);
+      const hmPct = ((s.hmSales / targets.hm) * 100).toFixed(1);
+
+      // Daily personal targets per role (assuming 30 days in month)
+      // Pharmacist & BM group (20% share split) vs ABM & PA group (80% / remaining share)
+      const phDailyTS = (targets.ts * 0.10) / 30;
+      const phDailyHB = (targets.hb * 0.10) / 30;
+      const phDailyHM = (targets.hm * 0.10) / 30;
+
+      const staffDailyTS = (targets.ts * 0.10) / 30;
+      const staffDailyHB = (targets.hb * 0.10) / 30;
+      const staffDailyHM = (targets.hm * 0.10) / 30;
+
+      let text = `Date of briefing: ${s.date || 'Today'}\n\n`;
+      text += `Target achievement:\n`;
+      text += `TS: RM ${s.totalSales.toFixed(2)} / RM ${targets.ts.toLocaleString()} (${tsPct}%)\n`;
+      text += `HB: RM ${s.hbSales.toFixed(2)} / RM ${targets.hb.toLocaleString()} (${hbPct}%)\n`;
+      text += `HM: RM ${s.hmSales.toFixed(2)} / RM ${targets.hm.toLocaleString()} (${hmPct}%)\n\n`;
+
+      text += `Personal target per day:\n`;
+      text += `Pharmacist and Branch Manager\n`;
+      text += `TS: RM ${phDailyTS.toFixed(2)}\n`;
+      text += `HB: RM ${phDailyHB.toFixed(2)}\n`;
+      text += `HM: RM ${phDailyHM.toFixed(2)}\n\n`;
+
+      text += `Assistant BM and Pharmacist Assistant (PA)\n`;
+      text += `TS: RM ${staffDailyTS.toFixed(2)}\n`;
+      text += `HB: RM ${staffDailyHB.toFixed(2)}\n`;
+      text += `HM: RM ${staffDailyHM.toFixed(2)}\n\n`;
+
+      text += `Congratulation board (for those who hit personal target)\n`;
+      
+      let congratsFound = false;
+      if (cachedData && cachedData.teammates) {
+        for (const [name, val] of Object.entries(cachedData.teammates)) {
+          // Check if teammate hit any target proportional to days elapsed or daily benchmark
+          let hits = [];
+          if (val.ts >= staffDailyTS) hits.push("TS");
+          if (val.hb >= staffDailyHB) hits.push("HB");
+          if (val.hm >= staffDailyHM) hits.push("HM");
+
+          if (hits.length > 0) {
+            text += `• ${name.split(" ")[0]} - Hit target for: ${hits.join(', ')}\n`;
+            congratsFound = true;
+          }
         }
       }
+      if (!congratsFound) {
+        text += `_Let's push hard today to get our names on the board!_\n`;
+      }
+
+      text += `\nAction plan to hit target:\n`;
+      if (cachedData && cachedData.actionPlans) {
+        text += `1. (1st Wk): ${cachedData.actionPlans.w1}\n`;
+        text += `2. (2nd Wk): ${cachedData.actionPlans.w2}\n`;
+        text += `3. (3rd Wk): ${cachedData.actionPlans.w3}\n`;
+        text += `4. (4th Wk): ${cachedData.actionPlans.w4}\n`;
+      } else {
+        text += `• Focus on House Brand product recommendations and pairing with OTC items.\n`;
+      }
+
       navigator.clipboard.writeText(text);
-      alert("WhatsApp Daily Briefing copied to clipboard!");
+      alert("Structured Team Sales Briefing copied to clipboard!");
     }
 
     // Exact Pixel-Perfect Director 7-Day Screenshot (Including Action Plans Block)
