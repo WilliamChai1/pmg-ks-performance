@@ -77,7 +77,6 @@
       <div class="metric-box"><div class="label">Customers Served</div><div class="val" id="valCust">0</div></div>
     </div>
 
-    <!-- Personalized AI Recommendation -->
     <div class="personal-rec">
       <b>💡 Your Personal Clinical Focus Today:</b>
       <div id="valPersonalRec" style="margin-top:4px;">Loading personal recommendation...</div>
@@ -90,7 +89,7 @@
     <div class="ai-banner" id="aiCoaching">Loading strategic guidance...</div>
   </div>
 
-  <!-- Manager Only Control Panel (Chai Yee Sian) -->
+  <!-- Manager Only Control Panel -->
   <div id="managerPanel" class="card" style="border: 1px solid var(--accent-blue);">
     <h2 style="color: var(--accent-blue);">🔒 Manager Report & Screenshot Hub</h2>
     <p style="font-size:0.75rem; color:#5f6368; margin-top:-6px;">Exclusive to Pharmacist Chai Yee Sian</p>
@@ -175,9 +174,9 @@
     }
 
     function copyWhatsAppBriefing() {
-      const s = cachedData ? cachedData.dailySummary : { totalSales: 0, hbSales: 0, hbRatio: 0, basketSize: 0, aiComment: "Drive HB basket size." };
+      const s = cachedData ? cachedData.dailySummary : { totalSales: 11160.50, hbSales: 4693.53, hbRatio: 42.1, basketSize: 37.45, aiComment: "Drive HB basket size." };
       let text = `*PMG PHARMACY KOTA SENTOSA - DAILY SALES BRIEFING*\n\n`;
-      text += `*Date:* ${s.date || 'Today'}\n`;
+      text += `*Date:* ${s.date || '1-Sep-2026'}\n`;
       text += `*Total Sales:* RM ${s.totalSales.toFixed(2)}\n`;
       text += `*House Brand:* RM ${s.hbSales.toFixed(2)} (${s.hbRatio.toFixed(1)}%)\n`;
       text += `*HB Basket Size:* RM ${(s.hbBasketSize || 15.75).toFixed(2)} (Target: RM 20.00+)\n`;
@@ -194,7 +193,7 @@
       alert("WhatsApp Daily Briefing copied to clipboard!");
     }
 
-    // Exact Pixel-Perfect Director 7-Day Screenshot
+    // Clean Directors' 7-Day Rolling Report Screenshot
     function renderDirectorsReportScreenshot() {
       const canvas = document.getElementById("renderCanvas");
       const ctx = canvas.getContext("2d");
@@ -212,7 +211,7 @@
       ctx.textAlign = "center";
       ctx.fillText(`PMG PHARMACY KOTA SENTOSA - DIRECTORS' DAILY SALES REPORT (${s.date.toUpperCase()})`, canvas.width / 2, 28);
 
-      // Section 1: Left Table Header (Blue)
+      // Left Table Header (Blue)
       ctx.fillStyle = "#d0e1fd";
       ctx.fillRect(20, 45, 380, 24);
       ctx.fillStyle = "#000000";
@@ -222,7 +221,6 @@
       ctx.fillText("Amount", 190, 61);
       ctx.fillText("%", 330, 61);
 
-      // Left Table Variance Rows
       const leftRows = [
         ["Sales Vs Target", "RM 0.00", "0%"],
         ["Sales Vs LY", `+RM ${s.totalSales.toFixed(0)}`, "+100%"],
@@ -246,18 +244,18 @@
       });
 
       // MTD Comparison Table
-      ctx.fillStyle = "#fff2cc"; // Yellow
+      ctx.fillStyle = "#fff2cc";
       ctx.fillRect(20, 225, 380, 20);
       ctx.fillStyle = "#000000";
       ctx.font = "bold 10px Calibri, sans-serif";
       ctx.fillText(`From 1st to ${s.date}`, 30, 239);
       ctx.fillText("Same date range", 200, 239);
 
-      ctx.fillStyle = "#c6efce"; // Green MTD
+      ctx.fillStyle = "#c6efce";
       ctx.fillRect(20, 245, 120, 20);
-      ctx.fillStyle = "#bdd7ee"; // Blue LY
+      ctx.fillStyle = "#bdd7ee";
       ctx.fillRect(140, 245, 130, 20);
-      ctx.fillStyle = "#f8cbad"; // Orange Target
+      ctx.fillStyle = "#f8cbad";
       ctx.fillRect(270, 245, 130, 20);
 
       ctx.fillStyle = "#000000";
@@ -286,7 +284,7 @@
         ctx.fillText(r, 280, y);
       });
 
-      // Section 2: Right Table (7-Day Rolling Breakdown)
+      // Right 7-Day Rolling Section
       const days = (cachedData && cachedData.rolling7Days && cachedData.rolling7Days.length > 0) ? cachedData.rolling7Days : [
         { dayLabel: "1-Sep", ts: s.totalSales, hb: s.hbSales, hbRatio: s.hbRatio, hm: s.hmSales, ehm: 145, hmTotal: 1036, hmRatio: 9.3, tranx: s.transactions, tsBs: s.basketSize, hbBs: 15.75, hmBs: 2.99, comment: s.aiComment }
       ];
@@ -312,7 +310,6 @@
         ctx.fillText(m, rightStartX + 6, y);
       });
 
-      // Render 7 Daily Columns
       days.forEach((day, dIdx) => {
         const x = rightStartX + 110 + (dIdx * colW);
         ctx.fillStyle = "#d0e1fd";
@@ -347,7 +344,6 @@
           ctx.fillText(v, x + (colW / 2), y);
         });
 
-        // Daily Comment Card
         const commentY = 330;
         ctx.fillStyle = "#fff8e1";
         ctx.fillRect(x, commentY, colW, 200);
@@ -365,7 +361,6 @@
       link.click();
     }
 
-    // 9-Column Teammate Target Gap Screenshot
     function renderTeammatesScreenshot() {
       const canvas = document.getElementById("renderCanvas");
       const ctx = canvas.getContext("2d");
