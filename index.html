@@ -204,7 +204,7 @@
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      const s = cachedData ? cachedData.dailySummary : { date: "1-Sep-2026", totalSales: 11160.50, hbSales: 4693.53, hmSales: 891.20, transactions: 298, basketSize: 37.45, lyTotalSales: 314607.72, lyHbSales: 114842.68 };
+      const s = cachedData ? cachedData.dailySummary : { date: "1-Sep-2026", totalSales: 11160.50, hbSales: 4693.53, hmSales: 1036.10, transactions: 298, basketSize: 37.45, lyTotalSales: 314607.72, lyHbSales: 114842.68 };
       
       // Title
       ctx.fillStyle = "#000000";
@@ -223,12 +223,12 @@
       ctx.fillText("%", 330, 61);
 
       const leftRows = [
-        { label: "Sales Vs Target", amount: "RM 0.00", pct: "0%" },
-        { label: "Sales Vs LY", amount: "+RM " + s.totalSales.toFixed(0), pct: "+100%" },
-        { label: "HB Vs Target", amount: "RM 0.00", pct: "0%" },
-        { label: "HB Vs LY", amount: "+RM " + s.hbSales.toFixed(0), pct: "+100%" },
-        { label: "HM Vs Target", amount: "RM 0.00", pct: "0%" },
-        { label: "HM Vs LY", amount: "+RM " + s.hmSales.toFixed(0), pct: "+100%" }
+        { label: "Sales Vs Target", amount: "-RM " + (400000 - s.totalSales).toFixed(0), pct: ((s.totalSales / 400000) * 100).toFixed(0) + "%" },
+        { label: "Sales Vs LY", amount: "-RM " + (s.lyTotalSales - s.totalSales).toFixed(0), pct: ((s.totalSales / s.lyTotalSales) * 100).toFixed(0) + "%" },
+        { label: "HB Vs Target", amount: "-RM " + (184000 - s.hbSales).toFixed(0), pct: ((s.hbSales / 184000) * 100).toFixed(0) + "%" },
+        { label: "HB Vs LY", amount: "-RM " + (s.lyHbSales - s.hbSales).toFixed(0), pct: ((s.hbSales / s.lyHbSales) * 100).toFixed(0) + "%" },
+        { label: "HM Vs Target", amount: "-RM " + (40000 - s.hmSales).toFixed(0), pct: ((s.hmSales / 40000) * 100).toFixed(0) + "%" },
+        { label: "HM Vs LY", amount: "-RM " + (29499 - s.hmSales).toFixed(0), pct: ((s.hmSales / 29499) * 100).toFixed(0) + "%" }
       ];
 
       leftRows.forEach((item, i) => {
@@ -245,18 +245,18 @@
       });
 
       // MTD Comparison Table
-      ctx.fillStyle = "#fff2cc";
+      ctx.fillStyle = "#fff2cc"; // Yellow
       ctx.fillRect(20, 225, 380, 20);
       ctx.fillStyle = "#000000";
       ctx.font = "bold 10px Calibri, sans-serif";
       ctx.fillText(`From 1st to ${s.date}`, 30, 239);
       ctx.fillText("Same date range", 200, 239);
 
-      ctx.fillStyle = "#c6efce";
+      ctx.fillStyle = "#c6efce"; // Green MTD
       ctx.fillRect(20, 245, 120, 20);
-      ctx.fillStyle = "#bdd7ee";
+      ctx.fillStyle = "#bdd7ee"; // Blue LY
       ctx.fillRect(140, 245, 130, 20);
-      ctx.fillStyle = "#f8cbad";
+      ctx.fillStyle = "#f8cbad"; // Orange Target
       ctx.fillRect(270, 245, 130, 20);
 
       ctx.fillStyle = "#000000";
@@ -267,7 +267,7 @@
       const mtdRows = [
         { title: "Total", mtd: "RM " + s.totalSales.toFixed(0), ly: "RM " + (s.lyTotalSales || 314608).toFixed(0), target: "RM 400,000" },
         { title: "HB", mtd: "RM " + s.hbSales.toFixed(0), ly: "RM " + (s.lyHbSales || 114843).toFixed(0), target: "RM 184,000" },
-        { title: "HM", mtd: "RM " + s.hmSales.toFixed(0), ly: "RM 25,114", target: "RM 40,000" },
+        { title: "HM", mtd: "RM " + s.hmSales.toFixed(0), ly: "RM 29,499", target: "RM 40,000" },
         { title: "EHM", mtd: "RM 145", ly: "RM 4,385", target: "-" }
       ];
 
@@ -287,7 +287,7 @@
 
       // Section 2: Right Table (7-Day Rolling Breakdown)
       const days = (cachedData && cachedData.rolling7Days && cachedData.rolling7Days.length > 0) ? cachedData.rolling7Days : [
-        { dayLabel: "1-Sep", ts: s.totalSales, hb: s.hbSales, hbRatio: s.hbRatio, hm: s.hmSales, ehm: 145, hmTotal: 1036, hmRatio: 9.3, tranx: s.transactions, tsBs: s.basketSize, hbBs: 15.75, hmBs: 2.99, comment: s.aiComment }
+        { dayLabel: "1-Sep", ts: s.totalSales, hb: s.hbSales, hbRatio: s.hbRatio, hm: 891.20, ehm: 144.90, hmTotal: 1036.10, hmRatio: 9.28, tranx: s.transactions, tsBs: s.basketSize, hbBs: 15.75, hmBs: 2.99, comment: s.aiComment }
       ];
 
       const colW = 125;
