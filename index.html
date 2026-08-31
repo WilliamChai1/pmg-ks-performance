@@ -4,33 +4,42 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0b8043">
-  <title>PMG KS - FY2027 Performance Portal</title>
+  <title>PMG KS - Performance Portal</title>
   <link rel="manifest" href="./manifest.json">
   <style>
-    :root { --primary: #0b8043; --primary-dark: #075e33; --bg: #f8f9fa; --card: #ffffff; --text: #202124; --accent-blue: #1a73e8; }
+    :root { 
+      --primary: #0b8043; 
+      --primary-dark: #075e33; 
+      --bg: #f8f9fa; 
+      --card: #ffffff; 
+      --text: #202124; 
+      --accent-blue: #1a73e8; 
+      --gap-green: #137333;
+    }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; }
     
     #pinOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-    .pin-box { background: white; border-radius: 16px; padding: 22px; text-align: center; width: 85%; max-width: 300px; }
+    .pin-box { background: white; border-radius: 16px; padding: 24px; text-align: center; width: 85%; max-width: 300px; }
     .pin-input { font-size: 1.6rem; letter-spacing: 10px; text-align: center; width: 80%; padding: 8px; border: 2px solid #dadce0; border-radius: 8px; margin: 14px 0; }
     
     .btn { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 11px 14px; font-size: 0.9rem; font-weight: 600; cursor: pointer; width: 100%; box-sizing: border-box; margin-top: 8px; }
     .btn:active { background: var(--primary-dark); }
     .btn-image { background: #e37400; }
     .btn-copy { background: #137333; }
+    .btn-logout { background: #5f6368; padding: 6px 12px; font-size: 0.75rem; width: auto; margin: 0; }
     
     .card { background: var(--card); border-radius: 12px; padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 12px; }
-    .card h2 { font-size: 0.92rem; color: var(--primary); margin: 0 0 10px; }
-    select { width: 100%; padding: 10px; font-size: 0.95rem; border-radius: 8px; border: 1px solid #dadce0; background: white; font-weight: 600; }
+    .card h2 { font-size: 0.92rem; color: var(--primary); margin: 0 0 10px; display: flex; justify-content: space-between; align-items: center; }
     
     .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
     .metric-box { background: #f1f3f4; padding: 10px; border-radius: 8px; text-align: center; }
     .metric-box .label { font-size: 0.68rem; color: #5f6368; text-transform: uppercase; font-weight: 600; }
     .metric-box .val { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-top: 2px; }
     
-    .ai-banner { background: #e6f4ea; border-left: 4px solid var(--primary); padding: 10px; border-radius: 6px; font-size: 0.82rem; line-height: 1.4; color: #137333; }
-    .action-plan-box { background: #fff8e1; border-left: 4px solid #f9a825; padding: 10px; border-radius: 6px; font-size: 0.82rem; line-height: 1.5; color: #37474f; margin-top: 8px; }
+    .gap-banner { background: #feefe3; border-left: 4px solid #e37400; padding: 10px; border-radius: 6px; font-size: 0.82rem; line-height: 1.5; margin-top: 8px; }
+    .commission-banner { background: #e6f4ea; border-left: 4px solid var(--gap-green); padding: 10px; border-radius: 6px; font-size: 0.85rem; line-height: 1.4; margin-top: 8px; color: var(--gap-green); }
     .personal-rec { background: #e8f0fe; border-left: 4px solid var(--accent-blue); padding: 10px; border-radius: 6px; font-size: 0.82rem; line-height: 1.4; color: #1a73e8; margin-top: 8px; }
+    .congrats-card { background: #fff8e1; border-left: 4px solid #f9a825; padding: 10px; border-radius: 6px; font-size: 0.82rem; line-height: 1.5; margin-top: 8px; }
     
     #managerPanel { display: none; }
     table { width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-top: 8px; }
@@ -41,66 +50,61 @@
 </head>
 <body>
 
-  <!-- PIN Shield -->
+  <!-- Multi-User PIN Authentication Shield -->
   <div id="pinOverlay">
     <div class="pin-box">
       <h2 style="margin:0; color:var(--primary); font-size:1.15rem;">PMG Kota Sentosa</h2>
-      <p style="font-size:0.8rem; color:#5f6368;">Enter 4-Digit Branch PIN</p>
+      <p style="font-size:0.8rem; color:#5f6368;">Enter Your Personal 4-Digit PIN</p>
       <input type="password" id="pinCode" class="pin-input" maxlength="4" placeholder="••••" autofocus>
-      <button class="btn" onclick="verifyPin()">Unlock Portal</button>
-      <p id="pinError" style="color:red; font-size:0.75rem; margin-top:8px; display:none;">Incorrect PIN</p>
+      <button class="btn" onclick="verifyPin()">Sign In</button>
+      <p id="pinError" style="color:red; font-size:0.75rem; margin-top:8px; display:none;">Invalid PIN. Contact William.</p>
     </div>
   </div>
 
   <div style="text-align:center; margin:8px 0 14px;">
     <h1 style="font-size:1.2rem; color:var(--primary); margin:0;">PMG Pharmacy Kota Sentosa</h1>
-    <p id="lastUpdated" style="font-size:0.78rem; color:#5f6368; margin-top:3px;">FY2027 Daily Performance Portal</p>
+    <p id="lastUpdated" style="font-size:0.78rem; color:#5f6368; margin-top:3px;">FY2027 Performance Portal</p>
   </div>
 
-  <!-- Teammate View -->
+  <!-- Authenticated User Personal Dashboard -->
   <div class="card">
-    <h2>👤 Teammate Dashboard</h2>
-    <select id="staffSelect" onchange="onStaffChange()">
-      <option value="Chai Yee Sian (William)">Chai Yee Sian (William) [Manager]</option>
-      <option value="Jong Pei Choo">Jong Pei Choo</option>
-      <option value="Fiona Fiena">Fiona Fiena</option>
-      <option value="Haniesha Louna">Haniesha Louna</option>
-      <option value="Daniela Janet">Daniela Janet</option>
-      <option value="Nurhafizah Pauli">Nurhafizah Pauli</option>
-      <option value="Muhammad Nur Farizin">Muhammad Nur Farizin</option>
-      <option value="Kenix Ling">Kenix Ling</option>
-    </select>
+    <h2>
+      <span id="userNameHeader">👤 Loading...</span>
+      <button class="btn btn-logout" onclick="logout()">Lock 🔒</button>
+    </h2>
 
     <div class="metric-grid">
-      <div class="metric-box"><div class="label">Total Sales (TS)</div><div class="val" id="valTS">RM 0.00</div></div>
-      <div class="metric-box"><div class="label">House Brand (HB)</div><div class="val" id="valHB">RM 0.00</div></div>
-      <div class="metric-box"><div class="label">HB % Ratio</div><div class="val" id="valHBRatio">0.0%</div></div>
+      <div class="metric-box"><div class="label">Today TS</div><div class="val" id="valTS">RM 0.00</div></div>
+      <div class="metric-box"><div class="label">Today HB</div><div class="val" id="valHB">RM 0.00</div></div>
+      <div class="metric-box"><div class="label">Today HM</div><div class="val" id="valHM">RM 0.00</div></div>
       <div class="metric-box"><div class="label">Customers Served</div><div class="val" id="valCust">0</div></div>
     </div>
 
-    <!-- Personalized AI Recommendation -->
-    <div class="personal-rec">
-      <b>💡 Your Personal Clinical Focus Today:</b>
-      <div id="valPersonalRec" style="margin-top:4px;">Loading personal recommendation...</div>
-    </div>
-  </div>
-
-  <!-- Overall Team Coaching & Action Plan -->
-  <div class="card">
-    <h2>🌟 Outlet Daily Strategic Focus & Action Plans</h2>
-    <div class="ai-banner" id="aiCoaching">Loading strategic guidance...</div>
-    
-    <div class="action-plan-box" id="actionPlanContainer">
-      <b>🎯 Today's Tactical Action Initiatives:</b>
-      <div id="actionPlanList" style="margin-top:4px;">
-        • 1. Prescribe 2 House Brand items in 1 transaction (e.g. OTC + Citazinc & Suppflora).<br>
-        • 2. Drive HB Basket Size to RM 20.00+.<br>
-        • 3. Active Checkout PWP on orders >RM 30.
+    <!-- Target Remaining (TS 40k, HB 18.4k, HM 4k) -->
+    <div class="gap-banner">
+      <b>🎯 Monthly Target Remaining (Sep 2026):</b>
+      <div id="valRemainingTarget" style="margin-top:4px;">
+        • TS Target Left: <b>RM 40,000.00</b><br>
+        • HB Target Left: <b>RM 18,400.00</b><br>
+        • HM Target Left: <b>RM 4,000.00</b>
       </div>
     </div>
+
+    <!-- Estimated Commission (3.5%) -->
+    <div class="commission-banner">
+      <b>💰 Estimated HB Commission Earned Today:</b>
+      <div style="font-size:1.15rem; font-weight:700; margin-top:2px;" id="valCommission">RM 0.00</div>
+      <div style="font-size:0.72rem; color:#5f6368; margin-top:2px;">(Calculated at 3.5% average House Brand commission rate)</div>
+    </div>
+
+    <!-- Personalized Clinical Focus -->
+    <div class="personal-rec">
+      <b>💡 Your Personal Clinical Focus Today:</b>
+      <div id="valPersonalRec" style="margin-top:4px;">Loading recommendation...</div>
+    </div>
   </div>
 
-  <!-- Manager Only Control Panel -->
+  <!-- Manager Only Control Panel (Chai Yee Sian) -->
   <div id="managerPanel" class="card" style="border: 1px solid var(--accent-blue);">
     <h2 style="color: var(--accent-blue);">🔒 Manager Report & Screenshot Hub</h2>
     <p style="font-size:0.75rem; color:#5f6368; margin-top:-6px;">Exclusive to Pharmacist Chai Yee Sian</p>
@@ -108,6 +112,11 @@
     <button class="btn btn-copy" onclick="copyWhatsAppBriefing()">📋 Copy WhatsApp Briefing</button>
     <button class="btn btn-image" onclick="renderDirectorsReportScreenshot()">📸 Download Directors 7-Day Screenshot</button>
     <button class="btn btn-image" style="background:#681da8;" onclick="renderTeammatesScreenshot()">📸 Download Teammates Gap Screenshot</button>
+
+    <div class="congrats-card" style="margin-top:12px;">
+      <b>🏆 Today's Congratulation Board:</b>
+      <div id="congratsPreview" style="margin-top:4px;">Loading achievers...</div>
+    </div>
 
     <div style="overflow-x:auto; margin-top:12px;">
       <table id="teammatesTable">
@@ -123,14 +132,29 @@
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbyDXiyZZuYYDN4e6w16HyoTXbKbLwmPCSqoJVAkuRd4iPTYQP7KGtMJZuaQ-NyyXgSZ-w/exec";
-    const CORRECT_PIN = "6688";
+    
+    // Team PIN Security Mapping
+    const USER_PINS = {
+      "6688": { name: "Chai Yee Sian (William)", role: "manager" },
+      "1001": { name: "Jong Pei Choo", role: "staff" },
+      "1002": { name: "Fiona Fiena", role: "staff" },
+      "1003": { name: "Haniesha Louna", role: "staff" },
+      "1004": { name: "Daniela Janet", role: "staff" },
+      "1005": { name: "Nurhafizah Pauli", role: "staff" },
+      "1006": { name: "Muhammad Nur Farizin", role: "staff" },
+      "1007": { name: "Kenix Ling", role: "staff" }
+    };
+
+    let currentUser = null;
     let cachedData = null;
 
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
 
     function verifyPin() {
-      if (document.getElementById("pinCode").value === CORRECT_PIN) {
-        localStorage.setItem("pmg_pin_auth", "true");
+      const pin = document.getElementById("pinCode").value;
+      if (USER_PINS[pin]) {
+        currentUser = USER_PINS[pin];
+        localStorage.setItem("pmg_auth_pin", pin);
         document.getElementById("pinOverlay").style.display = "none";
         loadData();
       } else {
@@ -138,45 +162,74 @@
       }
     }
 
+    function logout() {
+      localStorage.removeItem("pmg_auth_pin");
+      currentUser = null;
+      document.getElementById("pinCode").value = "";
+      document.getElementById("pinOverlay").style.display = "flex";
+      document.getElementById("managerPanel").style.display = "none";
+    }
+
     async function loadData() {
       try {
         const res = await fetch(API_URL);
         cachedData = await res.json();
         document.getElementById("lastUpdated").innerText = `Updated: ${cachedData.updatedAt || 'Today'}`;
-        document.getElementById("aiCoaching").innerText = cachedData.dailySummary.aiComment || "Prioritize House Brand consultations.";
-        
-        // Render Action Plans
-        if (cachedData.tacticalActionPlans && cachedData.tacticalActionPlans.length > 0) {
-          let apHtml = "";
-          cachedData.tacticalActionPlans.forEach((plan, idx) => {
-            apHtml += `<div><b>${idx + 1}.</b> ${plan}</div>`;
-          });
-          document.getElementById("actionPlanList").innerHTML = apHtml;
-        }
-
-        onStaffChange();
+        renderUserDashboard();
         renderTeammatesTable();
+        renderCongratsPreview();
       } catch (e) {
-        document.getElementById("aiCoaching").innerText = "Pair routine OTC transactions with Nutribridge Suppflora & Citazinc.";
+        console.log("Error loading feed: " + e);
       }
     }
 
-    function onStaffChange() {
-      const selected = document.getElementById("staffSelect").value;
-      localStorage.setItem("pmg_user", selected);
-      
-      const isManager = selected.includes("Chai Yee Sian");
-      document.getElementById("managerPanel").style.display = isManager ? "block" : "none";
-      
+    function renderUserDashboard() {
+      if (!currentUser) return;
+      const userName = currentUser.name;
+      document.getElementById("userNameHeader").innerText = `👤 ${userName}`;
+
+      // Toggle Manager Console
+      document.getElementById("managerPanel").style.display = currentUser.role === "manager" ? "block" : "none";
+
       if (!cachedData) return;
-      const s = (cachedData.teammates && cachedData.teammates[selected]) || { ts: 0, hb: 0, customers: 0 };
+      const s = (cachedData.teammates && cachedData.teammates[userName]) || { ts: 0, hb: 0, hm: 0, customers: 0 };
+
       document.getElementById("valTS").innerText = "RM " + s.ts.toFixed(2);
       document.getElementById("valHB").innerText = "RM " + s.hb.toFixed(2);
-      document.getElementById("valHBRatio").innerText = ((s.hb / (s.ts || 1)) * 100).toFixed(1) + "%";
+      document.getElementById("valHM").innerText = "RM " + s.hm.toFixed(2);
       document.getElementById("valCust").innerText = s.customers;
 
-      const rec = (cachedData.recommendations && cachedData.recommendations[selected]) || "Focus on pairing OTC cough/flu items with JH Nutrition Citazinc and Suppflora.";
+      const tsRem = Math.max(0, 40000 - s.ts);
+      const hbRem = Math.max(0, 18400 - s.hb);
+      const hmRem = Math.max(0, 4000 - s.hm);
+
+      document.getElementById("valRemainingTarget").innerHTML = `
+        • TS Target Left: <b>RM ${tsRem.toFixed(2)}</b><br>
+        • HB Target Left: <b>RM ${hbRem.toFixed(2)}</b><br>
+        • HM Target Left: <b>RM ${hmRem.toFixed(2)}</b>
+      `;
+
+      // 3.5% Estimated HB Commission
+      const comm = s.hb * 0.035;
+      document.getElementById("valCommission").innerText = "RM " + comm.toFixed(2);
+
+      const rec = (cachedData.recommendations && cachedData.recommendations[userName]) || "Focus on pairing OTC cough/flu items with JH Nutrition Citazinc and Suppflora.";
       document.getElementById("valPersonalRec").innerText = rec;
+    }
+
+    function renderCongratsPreview() {
+      if (!cachedData || !cachedData.teammates) return;
+      let html = "";
+      for (const [name, val] of Object.entries(cachedData.teammates)) {
+        let hits = [];
+        if (val.ts >= 1333.33) hits.push("TS");
+        if (val.hb >= 613.33) hits.push("HB");
+        if (val.hm >= 133.33) hits.push("HM");
+        if (hits.length > 0) {
+          html += `• <b>${name.split(" ")[0]}</b> - Hit target for: ${hits.join(", ")}<br>`;
+        }
+      }
+      document.getElementById("congratsPreview").innerHTML = html || "No target hits recorded today.";
     }
 
     function renderTeammatesTable() {
@@ -194,17 +247,42 @@
       }
     }
 
-    // Formatted WhatsApp Briefing Mirroring the Strategic Action Plans
     function copyWhatsAppBriefing() {
-      const s = cachedData ? cachedData.dailySummary : { totalSales: 11160.50, hbSales: 4693.53, hbRatio: 42.1, basketSize: 37.45, aiComment: "Drive HB basket size." };
-      let text = `*PMG PHARMACY KOTA SENTOSA - DAILY SALES BRIEFING*\n\n`;
-      text += `*Date:* ${s.date || '1-Sep-2026'}\n`;
-      text += `*Total Sales:* RM ${s.totalSales.toFixed(2)}\n`;
-      text += `*House Brand:* RM ${s.hbSales.toFixed(2)} (${s.hbRatio.toFixed(1)}%)\n`;
-      text += `*HB Basket Size:* RM ${(s.hbBasketSize || 15.75).toFixed(2)} (Target: RM 20.00+)\n`;
-      text += `*Total Customers Served:* ${s.transactions}\n\n`;
+      const s = cachedData ? cachedData.dailySummary : { date: "1-Sep-2026", totalSales: 11160.50, hbSales: 4693.53, hmSales: 1036.10 };
       
-      text += `*🎯 Outlet Strategic Priorities & Action Plans:*\n`;
+      let text = `Date of briefing: ${s.date || '1-Sep-2026'}\n\n`;
+      
+      text += `Target achievement:\n`;
+      text += `TS: RM ${s.totalSales.toFixed(2)} / RM 400,000 (${((s.totalSales/400000)*100).toFixed(1)}%)\n`;
+      text += `HB: RM ${s.hbSales.toFixed(2)} / RM 184,000 (${((s.hbSales/184000)*100).toFixed(1)}%)\n`;
+      text += `HM: RM ${s.hmSales.toFixed(2)} / RM 40,000 (${((s.hmSales/40000)*100).toFixed(1)}%)\n\n`;
+
+      text += `Personal target per day:\n`;
+      text += `Pharmacist and Branch Manager\n`;
+      text += `TS: RM 1333.33\n`;
+      text += `HB: RM 613.33\n`;
+      text += `HM: RM 133.33\n\n`;
+
+      text += `Assistant BM and Pharmacist Assistant (PA)\n`;
+      text += `TS: RM 1333.33\n`;
+      text += `HB: RM 613.33\n`;
+      text += `HM: RM 133.33\n\n`;
+
+      text += `Congratulation board (for those who hit personal target)\n`;
+      if (cachedData && cachedData.teammates) {
+        for (const [name, val] of Object.entries(cachedData.teammates)) {
+          let hits = [];
+          if (val.ts >= 1333.33) hits.push("TS");
+          if (val.hb >= 613.33) hits.push("HB");
+          if (val.hm >= 133.33) hits.push("HM");
+          if (hits.length > 0) {
+            text += `• ${name.split(" ")[0]} - Hit target for: ${hits.join(", ")}\n`;
+          }
+        }
+      }
+      text += `\n`;
+
+      text += `🎯 Outlet Strategic Priorities & Action Plans:\n`;
       if (cachedData && cachedData.tacticalActionPlans && cachedData.tacticalActionPlans.length > 0) {
         cachedData.tacticalActionPlans.forEach((plan, idx) => {
           text += `${idx + 1}. ${plan}\n`;
@@ -214,29 +292,28 @@
       }
       text += `\n`;
 
-      text += `*👤 Individual Teammate Priorities:*\n`;
+      text += `👤 Individual Teammate Priorities:\n\n`;
       if (cachedData && cachedData.recommendations) {
         for (const [name, tip] of Object.entries(cachedData.recommendations)) {
-          text += `• *${name.split(" ")[0]}:* ${tip}\n`;
+          text += `• *${name.split(" ")[0]}:* ${tip}\n\n`;
         }
       }
-      text += `\n_Let's execute today's clinical action plans together!_`;
 
       navigator.clipboard.writeText(text);
       alert("WhatsApp Daily Briefing copied to clipboard!");
     }
 
-    // Exact Pixel-Perfect Director 7-Day Screenshot
     function renderDirectorsReportScreenshot() {
       const canvas = document.getElementById("renderCanvas");
       const ctx = canvas.getContext("2d");
       canvas.width = 1380;
-      canvas.height = 700;
+      canvas.height = 720;
 
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       const s = cachedData ? cachedData.dailySummary : { date: "1-Sep-2026", totalSales: 11160.50, hbSales: 4693.53, hmSales: 1036.10, transactions: 298, basketSize: 37.45, lyTotalSales: 314607.72, lyHbSales: 114842.68 };
+      const ap = cachedData && cachedData.actionPlans ? cachedData.actionPlans : { date: "1/9/2026", w1: "Ordering", w2: "Focus on HB sales", w3: "Ordering", w4: "Continue training" };
       
       // Title
       ctx.fillStyle = "#000000";
@@ -244,7 +321,7 @@
       ctx.textAlign = "center";
       ctx.fillText(`PMG PHARMACY KOTA SENTOSA - DIRECTORS' DAILY SALES REPORT (${s.date.toUpperCase()})`, canvas.width / 2, 28);
 
-      // Left Table Header (Blue)
+      // Section 1: Left Table Header (Blue)
       ctx.fillStyle = "#d0e1fd";
       ctx.fillRect(20, 45, 380, 24);
       ctx.fillStyle = "#000000";
@@ -317,7 +394,40 @@
         ctx.fillText(item.target, 280, y);
       });
 
-      // Right 7-Day Rolling Section
+      // Section 1B: Action Plans Block
+      const actionPlansList = [
+        { week: "Action Plan (1st Week):", plan: ap.w1 },
+        { week: "Action Plan (2nd Week):", plan: ap.w2 },
+        { week: "Action Plan (3rd Week):", plan: ap.w3 },
+        { week: "Action Plan (4th Week):", plan: ap.w4 }
+      ];
+
+      actionPlansList.forEach((aItem, aIdx) => {
+        const y = 390 + (aIdx * 24);
+        if (aIdx === 2) {
+          ctx.fillStyle = "#202124";
+          ctx.font = "10px Calibri, sans-serif";
+          ctx.fillText(ap.date || "1/9/2026", 25, y);
+        }
+
+        ctx.fillStyle = "#fce5cd";
+        ctx.fillRect(80, y - 15, 140, 24);
+        ctx.strokeStyle = "#dadce0";
+        ctx.strokeRect(80, y - 15, 140, 24);
+        ctx.fillStyle = "#000000";
+        ctx.font = "bold 10px Calibri, sans-serif";
+        ctx.fillText(aItem.week, 85, y);
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(220, y - 15, 180, 24);
+        ctx.strokeStyle = "#dadce0";
+        ctx.strokeRect(220, y - 15, 180, 24);
+        ctx.fillStyle = "#202124";
+        ctx.font = "10px Calibri, sans-serif";
+        ctx.fillText(aItem.plan, 228, y);
+      });
+
+      // Section 2: Right Table (7-Day Rolling Breakdown)
       const days = (cachedData && cachedData.rolling7Days && cachedData.rolling7Days.length > 0) ? cachedData.rolling7Days : [
         { dayLabel: "1-Sep", ts: s.totalSales, hb: s.hbSales, hbRatio: s.hbRatio, hm: 891.20, ehm: 144.90, hmTotal: 1036.10, hmRatio: 9.28, tranx: s.transactions, tsBs: s.basketSize, hbBs: 15.75, hmBs: 2.99, comment: s.aiComment }
       ];
@@ -464,7 +574,9 @@
     }
 
     window.onload = () => {
-      if (localStorage.getItem("pmg_pin_auth") === "true") {
+      const savedPin = localStorage.getItem("pmg_auth_pin");
+      if (savedPin && USER_PINS[savedPin]) {
+        currentUser = USER_PINS[savedPin];
         document.getElementById("pinOverlay").style.display = "none";
         loadData();
       }
