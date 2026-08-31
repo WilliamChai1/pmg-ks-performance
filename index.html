@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PMG KS - Performance Portal</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    :root { --primary: #0b8043; --accent: #137333; --bg: #f8f9fa; --card: #ffffff; --text: #202124; --gap-red: #d93025; --gap-green: #188038; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 16px; }
+    .header { text-align: center; margin-bottom: 20px; }
+    .header h1 { font-size: 1.25rem; color: var(--primary); margin: 0; }
+    .header p { font-size: 0.85rem; color: #5f6368; margin-top: 4px; }
+    .card { background: var(--card); border-radius: 12px; padding: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 16px; }
+    select { width: 100%; padding: 12px; font-size: 1rem; border-radius: 8px; border: 1px solid #dadce0; background: white; margin-bottom: 12px; font-weight: 600; }
+    .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .metric-box { background: #f1f3f4; padding: 12px; border-radius: 8px; text-align: center; }
+    .metric-box .label { font-size: 0.75rem; color: #5f6368; text-transform: uppercase; }
+    .metric-box .val { font-size: 1.15rem; font-weight: 700; color: var(--text); margin-top: 4px; }
+    .ai-banner { background: #e6f4ea; border-left: 4px solid var(--primary); padding: 12px; border-radius: 6px; font-size: 0.9rem; line-height: 1.4; }
+    .target-gap { font-size: 1rem; font-weight: 700; text-align: center; padding: 8px; border-radius: 6px; margin-top: 10px; }
+    .gap-achieved { background: #ceead6; color: var(--gap-green); }
+    .gap-behind { background: #fad2cf; color: var(--gap-red); }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>PMG Pharmacy Kota Sentosa</h1>
+    <p>FY2027 Daily Performance & Target Gap</p>
+  </div>
+
+  <div class="card">
+    <label for="staffSelect" style="font-size: 0.8rem; font-weight: 600; color: #5f6368;">SELECT YOUR NAME:</label>
+    <select id="staffSelect" onchange="renderStaffData()">
+      <option value="Chai Yee Sian (William)">Chai Yee Sian (William)</option>
+      <option value="Jong Pei Choo">Jong Pei Choo</option>
+      <option value="Fiona Fiena">Fiona Fiena</option>
+      <option value="Haniesha Louna">Haniesha Louna</option>
+      <option value="Daniela Janet">Daniela Janet</option>
+      <option value="Nurhafizah Pauli">Nurhafizah Pauli</option>
+      <option value="Muhammad Nur Farizin">Muhammad Nur Farizin</option>
+      <option value="Kenix Ling">Kenix Ling</option>
+    </select>
+
+    <div id="staffMetrics">
+      <div class="metric-grid">
+        <div class="metric-box">
+          <div class="label">Total Sales (TS)</div>
+          <div class="val" id="valTS">RM 0.00</div>
+        </div>
+        <div class="metric-box">
+          <div class="label">House Brand (HB)</div>
+          <div class="val" id="valHB">RM 0.00</div>
+        </div>
+        <div class="metric-box">
+          <div class="label">HB % Ratio</div>
+          <div class="val" id="valHBRatio">0.0%</div>
+        </div>
+        <div class="metric-box">
+          <div class="label">Customers Served</div>
+          <div class="val" id="valCust">0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="font-size: 0.95rem; margin-top: 0; color: var(--primary);">🌟 Daily House Brand Coaching</h3>
+    <div class="ai-banner" id="aiCoaching">
+      Loading daily strategic focus...
+    </div>
+  </div>
+
+  <script>
+    // Paste your Google Apps Script Web App Deployment URL here:
+    const API_URL = "https://script.google.com/macros/s/AKfycbyDXiyZZuYYDN4e6w16HyoTXbKbLwmPCSqoJVAkuRd4iPTYQP7KGtMJZuaQ-NyyXgSZ-w/exec";
+
+    let cachedData = null;
+
+    async function loadData() {
+      try {
+        const res = await fetch(API_URL);
+        cachedData = await res.json();
+        document.getElementById("aiCoaching").innerText = cachedData.dailySummary.aiComment || "Focus on House Brand consultations.";
+        renderStaffData();
+      } catch (e) {
+        document.getElementById("aiCoaching").innerText = "Pair URTI OTCs with Citazinc & Suppflora to boost HB basket size.";
+      }
+    }
+
+    function renderStaffData() {
+      const selected = document.getElementById("staffSelect").value;
+      localStorage.setItem("pmg_user", selected);
+      
+      if (!cachedData || !cachedData.teammates || !cachedData.teammates[selected]) return;
+      const s = cachedData.teammates[selected];
+      
+      document.getElementById("valTS").innerText = "RM " + s.ts.toFixed(2);
+      document.getElementById("valHB").innerText = "RM " + s.hb.toFixed(2);
+      document.getElementById("valHBRatio").innerText = ((s.hb / (s.ts || 1)) * 100).toFixed(1) + "%";
+      document.getElementById("valCust").innerText = s.customers;
+    }
+
+    window.onload = () => {
+      const saved = localStorage.getItem("pmg_user");
+      if (saved) document.getElementById("staffSelect").value = saved;
+      loadData();
+    };
+  </script>
+</body>
+</html>
