@@ -4,9 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0b8043">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="PMG KS">
   <title>PMG KS - Performance Portal</title>
-  <link rel="manifest" href="manifest.json">
+  
+  <link rel="manifest" href="./manifest.json">
   <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3063/3063822.png">
+  
   <style>
     :root {
       --primary: #0b8043;
@@ -14,27 +19,25 @@
       --bg: #f8f9fa;
       --card: #ffffff;
       --text: #202124;
-      --gap-red: #d93025;
-      --gap-green: #188038;
     }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; }
-    .header { text-align: center; margin: 8px 0 14px; }
-    .header h1 { font-size: 1.2rem; color: var(--primary); margin: 0; }
-    .header p { font-size: 0.78rem; color: #5f6368; margin-top: 3px; }
     
-    /* PIN Overlay */
+    /* Smart Install Banner */
+    #installBanner { background: #e8f0fe; border: 1px solid #1a73e8; border-radius: 10px; padding: 12px; margin-bottom: 12px; font-size: 0.85rem; }
+    #installBanner h3 { margin: 0 0 4px; color: #1a73e8; font-size: 0.95rem; }
+    
+    /* PIN Modal */
     #pinOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; }
     .pin-box { background: white; border-radius: 16px; padding: 22px; text-align: center; width: 85%; max-width: 300px; }
     .pin-input { font-size: 1.6rem; letter-spacing: 10px; text-align: center; width: 80%; padding: 8px; border: 2px solid #dadce0; border-radius: 8px; margin: 14px 0; }
     
     .btn { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 10px 14px; font-size: 0.9rem; font-weight: 600; cursor: pointer; width: 100%; box-sizing: border-box; }
-    .btn:active { background: var(--primary-dark); }
-    .btn-install { background: #1a73e8; margin-bottom: 12px; display: none; }
+    .btn-action { background: #1a73e8; margin-top: 6px; }
     .btn-image { background: #e37400; margin-top: 8px; }
     .btn-copy { background: #137333; margin-top: 8px; }
     
     .card { background: var(--card); border-radius: 12px; padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 12px; }
-    .card h2 { font-size: 0.92rem; color: var(--primary); margin: 0 0 10px; display: flex; justify-content: space-between; }
+    .card h2 { font-size: 0.92rem; color: var(--primary); margin: 0 0 10px; }
     select { width: 100%; padding: 10px; font-size: 0.95rem; border-radius: 8px; border: 1px solid #dadce0; background: white; font-weight: 600; }
     
     .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
@@ -43,15 +46,10 @@
     .metric-box .val { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-top: 2px; }
     
     .ai-banner { background: #e6f4ea; border-left: 4px solid var(--primary); padding: 10px; border-radius: 6px; font-size: 0.82rem; line-height: 1.4; color: #137333; }
-    
-    /* Hidden Admin Panel */
     #managerPanel { display: none; }
     table { width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-top: 8px; }
     th, td { padding: 6px 4px; text-align: right; border-bottom: 1px solid #eee; }
     th:first-child, td:first-child { text-align: left; }
-    th { color: #5f6368; }
-    
-    /* Off-screen canvas for rendering screenshots */
     #renderCanvas { display: none; }
   </style>
 </head>
@@ -68,11 +66,16 @@
     </div>
   </div>
 
-  <button id="btnInstall" class="btn btn-install" onclick="installPwa()">📲 Install App to Home Screen</button>
+  <!-- Smart Install Guide Banner -->
+  <div id="installBanner" style="display:none;">
+    <h3 id="installTitle">📲 Install as App</h3>
+    <div id="installBody"></div>
+    <button id="btnAndroidInstall" class="btn btn-action" style="display:none;" onclick="triggerAndroidInstall()">Install App Now</button>
+  </div>
 
-  <div class="header">
-    <h1>PMG Pharmacy Kota Sentosa</h1>
-    <p id="lastUpdated">FY2027 Daily Performance Portal</p>
+  <div style="text-align:center; margin:8px 0 14px;">
+    <h1 style="font-size:1.2rem; color:var(--primary); margin:0;">PMG Pharmacy Kota Sentosa</h1>
+    <p id="lastUpdated" style="font-size:0.78rem; color:#5f6368; margin-top:3px;">FY2027 Performance Portal</p>
   </div>
 
   <!-- Teammate View -->
@@ -122,7 +125,6 @@
     </div>
   </div>
 
-  <!-- Offscreen canvas for rendering PNG images -->
   <canvas id="renderCanvas"></canvas>
 
   <script>
@@ -131,25 +133,53 @@
     let cachedData = null;
     let deferredPrompt = null;
 
-    // Service Worker Registration for PWA
+    // 1. Register Service Worker with relative path
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
+      navigator.serviceWorker.register('./sw.js').then(reg => {
+        console.log('SW Registered successfully');
+      });
     }
 
-    // PWA Install Prompt Handler
+    // 2. Smart Install Detection
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      document.getElementById('btnInstall').style.display = 'block';
+      const banner = document.getElementById('installBanner');
+      banner.style.display = 'block';
+      document.getElementById('installBody').innerHTML = 'Tap the button below to add this portal to your home screen.';
+      document.getElementById('btnAndroidInstall').style.display = 'block';
     });
 
-    function installPwa() {
+    function triggerAndroidInstall() {
       if (deferredPrompt) {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then(() => {
-          document.getElementById('btnInstall').style.display = 'none';
+          document.getElementById('installBanner').style.display = 'none';
           deferredPrompt = null;
         });
+      }
+    }
+
+    // iOS Detection & In-App Browser Warning
+    function checkDeviceInstallGuidance() {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+      if (isStandalone) return; // Already installed
+
+      const ua = navigator.userAgent || navigator.vendor || window.opera;
+      const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+      const isWhatsAppOrWebview = /FBAN|FBAV|WhatsApp|Line/i.test(ua);
+
+      const banner = document.getElementById('installBanner');
+      const body = document.getElementById('installBody');
+
+      if (isWhatsAppOrWebview) {
+        banner.style.display = 'block';
+        document.getElementById('installTitle').innerText = '⚠️ Opened in WhatsApp / In-App Browser';
+        body.innerHTML = 'To install as an app, tap <b>⋮ (Menu)</b> at top right and choose <b>"Open in Chrome"</b> (Android) or <b>"Open in Safari"</b> (iPhone).';
+      } else if (isIOS && !deferredPrompt) {
+        banner.style.display = 'block';
+        document.getElementById('installTitle').innerText = '📲 Install on iPhone (Safari)';
+        body.innerHTML = 'Tap the <b>Share icon ⎋</b> at the bottom of Safari, then scroll down and tap <b>"Add to Home Screen ➕"</b>.';
       }
     }
 
@@ -181,7 +211,6 @@
       const selected = document.getElementById("staffSelect").value;
       localStorage.setItem("pmg_user", selected);
       
-      // Toggle Manager Access (Chai Yee Sian only)
       const isManager = selected.includes("Chai Yee Sian");
       document.getElementById("managerPanel").style.display = isManager ? "block" : "none";
       
@@ -215,25 +244,21 @@
       alert("WhatsApp Daily Briefing copied to clipboard!");
     }
 
-    // Direct High-Resolution 7-Day Directors Report Image Renderer
     function renderDirectorsReportImage() {
       const canvas = document.getElementById("renderCanvas");
       const ctx = canvas.getContext("2d");
       canvas.width = 1200;
       canvas.height = 650;
 
-      // Background
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Title
       ctx.fillStyle = "#000000";
       ctx.font = "bold 20px sans-serif";
       ctx.textAlign = "center";
       const dateStr = cachedData ? cachedData.dailySummary.date : "TODAY";
       ctx.fillText(`PMG PHARMACY KOTA SENTOSA - DIRECTORS' DAILY SALES REPORT (${dateStr})`, canvas.width / 2, 35);
 
-      // Headers (Light Blue)
       ctx.fillStyle = "#d0e1fd";
       ctx.fillRect(40, 60, 420, 30);
       ctx.fillRect(480, 60, 680, 30);
@@ -244,7 +269,6 @@
       ctx.fillText("Monthly Sales Summary", 50, 80);
       ctx.fillText("7-Day Rolling Daily Breakdown", 490, 80);
 
-      // Draw Summary Grid
       ctx.font = "12px sans-serif";
       const s = cachedData ? cachedData.dailySummary : { totalSales: 357719.79, hbSales: 155316.34, hmSales: 34130.60, transactions: 249, basketSize: 42.88 };
       
@@ -272,7 +296,6 @@
         ctx.fillText(m, 340, y);
       });
 
-      // Right Side Strategy & Comments Box
       ctx.fillStyle = "#e6f4ea";
       ctx.fillRect(480, 100, 680, 180);
       ctx.strokeStyle = "#137333";
@@ -287,14 +310,12 @@
       const comment = (cachedData && cachedData.dailySummary.aiComment) ? cachedData.dailySummary.aiComment : "Pair OTC purchases with Nutribridge Suppflora and Citazinc to elevate House Brand basket size.";
       wrapText(ctx, comment, 500, 165, 640, 22);
 
-      // Download Image
       const link = document.createElement('a');
       link.download = `Directors_Report_${dateStr}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
     }
 
-    // Direct Teammate Target Gap Screenshot Renderer
     function renderTeammateGapImage() {
       const canvas = document.getElementById("renderCanvas");
       const ctx = canvas.getContext("2d");
@@ -309,7 +330,6 @@
       ctx.textAlign = "center";
       ctx.fillText("PMG KOTA SENTOSA - TEAMMATE PERFORMANCE & TARGET GAP", canvas.width / 2, 35);
 
-      // Table Headers
       ctx.fillStyle = "#1a73e8";
       ctx.fillRect(30, 60, 940, 32);
 
@@ -368,6 +388,7 @@
     }
 
     window.onload = () => {
+      checkDeviceInstallGuidance();
       if (localStorage.getItem("pmg_pin_auth") === "true") {
         document.getElementById("pinOverlay").style.display = "none";
         loadData();
