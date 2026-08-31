@@ -77,6 +77,7 @@
       <div class="metric-box"><div class="label">Customers Served</div><div class="val" id="valCust">0</div></div>
     </div>
 
+    <!-- Personalized AI Recommendation -->
     <div class="personal-rec">
       <b>💡 Your Personal Clinical Focus Today:</b>
       <div id="valPersonalRec" style="margin-top:4px;">Loading personal recommendation...</div>
@@ -193,21 +194,21 @@
       alert("WhatsApp Daily Briefing copied to clipboard!");
     }
 
-    // Exact Pixel-Perfect Director 7-Day Rolling Report Screenshot
+    // Exact Pixel-Perfect Director 7-Day Screenshot
     function renderDirectorsReportScreenshot() {
       const canvas = document.getElementById("renderCanvas");
       const ctx = canvas.getContext("2d");
       canvas.width = 1380;
-      canvas.height = 720;
+      canvas.height = 700;
 
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      const s = cachedData ? cachedData.dailySummary : { date: "31-AUG-2026", totalSales: 11160.50, hbSales: 4693.53, hmSales: 891.20, transactions: 298, basketSize: 37.45, lyTotalSales: 314607.72, lyHbSales: 114842.68 };
+      const s = cachedData ? cachedData.dailySummary : { date: "1-Sep-2026", totalSales: 11160.50, hbSales: 4693.53, hmSales: 891.20, transactions: 298, basketSize: 37.45, lyTotalSales: 314607.72, lyHbSales: 114842.68 };
       
       // Title
       ctx.fillStyle = "#000000";
-      ctx.font = "bold 16px sans-serif";
+      ctx.font = "bold 16px Calibri, sans-serif";
       ctx.textAlign = "center";
       ctx.fillText(`PMG PHARMACY KOTA SENTOSA - DIRECTORS' DAILY SALES REPORT (${s.date.toUpperCase()})`, canvas.width / 2, 28);
 
@@ -215,20 +216,20 @@
       ctx.fillStyle = "#d0e1fd";
       ctx.fillRect(20, 45, 380, 24);
       ctx.fillStyle = "#000000";
-      ctx.font = "bold 11px sans-serif";
+      ctx.font = "bold 11px Calibri, sans-serif";
       ctx.textAlign = "left";
       ctx.fillText("Monthly Sales", 30, 61);
-      ctx.fillText("Amount", 180, 61);
-      ctx.fillText("%", 320, 61);
+      ctx.fillText("Amount", 190, 61);
+      ctx.fillText("%", 330, 61);
 
-      // Left Table Rows (Variance vs Target & LY)
+      // Left Table Variance Rows
       const leftRows = [
         ["Sales Vs Target", "RM 0.00", "0%"],
-        ["Sales Vs LY", `+RM ${(s.totalSales).toFixed(0)}`, "+100%"],
+        ["Sales Vs LY", `+RM ${s.totalSales.toFixed(0)}`, "+100%"],
         ["HB Vs Target", "RM 0.00", "0%"],
-        ["HB Vs LY", `+RM ${(s.hbSales).toFixed(0)}`, "+100%"],
+        ["HB Vs LY", `+RM ${s.hbSales.toFixed(0)}`, "+100%"],
         ["HM Vs Target", "RM 0.00", "0%"],
-        ["HM Vs LY", `+RM ${(s.hmSales).toFixed(0)}`, "+100%"]
+        ["HM Vs LY", `+RM ${s.hmSales.toFixed(0)}`, "+100%"]
       ];
 
       leftRows.forEach((r, i) => {
@@ -238,17 +239,17 @@
         ctx.strokeStyle = "#dadce0";
         ctx.strokeRect(20, y - 15, 380, 22);
         ctx.fillStyle = "#202124";
-        ctx.font = "11px sans-serif";
+        ctx.font = "11px Calibri, sans-serif";
         ctx.fillText(r[0], 30, y);
-        ctx.fillText(r, 180, y);
-        ctx.fillText(r, 320, y);
+        ctx.fillText(r, 190, y);
+        ctx.fillText(r, 330, y);
       });
 
       // MTD Comparison Table
-      ctx.fillStyle = "#fff2cc"; // Yellow Header
+      ctx.fillStyle = "#fff2cc"; // Yellow
       ctx.fillRect(20, 225, 380, 20);
       ctx.fillStyle = "#000000";
-      ctx.font = "bold 10px sans-serif";
+      ctx.font = "bold 10px Calibri, sans-serif";
       ctx.fillText(`From 1st to ${s.date}`, 30, 239);
       ctx.fillText("Same date range", 200, 239);
 
@@ -265,8 +266,8 @@
       ctx.fillText("Target", 280, 259);
 
       const mtdRows = [
-        ["Total", `RM ${s.totalSales.toFixed(0)}`, `RM ${(s.lyTotalSales || 314607).toFixed(0)}`, "RM 400,000"],
-        ["HB", `RM ${s.hbSales.toFixed(0)}`, `RM ${(s.lyHbSales || 114842).toFixed(0)}`, "RM 184,000"],
+        ["Total", `RM ${s.totalSales.toFixed(0)}`, `RM ${(s.lyTotalSales || 314608).toFixed(0)}`, "RM 400,000"],
+        ["HB", `RM ${s.hbSales.toFixed(0)}`, `RM ${(s.lyHbSales || 114843).toFixed(0)}`, "RM 184,000"],
         ["HM", `RM ${s.hmSales.toFixed(0)}`, "RM 25,114", "RM 40,000"],
         ["EHM", "RM 145", "RM 4,385", "-"]
       ];
@@ -278,9 +279,9 @@
         ctx.strokeStyle = "#dadce0";
         ctx.strokeRect(20, y - 15, 380, 22);
         ctx.fillStyle = "#202124";
-        ctx.font = "10px sans-serif";
+        ctx.font = "10px Calibri, sans-serif";
         ctx.fillText(r[0], 25, y);
-        ctx.fillText(r, 70, y);
+        ctx.fillText(r, 50, y);
         ctx.fillText(r, 150, y);
         ctx.fillText(r, 280, y);
       });
@@ -293,11 +294,10 @@
       const colW = 125;
       const rightStartX = 420;
 
-      // Metric Headers column
       ctx.fillStyle = "#d0e1fd";
       ctx.fillRect(rightStartX, 45, 110, 24);
       ctx.fillStyle = "#000000";
-      ctx.font = "bold 11px sans-serif";
+      ctx.font = "bold 11px Calibri, sans-serif";
       ctx.fillText("Metric", rightStartX + 10, 61);
 
       const metricNames = ["Total Sales", "HB", "HB%", "HM", "EHM", "HM Total", "HM%", "No. of tranx", "Total Sales BS", "HB BS", "HM BS"];
@@ -308,17 +308,17 @@
         ctx.strokeStyle = "#dadce0";
         ctx.strokeRect(rightStartX, y - 15, 110, 22);
         ctx.fillStyle = "#202124";
-        ctx.font = "bold 10px sans-serif";
+        ctx.font = "bold 10px Calibri, sans-serif";
         ctx.fillText(m, rightStartX + 6, y);
       });
 
-      // Render up to 7 Days columns
+      // Render 7 Daily Columns
       days.forEach((day, dIdx) => {
         const x = rightStartX + 110 + (dIdx * colW);
         ctx.fillStyle = "#d0e1fd";
         ctx.fillRect(x, 45, colW, 24);
         ctx.fillStyle = "#000000";
-        ctx.font = "bold 11px sans-serif";
+        ctx.font = "bold 11px Calibri, sans-serif";
         ctx.textAlign = "center";
         ctx.fillText(day.dayLabel, x + (colW / 2), 61);
 
@@ -343,20 +343,20 @@
           ctx.strokeStyle = "#dadce0";
           ctx.strokeRect(x, y - 15, colW, 22);
           ctx.fillStyle = "#202124";
-          ctx.font = "10px sans-serif";
+          ctx.font = "10px Calibri, sans-serif";
           ctx.fillText(v, x + (colW / 2), y);
         });
 
-        // Daily Comment Box
+        // Daily Comment Card
         const commentY = 330;
-        ctx.fillStyle = "#fff8e1"; // Light cream
+        ctx.fillStyle = "#fff8e1";
         ctx.fillRect(x, commentY, colW, 200);
         ctx.strokeStyle = "#ffe082";
         ctx.strokeRect(x, commentY, colW, 200);
         ctx.fillStyle = "#37474f";
-        ctx.font = "9px sans-serif";
+        ctx.font = "9px Calibri, sans-serif";
         ctx.textAlign = "left";
-        wrapText(ctx, day.comment || "Focus on House Brand pairings.", x + 6, commentY + 16, colW - 12, 14);
+        wrapText(ctx, day.comment || "Focus on House Brand pairings.", x + 6, commentY + 16, colW - 12, 13);
       });
 
       const link = document.createElement('a');
@@ -365,7 +365,7 @@
       link.click();
     }
 
-    // 9-Column Teammate Summary Image
+    // 9-Column Teammate Target Gap Screenshot
     function renderTeammatesScreenshot() {
       const canvas = document.getElementById("renderCanvas");
       const ctx = canvas.getContext("2d");
@@ -376,14 +376,14 @@
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       ctx.fillStyle = "#000000";
-      ctx.font = "bold 16px sans-serif";
+      ctx.font = "bold 16px Calibri, sans-serif";
       ctx.textAlign = "center";
       ctx.fillText("PMG KOTA SENTOSA - TEAMMATE PERFORMANCE & TARGET GAP", canvas.width / 2, 32);
 
       ctx.fillStyle = "#1a73e8";
       ctx.fillRect(30, 50, 990, 30);
       ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 11px sans-serif";
+      ctx.font = "bold 11px Calibri, sans-serif";
       ctx.textAlign = "left";
       ctx.fillText("Teammate Name", 42, 69);
       ctx.fillText("Cust", 260, 69);
@@ -401,9 +401,9 @@
           ctx.strokeRect(30, rowY - 16, 990, 26);
 
           ctx.fillStyle = "#111827";
-          ctx.font = "bold 11px sans-serif";
+          ctx.font = "bold 11px Calibri, sans-serif";
           ctx.fillText(name, 42, rowY);
-          ctx.font = "11px sans-serif";
+          ctx.font = "11px Calibri, sans-serif";
           ctx.fillText(val.customers.toString(), 260, rowY);
           ctx.fillText("RM " + val.ts.toFixed(2), 360, rowY);
           ctx.fillText("RM " + val.hb.toFixed(2), 540, rowY);
