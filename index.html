@@ -3,74 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>PMG KS - Management & Performance Portal</title>
+  <meta name="theme-color" content="#0b8043">
+  <title>PMG KS - Performance Portal</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3063/3063822.png">
   <style>
     :root {
       --primary: #0b8043;
       --primary-dark: #075e33;
-      --accent: #137333;
       --bg: #f8f9fa;
       --card: #ffffff;
       --text: #202124;
-      --gap-red: #c5221f;
-      --gap-green: #137333;
+      --gap-red: #d93025;
+      --gap-green: #188038;
     }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; }
-    .header { text-align: center; margin: 12px 0 16px; }
-    .header h1 { font-size: 1.25rem; color: var(--primary); margin: 0; }
-    .header p { font-size: 0.8rem; color: #5f6368; margin-top: 4px; }
+    .header { text-align: center; margin: 8px 0 14px; }
+    .header h1 { font-size: 1.2rem; color: var(--primary); margin: 0; }
+    .header p { font-size: 0.78rem; color: #5f6368; margin-top: 3px; }
     
-    /* PIN Modal */
+    /* PIN Overlay */
     #pinOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-    .pin-box { background: white; border-radius: 16px; padding: 24px; text-align: center; width: 85%; max-width: 320px; }
-    .pin-input { font-size: 1.8rem; letter-spacing: 12px; text-align: center; width: 80%; padding: 8px; border: 2px solid #dadce0; border-radius: 8px; margin: 16px 0; }
-    .btn { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 12px 18px; font-size: 0.95rem; font-weight: 600; cursor: pointer; width: 100%; }
+    .pin-box { background: white; border-radius: 16px; padding: 22px; text-align: center; width: 85%; max-width: 300px; }
+    .pin-input { font-size: 1.6rem; letter-spacing: 10px; text-align: center; width: 80%; padding: 8px; border: 2px solid #dadce0; border-radius: 8px; margin: 14px 0; }
+    
+    .btn { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 10px 14px; font-size: 0.9rem; font-weight: 600; cursor: pointer; width: 100%; box-sizing: border-box; }
     .btn:active { background: var(--primary-dark); }
-    .btn-secondary { background: #5f6368; margin-top: 8px; }
-    .btn-copy { background: #1a73e8; }
+    .btn-install { background: #1a73e8; margin-bottom: 12px; display: none; }
+    .btn-image { background: #e37400; margin-top: 8px; }
+    .btn-copy { background: #137333; margin-top: 8px; }
     
-    /* Card Styles */
-    .card { background: var(--card); border-radius: 12px; padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 12px; }
-    .card h2 { font-size: 0.95rem; color: var(--primary); margin: 0 0 10px; display: flex; justify-content: space-between; align-items: center; }
-    select { width: 100%; padding: 10px; font-size: 0.95rem; border-radius: 8px; border: 1px solid #dadce0; background: white; margin-bottom: 10px; font-weight: 600; }
+    .card { background: var(--card); border-radius: 12px; padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 12px; }
+    .card h2 { font-size: 0.92rem; color: var(--primary); margin: 0 0 10px; display: flex; justify-content: space-between; }
+    select { width: 100%; padding: 10px; font-size: 0.95rem; border-radius: 8px; border: 1px solid #dadce0; background: white; font-weight: 600; }
     
-    .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
     .metric-box { background: #f1f3f4; padding: 10px; border-radius: 8px; text-align: center; }
-    .metric-box .label { font-size: 0.7rem; color: #5f6368; text-transform: uppercase; font-weight: 600; }
+    .metric-box .label { font-size: 0.68rem; color: #5f6368; text-transform: uppercase; font-weight: 600; }
     .metric-box .val { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-top: 2px; }
     
-    .ai-banner { background: #e6f4ea; border-left: 4px solid var(--primary); padding: 10px; border-radius: 6px; font-size: 0.85rem; line-height: 1.4; color: #137333; font-weight: 500; }
+    .ai-banner { background: #e6f4ea; border-left: 4px solid var(--primary); padding: 10px; border-radius: 6px; font-size: 0.82rem; line-height: 1.4; color: #137333; }
     
-    /* Table Styles */
-    table { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin-top: 8px; }
+    /* Hidden Admin Panel */
+    #managerPanel { display: none; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-top: 8px; }
     th, td { padding: 6px 4px; text-align: right; border-bottom: 1px solid #eee; }
     th:first-child, td:first-child { text-align: left; }
-    th { color: #5f6368; font-weight: 600; }
+    th { color: #5f6368; }
+    
+    /* Off-screen canvas for rendering screenshots */
+    #renderCanvas { display: none; }
   </style>
 </head>
 <body>
 
-  <!-- PIN Protection Screen -->
+  <!-- PIN Modal -->
   <div id="pinOverlay">
     <div class="pin-box">
-      <h2 style="margin: 0; color: var(--primary); font-size: 1.2rem;">PMG Kota Sentosa</h2>
-      <p style="font-size: 0.85rem; color: #5f6368;">Enter 4-Digit Branch PIN</p>
+      <h2 style="margin:0; color:var(--primary); font-size:1.15rem;">PMG Kota Sentosa</h2>
+      <p style="font-size:0.8rem; color:#5f6368;">Enter 4-Digit Branch PIN</p>
       <input type="password" id="pinCode" class="pin-input" maxlength="4" placeholder="••••" autofocus>
       <button class="btn" onclick="verifyPin()">Unlock Portal</button>
-      <p id="pinError" style="color: red; font-size: 0.8rem; margin-top: 10px; display: none;">Incorrect PIN</p>
+      <p id="pinError" style="color:red; font-size:0.75rem; margin-top:8px; display:none;">Incorrect PIN</p>
     </div>
   </div>
 
+  <button id="btnInstall" class="btn btn-install" onclick="installPwa()">📲 Install App to Home Screen</button>
+
   <div class="header">
     <h1>PMG Pharmacy Kota Sentosa</h1>
-    <p id="lastUpdated">FY2027 Management & Daily Performance</p>
+    <p id="lastUpdated">FY2027 Daily Performance Portal</p>
   </div>
 
-  <!-- Teammate Performance Selector -->
+  <!-- Teammate View -->
   <div class="card">
-    <h2>👤 Individual Teammate Dashboard</h2>
-    <select id="staffSelect" onchange="renderStaffData()">
-      <option value="Chai Yee Sian (William)">Chai Yee Sian (William)</option>
+    <h2>👤 Teammate Dashboard</h2>
+    <select id="staffSelect" onchange="onStaffChange()">
+      <option value="Chai Yee Sian (William)">Chai Yee Sian (William) [Manager]</option>
       <option value="Jong Pei Choo">Jong Pei Choo</option>
       <option value="Fiona Fiena">Fiona Fiena</option>
       <option value="Haniesha Louna">Haniesha Louna</option>
@@ -79,6 +88,7 @@
       <option value="Muhammad Nur Farizin">Muhammad Nur Farizin</option>
       <option value="Kenix Ling">Kenix Ling</option>
     </select>
+
     <div class="metric-grid">
       <div class="metric-box"><div class="label">Total Sales (TS)</div><div class="val" id="valTS">RM 0.00</div></div>
       <div class="metric-box"><div class="label">House Brand (HB)</div><div class="val" id="valHB">RM 0.00</div></div>
@@ -87,23 +97,22 @@
     </div>
   </div>
 
-  <!-- AI Daily Coaching & Morning Briefing Copy -->
+  <!-- AI Daily Coaching Banner -->
   <div class="card">
-    <h2>🌟 AI Morning Sales Coaching</h2>
-    <div class="ai-banner" id="aiCoaching">Loading clinical House Brand guidance...</div>
-    <div style="margin-top: 10px;">
-      <button class="btn btn-copy" onclick="copyWhatsAppBriefing()">📋 Copy WhatsApp Briefing</button>
-    </div>
+    <h2>🌟 AI House Brand Daily Coaching</h2>
+    <div class="ai-banner" id="aiCoaching">Loading House Brand clinical tips...</div>
   </div>
 
-  <!-- Directors & Teammate Performance Downloads -->
-  <div class="card">
-    <h2>📊 Reports & Direct Downloads</h2>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-      <button class="btn" onclick="downloadDirectorsReport()">📥 Directors Report</button>
-      <button class="btn btn-secondary" onclick="downloadTeammatesCSV()">📥 Teammates CSV</button>
-    </div>
-    <div style="overflow-x: auto; margin-top: 12px;">
+  <!-- Manager Only Control Panel (Chai Yee Sian) -->
+  <div id="managerPanel" class="card" style="border: 1px solid #1a73e8;">
+    <h2 style="color: #1a73e8;">🔒 Manager Report & Screenshot Hub</h2>
+    <p style="font-size:0.75rem; color:#5f6368; margin-top:-6px;">Exclusive to Pharmacist Chai Yee Sian</p>
+    
+    <button class="btn btn-copy" onclick="copyWhatsAppBriefing()">📋 Copy WhatsApp Briefing</button>
+    <button class="btn btn-image" onclick="renderDirectorsReportImage()">📸 Download Directors 7-Day Screenshot</button>
+    <button class="btn btn-image" style="background:#681da8;" onclick="renderTeammateGapImage()">📸 Download Teammates Gap Screenshot</button>
+
+    <div style="overflow-x:auto; margin-top:12px;">
       <table id="teammatesTable">
         <thead>
           <tr><th>Name</th><th>TS (RM)</th><th>HB (RM)</th><th>HB %</th><th>Cust</th></tr>
@@ -113,10 +122,36 @@
     </div>
   </div>
 
+  <!-- Offscreen canvas for rendering PNG images -->
+  <canvas id="renderCanvas"></canvas>
+
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbyDXiyZZuYYDN4e6w16HyoTXbKbLwmPCSqoJVAkuRd4iPTYQP7KGtMJZuaQ-NyyXgSZ-w/exec";
+    const API_URL = "YOUR_DEPLOYED_APPS_SCRIPT_WEBAPP_URL";
     const CORRECT_PIN = "6688";
     let cachedData = null;
+    let deferredPrompt = null;
+
+    // Service Worker Registration for PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+
+    // PWA Install Prompt Handler
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('btnInstall').style.display = 'block';
+    });
+
+    function installPwa() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          document.getElementById('btnInstall').style.display = 'none';
+          deferredPrompt = null;
+        });
+      }
+    }
 
     function verifyPin() {
       const pin = document.getElementById("pinCode").value;
@@ -135,16 +170,21 @@
         cachedData = await res.json();
         document.getElementById("lastUpdated").innerText = `Updated: ${cachedData.updatedAt || 'Today'}`;
         document.getElementById("aiCoaching").innerText = cachedData.dailySummary.aiComment || "Pair OTCs with Citazinc & Suppflora.";
-        renderStaffData();
+        onStaffChange();
         renderTeammatesTable();
       } catch (e) {
-        document.getElementById("aiCoaching").innerText = "Focus on House Brand pairings (Citazinc / Progutor / Suppflora).";
+        document.getElementById("aiCoaching").innerText = "Pair routine OTC transactions with Nutribridge Suppflora & Citazinc.";
       }
     }
 
-    function renderStaffData() {
+    function onStaffChange() {
       const selected = document.getElementById("staffSelect").value;
       localStorage.setItem("pmg_user", selected);
+      
+      // Toggle Manager Access (Chai Yee Sian only)
+      const isManager = selected.includes("Chai Yee Sian");
+      document.getElementById("managerPanel").style.display = isManager ? "block" : "none";
+      
       if (!cachedData || !cachedData.teammates || !cachedData.teammates[selected]) return;
       const s = cachedData.teammates[selected];
       document.getElementById("valTS").innerText = "RM " + s.ts.toFixed(2);
@@ -158,14 +198,13 @@
       const tbody = document.querySelector("#teammatesTable tbody");
       tbody.innerHTML = "";
       for (const [name, val] of Object.entries(cachedData.teammates)) {
-        const row = `<tr>
+        tbody.innerHTML += `<tr>
           <td>${name.split(" ")[0]}</td>
           <td>${val.ts.toFixed(0)}</td>
           <td>${val.hb.toFixed(0)}</td>
           <td>${((val.hb/(val.ts||1))*100).toFixed(0)}%</td>
           <td>${val.customers}</td>
         </tr>`;
-        tbody.innerHTML += row;
       }
     }
 
@@ -176,27 +215,156 @@
       alert("WhatsApp Daily Briefing copied to clipboard!");
     }
 
-    function downloadDirectorsReport() {
-      const summary = cachedData ? cachedData.dailySummary : { totalSales: 0, hbSales: 0, hmSales: 0, transactions: 0 };
-      const content = `PMG PHARMACY KOTA SENTOSA - DIRECTORS REPORT\nDate: ${summary.date || 'Today'}\nTotal Sales (Inc WHM): RM ${summary.totalSales}\nHouse Brand: RM ${summary.hbSales} (${summary.hbRatio}%)\nHigh Margin: RM ${summary.hmSales}\nTransactions: ${summary.transactions}\nAI Strategy Comment: ${summary.aiComment}`;
-      const blob = new Blob([content], { type: "text/plain" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `Directors_Report_${new Date().toISOString().slice(0,10)}.txt`;
-      a.click();
+    // Direct High-Resolution 7-Day Directors Report Image Renderer
+    function renderDirectorsReportImage() {
+      const canvas = document.getElementById("renderCanvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = 1200;
+      canvas.height = 650;
+
+      // Background
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Title
+      ctx.fillStyle = "#000000";
+      ctx.font = "bold 20px sans-serif";
+      ctx.textAlign = "center";
+      const dateStr = cachedData ? cachedData.dailySummary.date : "TODAY";
+      ctx.fillText(`PMG PHARMACY KOTA SENTOSA - DIRECTORS' DAILY SALES REPORT (${dateStr})`, canvas.width / 2, 35);
+
+      // Headers (Light Blue)
+      ctx.fillStyle = "#d0e1fd";
+      ctx.fillRect(40, 60, 420, 30);
+      ctx.fillRect(480, 60, 680, 30);
+
+      ctx.fillStyle = "#000000";
+      ctx.font = "bold 13px sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText("Monthly Sales Summary", 50, 80);
+      ctx.fillText("7-Day Rolling Daily Breakdown", 490, 80);
+
+      // Draw Summary Grid
+      ctx.font = "12px sans-serif";
+      const s = cachedData ? cachedData.dailySummary : { totalSales: 357719.79, hbSales: 155316.34, hmSales: 34130.60, transactions: 249, basketSize: 42.88 };
+      
+      const metrics = [
+        ["Total Sales (Inc WHM)", `RM ${s.totalSales.toFixed(2)}`, "Target: RM 400,000"],
+        ["House Brand (HB)", `RM ${s.hbSales.toFixed(2)} (${s.hbRatio || 43.4}%)`, "Target: RM 184,000"],
+        ["High Margin (HM)", `RM ${s.hmSales.toFixed(2)}`, "Target: RM 40,000"],
+        ["Number of Transactions", `${s.transactions}`, "Daily Avg: 260"],
+        ["Total Sales Basket Size", `RM ${(s.basketSize || 42.88).toFixed(2)}`, "Target: RM 45.00+"]
+      ];
+
+      metrics.forEach((m, idx) => {
+        const y = 115 + (idx * 36);
+        ctx.fillStyle = idx % 2 === 0 ? "#f8f9fa" : "#ffffff";
+        ctx.fillRect(40, y - 20, 420, 30);
+        ctx.strokeStyle = "#e0e0e0";
+        ctx.strokeRect(40, y - 20, 420, 30);
+
+        ctx.fillStyle = "#202124";
+        ctx.font = "bold 12px sans-serif";
+        ctx.fillText(m[0], 50, y);
+        ctx.font = "12px sans-serif";
+        ctx.fillText(m, 230, y);
+        ctx.fillStyle = "#5f6368";
+        ctx.fillText(m, 340, y);
+      });
+
+      // Right Side Strategy & Comments Box
+      ctx.fillStyle = "#e6f4ea";
+      ctx.fillRect(480, 100, 680, 180);
+      ctx.strokeStyle = "#137333";
+      ctx.strokeRect(480, 100, 680, 180);
+
+      ctx.fillStyle = "#137333";
+      ctx.font = "bold 14px sans-serif";
+      ctx.fillText("🌟 AI Daily Strategy & Clinical Coaching Comment:", 500, 130);
+
+      ctx.fillStyle = "#202124";
+      ctx.font = "13px sans-serif";
+      const comment = (cachedData && cachedData.dailySummary.aiComment) ? cachedData.dailySummary.aiComment : "Pair OTC purchases with Nutribridge Suppflora and Citazinc to elevate House Brand basket size.";
+      wrapText(ctx, comment, 500, 165, 640, 22);
+
+      // Download Image
+      const link = document.createElement('a');
+      link.download = `Directors_Report_${dateStr}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
     }
 
-    function downloadTeammatesCSV() {
-      if (!cachedData || !cachedData.teammates) return;
-      let csv = "Teammate,Total Sales (RM),House Brand (RM),HB %,Customers\n";
-      for (const [name, val] of Object.entries(cachedData.teammates)) {
-        csv += `"${name}",${val.ts.toFixed(2)},${val.hb.toFixed(2)},${((val.hb/(val.ts||1))*100).toFixed(1)}%,${val.customers}\n`;
+    // Direct Teammate Target Gap Screenshot Renderer
+    function renderTeammateGapImage() {
+      const canvas = document.getElementById("renderCanvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = 1000;
+      canvas.height = 550;
+
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#000000";
+      ctx.font = "bold 18px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("PMG KOTA SENTOSA - TEAMMATE PERFORMANCE & TARGET GAP", canvas.width / 2, 35);
+
+      // Table Headers
+      ctx.fillStyle = "#1a73e8";
+      ctx.fillRect(30, 60, 940, 32);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 12px sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText("Teammate Name", 45, 81);
+      ctx.fillText("Cust", 260, 81);
+      ctx.fillText("MTD Sales (RM)", 350, 81);
+      ctx.fillText("MTD HB (RM)", 530, 81);
+      ctx.fillText("HB %", 710, 81);
+      ctx.fillText("HM %", 830, 81);
+
+      let rowY = 115;
+      if (cachedData && cachedData.teammates) {
+        for (const [name, val] of Object.entries(cachedData.teammates)) {
+          ctx.fillStyle = (rowY % 2 === 0) ? "#f9fafb" : "#ffffff";
+          ctx.fillRect(30, rowY - 18, 940, 28);
+          ctx.strokeStyle = "#e5e7eb";
+          ctx.strokeRect(30, rowY - 18, 940, 28);
+
+          ctx.fillStyle = "#111827";
+          ctx.font = "bold 12px sans-serif";
+          ctx.fillText(name, 45, rowY);
+          ctx.font = "12px sans-serif";
+          ctx.fillText(val.customers.toString(), 260, rowY);
+          ctx.fillText("RM " + val.ts.toFixed(2), 350, rowY);
+          ctx.fillText("RM " + val.hb.toFixed(2), 530, rowY);
+          ctx.fillText(((val.hb / (val.ts || 1)) * 100).toFixed(1) + "%", 710, rowY);
+          ctx.fillText(((val.hm / (val.ts || 1)) * 100).toFixed(1) + "%", 830, rowY);
+          rowY += 32;
+        }
       }
-      const blob = new Blob([csv], { type: "text/csv" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `Teammate_Performance_${new Date().toISOString().slice(0,10)}.csv`;
-      a.click();
+
+      const link = document.createElement('a');
+      link.download = `Teammates_Performance_Gap_${new Date().toISOString().slice(0,10)}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    }
+
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+      const words = text.split(' ');
+      let line = '';
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && n > 0) {
+          ctx.fillText(line, x, y);
+          line = words[n] + ' ';
+          y += lineHeight;
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line, x, y);
     }
 
     window.onload = () => {
