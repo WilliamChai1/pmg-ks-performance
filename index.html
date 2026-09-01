@@ -64,7 +64,6 @@
     <p id="lastUpdated" style="font-size:0.78rem; color:#5f6368; margin-top:3px;">FY2027 Daily Performance Portal</p>
   </div>
 
-  <!-- Teammate View -->
   <div class="card">
     <h2>
       <span id="userNameHeader">👤 Loading...</span>
@@ -95,14 +94,12 @@
       <div style="font-size:0.72rem; color:#5f6368; margin-top:2px;">(Calculated at 3.5% average House Brand commission rate)</div>
     </div>
 
-    <!-- Personalized Clinical Focus -->
     <div class="personal-rec">
       <b>💡 Your Personal Clinical Focus Today:</b>
       <div id="valPersonalRec" style="margin-top:4px;">Loading recommendation...</div>
     </div>
   </div>
 
-  <!-- Manager Only Control Panel (Chai Yee Sian) -->
   <div id="managerPanel" class="card" style="border: 1px solid var(--accent-blue);">
     <h2 style="color: var(--accent-blue);">🔒 Manager Report & Screenshot Hub</h2>
     <p style="font-size:0.75rem; color:#5f6368; margin-top:-6px;">Exclusive to Pharmacist Chai Yee Sian</p>
@@ -129,19 +126,18 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbyDXiyZZuYYDN4e6w16HyoTXbKbLwmPCSqoJVAkuRd4iPTYQP7KGtMJZuaQ-NyyXgSZ-w/exec";
     
-    // Role-based Target Configurations
+    // Updated Role-based Target Configurations (7.5% and 14%)
     const USER_CONFIGS = {
-      "6688": { name: "Chai Yee Sian (William)", role: "manager", tsTgt: 40000, hbTgt: 18400, hmTgt: 4000, dTs: 1333.33, dHb: 613.33, dHm: 133.33 },
-      "1001": { name: "Jong Pei Choo", role: "staff", tsTgt: 48000, hbTgt: 22080, hmTgt: 4800, dTs: 1600.00, dHb: 736.00, dHm: 160.00 },
-      "1002": { name: "Fiona Fiena", role: "staff", tsTgt: 48000, hbTgt: 22080, hmTgt: 4800, dTs: 1600.00, dHb: 736.00, dHm: 160.00 },
-      "1003": { name: "Haniesha Louna", role: "staff", tsTgt: 40000, hbTgt: 18400, hmTgt: 4000, dTs: 1333.33, dHb: 613.33, dHm: 133.33 },
-      "1004": { name: "Daniela Janet", role: "staff", tsTgt: 48000, hbTgt: 22080, hmTgt: 4800, dTs: 1600.00, dHb: 736.00, dHm: 160.00 },
-      "1005": { name: "Nurhafizah Pauli", role: "staff", tsTgt: 48000, hbTgt: 22080, hmTgt: 4800, dTs: 1600.00, dHb: 736.00, dHm: 160.00 },
-      "1006": { name: "Muhammad Nur Farizin", role: "staff", tsTgt: 48000, hbTgt: 22080, hmTgt: 4800, dTs: 1600.00, dHb: 736.00, dHm: 160.00 },
-      "1007": { name: "Kenix Ling", role: "staff", tsTgt: 40000, hbTgt: 18400, hmTgt: 4000, dTs: 1333.33, dHb: 613.33, dHm: 133.33 }
+      "6688": { name: "Chai Yee Sian (William)", role: "manager", tsTgt: 30000, hbTgt: 13800, hmTgt: 3000, dTs: 1000.00, dHb: 460.00, dHm: 100.00 },
+      "1001": { name: "Jong Pei Choo", role: "staff", tsTgt: 56000, hbTgt: 25760, hmTgt: 5600, dTs: 1866.67, dHb: 858.67, dHm: 186.67 },
+      "1002": { name: "Fiona Fiena", role: "staff", tsTgt: 56000, hbTgt: 25760, hmTgt: 5600, dTs: 1866.67, dHb: 858.67, dHm: 186.67 },
+      "1003": { name: "Haniesha Louna", role: "staff", tsTgt: 30000, hbTgt: 13800, hmTgt: 3000, dTs: 1000.00, dHb: 460.00, dHm: 100.00 },
+      "1004": { name: "Daniela Janet", role: "staff", tsTgt: 56000, hbTgt: 25760, hmTgt: 5600, dTs: 1866.67, dHb: 858.67, dHm: 186.67 },
+      "1005": { name: "Nurhafizah Pauli", role: "staff", tsTgt: 56000, hbTgt: 25760, hmTgt: 5600, dTs: 1866.67, dHb: 858.67, dHm: 186.67 },
+      "1006": { name: "Muhammad Nur Farizin", role: "staff", tsTgt: 56000, hbTgt: 25760, hmTgt: 5600, dTs: 1866.67, dHb: 858.67, dHm: 186.67 },
+      "1007": { name: "Kenix Ling", role: "staff", tsTgt: 30000, hbTgt: 13800, hmTgt: 3000, dTs: 1000.00, dHb: 460.00, dHm: 100.00 }
     };
 
-    // Live Verified 1-Sep Dataset
     const BACKUP_DATA = {
       updatedAt: "01-Sep-2026 23:00",
       dailySummary: {
@@ -244,7 +240,6 @@
         • HM Target Left: <b>RM ${hmRem.toFixed(2)}</b> (Target: RM ${currentUser.hmTgt.toLocaleString()})
       `;
 
-      // 3.5% Estimated HB Commission
       const comm = s.hb * 0.035;
       document.getElementById("valCommission").innerText = "RM " + comm.toFixed(2);
 
@@ -293,21 +288,28 @@
       text += `HM: RM ${s.hmSales.toFixed(2)} / RM 40,000 (${((s.hmSales/40000)*100).toFixed(1)}%)\n\n`;
 
       text += `Personal target per day:\n`;
-      text += `Pharmacist and Branch Manager\n`;
-      text += `TS: RM 1333.33\n`;
-      text += `HB: RM 613.33\n`;
-      text += `HM: RM 133.33\n\n`;
+      text += `Pharmacist, Branch Manager, and Assistant BM\n`;
+      text += `TS: RM 1000.00\n`;
+      text += `HB: RM 460.00\n`;
+      text += `HM: RM 100.00\n\n`;
 
-      text += `Assistant BM and Pharmacist Assistant (PA)\n`;
-      text += `TS: RM 1600.00\n`;
-      text += `HB: RM 736.00\n`;
-      text += `HM: RM 160.00\n\n`;
+      text += `Pharmacist Assistant (PA)\n`;
+      text += `TS: RM 1866.67\n`;
+      text += `HB: RM 858.67\n`;
+      text += `HM: RM 186.67\n\n`;
 
       text += `🏆 Congratulation board (for those who hit personal target)\n`;
-      text += `• Chai - Hit target for: TS, HB, HM\n`;
-      text += `• Haniesha - Hit target for: TS, HB, HM\n`;
-      text += `• Daniela - Hit target for: TS, HB, HM\n`;
-      text += `• Kenix - Hit target for: TS, HB, HM\n\n`;
+      for (const [pin, cfg] of Object.entries(USER_CONFIGS)) {
+        const val = cachedData.teammates[cfg.name] || { ts: 0, hb: 0, hm: 0 };
+        let hits = [];
+        if (val.ts >= cfg.dTs) hits.push("TS");
+        if (val.hb >= cfg.dHb) hits.push("HB");
+        if (val.hm >= cfg.dHm) hits.push("HM");
+        if (hits.length > 0) {
+          text += `• ${cfg.name.split(" ")[0]} - Hit target for: ${hits.join(", ")}\n`;
+        }
+      }
+      text += `\n`;
 
       text += `🎯 Outlet Strategic Priorities & Action Plans:\n`;
       if (cachedData && cachedData.tacticalActionPlans && cachedData.tacticalActionPlans.length > 0) {
