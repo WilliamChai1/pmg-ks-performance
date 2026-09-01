@@ -49,7 +49,6 @@
 </head>
 <body>
 
-  <!-- Multi-User PIN Authentication Shield -->
   <div id="pinOverlay">
     <div class="pin-box">
       <h2 style="margin:0; color:var(--primary); font-size:1.15rem;">PMG Kota Sentosa</h2>
@@ -65,7 +64,7 @@
     <p id="lastUpdated" style="font-size:0.78rem; color:#5f6368; margin-top:3px;">FY2027 Daily Performance Portal</p>
   </div>
 
-  <!-- Authenticated User Personal Dashboard -->
+  <!-- Teammate View -->
   <div class="card">
     <h2>
       <span id="userNameHeader">👤 Loading...</span>
@@ -83,9 +82,9 @@
     <div class="gap-banner">
       <b>🎯 Monthly Target Remaining (Sep 2026):</b>
       <div id="valRemainingTarget" style="margin-top:4px;">
-        • TS Target Left: <b>RM 40,000.00</b><br>
-        • HB Target Left: <b>RM 18,400.00</b><br>
-        • HM Target Left: <b>RM 4,000.00</b>
+        • TS Target Left: <b>RM 0.00</b><br>
+        • HB Target Left: <b>RM 0.00</b><br>
+        • HM Target Left: <b>RM 0.00</b>
       </div>
     </div>
 
@@ -130,25 +129,27 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbyDXiyZZuYYDN4e6w16HyoTXbKbLwmPCSqoJVAkuRd4iPTYQP7KGtMJZuaQ-NyyXgSZ-w/exec";
     
-    // Fallback/Live Verified Dataset (01-Sep-2026)
+    // Role-based Target Configurations
+    const USER_CONFIGS = {
+      "6688": { name: "Chai Yee Sian (William)", role: "manager", tsTgt: 40000, hbTgt: 18400, hmTgt: 4000, dTs: 1333.33, dHb: 613.33, dHm: 133.33 },
+      "1001": { name: "Jong Pei Choo", role: "staff", tsTgt: 48000, hbTgt: 22080, hmTgt: 4800, dTs: 1600.00, dHb: 736.00, dHm: 160.00 },
+      "1002": { name: "Fiona Fiena", role: "staff", tsTgt: 48000, hbTgt: 22080, hmTgt: 4800, dTs: 1600.00, dHb: 736.00, dHm: 160.00 },
+      "1003": { name: "Haniesha Louna", role: "staff", tsTgt: 40000, hbTgt: 18400, hmTgt: 4000, dTs: 1333.33, dHb: 613.33, dHm: 133.33 },
+      "1004": { name: "Daniela Janet", role: "staff", tsTgt: 48000, hbTgt: 22080, hmTgt: 4800, dTs: 1600.00, dHb: 736.00, dHm: 160.00 },
+      "1005": { name: "Nurhafizah Pauli", role: "staff", tsTgt: 48000, hbTgt: 22080, hmTgt: 4800, dTs: 1600.00, dHb: 736.00, dHm: 160.00 },
+      "1006": { name: "Muhammad Nur Farizin", role: "staff", tsTgt: 48000, hbTgt: 22080, hmTgt: 4800, dTs: 1600.00, dHb: 736.00, dHm: 160.00 },
+      "1007": { name: "Kenix Ling", role: "staff", tsTgt: 40000, hbTgt: 18400, hmTgt: 4000, dTs: 1333.33, dHb: 613.33, dHm: 133.33 }
+    };
+
+    // Live Verified 1-Sep Dataset
     const BACKUP_DATA = {
-      updatedAt: "01-Sep-2026 22:30",
-      outlet: "PMG Pharmacy Kota Sentosa",
+      updatedAt: "01-Sep-2026 23:00",
       dailySummary: {
         date: "01-Sep-2026",
         totalSales: 13035.66,
         hbSales: 5079.09,
-        hbRatio: 39.0,
         hmSales: 1696.50,
-        hmRatio: 13.0,
-        transactions: 303,
-        basketSize: 43.02,
-        hbBasketSize: 16.76,
-        pmgAppCount: 3,
-        pmgAppMtd: 3,
-        aiComment: "Solid start to FY27 with RM 13.0k TS & 39.0% HB ratio! Pair cold OTCs with Citazinc and Suppflora to lift basket size.",
-        lyTotalSales: 11634.19,
-        lyHbSales: 3524.17
+        transactions: 303
       },
       directorsReportDriveUrl: "https://drive.google.com/file/d/1oU21bWXbkHHD6xfNFhkDEMlvwmLx1CMW/view?usp=drivesdk",
       teammatesGapDriveUrl: "https://drive.google.com/file/d/1AGlDj5R2EH1CtYi1oA41UJa9L7aWQcfv/view?usp=drivesdk",
@@ -179,24 +180,13 @@
       }
     };
 
-    const USER_PINS = {
-      "6688": { name: "Chai Yee Sian (William)", role: "manager" },
-      "1001": { name: "Jong Pei Choo", role: "staff" },
-      "1002": { name: "Fiona Fiena", role: "staff" },
-      "1003": { name: "Haniesha Louna", role: "staff" },
-      "1004": { name: "Daniela Janet", role: "staff" },
-      "1005": { name: "Nurhafizah Pauli", role: "staff" },
-      "1006": { name: "Muhammad Nur Farizin", role: "staff" },
-      "1007": { name: "Kenix Ling", role: "staff" }
-    };
-
     let currentUser = null;
     let cachedData = BACKUP_DATA;
 
     function verifyPin() {
       const pin = document.getElementById("pinCode").value;
-      if (USER_PINS[pin]) {
-        currentUser = USER_PINS[pin];
+      if (USER_CONFIGS[pin]) {
+        currentUser = USER_CONFIGS[pin];
         localStorage.setItem("pmg_auth_pin", pin);
         document.getElementById("pinOverlay").style.display = "none";
         loadData();
@@ -217,11 +207,11 @@
       try {
         const res = await fetch(API_URL);
         const liveJson = await res.json();
-        if (liveJson && liveJson.dailySummary && liveJson.dailySummary.totalSales > 1000) {
+        if (liveJson && liveJson.teammates && Object.keys(liveJson.teammates).length > 0) {
           cachedData = liveJson;
         }
       } catch (e) {
-        console.log("Using live cached dataset.");
+        console.log("Using live verified dataset.");
       }
       
       document.getElementById("lastUpdated").innerText = `Updated: ${cachedData.updatedAt || '01-Sep-2026'}`;
@@ -244,14 +234,14 @@
       document.getElementById("valHM").innerText = "RM " + s.hm.toFixed(2);
       document.getElementById("valCust").innerText = s.customers;
 
-      const tsRem = Math.max(0, 40000 - s.ts);
-      const hbRem = Math.max(0, 18400 - s.hb);
-      const hmRem = Math.max(0, 4000 - s.hm);
+      const tsRem = Math.max(0, currentUser.tsTgt - s.ts);
+      const hbRem = Math.max(0, currentUser.hbTgt - s.hb);
+      const hmRem = Math.max(0, currentUser.hmTgt - s.hm);
 
       document.getElementById("valRemainingTarget").innerHTML = `
-        • TS Target Left: <b>RM ${tsRem.toFixed(2)}</b><br>
-        • HB Target Left: <b>RM ${hbRem.toFixed(2)}</b><br>
-        • HM Target Left: <b>RM ${hmRem.toFixed(2)}</b>
+        • TS Target Left: <b>RM ${tsRem.toFixed(2)}</b> (Target: RM ${currentUser.tsTgt.toLocaleString()})<br>
+        • HB Target Left: <b>RM ${hbRem.toFixed(2)}</b> (Target: RM ${currentUser.hbTgt.toLocaleString()})<br>
+        • HM Target Left: <b>RM ${hmRem.toFixed(2)}</b> (Target: RM ${currentUser.hmTgt.toLocaleString()})
       `;
 
       // 3.5% Estimated HB Commission
@@ -265,13 +255,14 @@
     function renderCongratsPreview() {
       if (!cachedData || !cachedData.teammates) return;
       let html = "";
-      for (const [name, val] of Object.entries(cachedData.teammates)) {
+      for (const [pin, cfg] of Object.entries(USER_CONFIGS)) {
+        const val = cachedData.teammates[cfg.name] || { ts: 0, hb: 0, hm: 0 };
         let hits = [];
-        if (val.ts >= 1333.33) hits.push("TS");
-        if (val.hb >= 613.33) hits.push("HB");
-        if (val.hm >= 133.33) hits.push("HM");
+        if (val.ts >= cfg.dTs) hits.push("TS");
+        if (val.hb >= cfg.dHb) hits.push("HB");
+        if (val.hm >= cfg.dHm) hits.push("HM");
         if (hits.length > 0) {
-          html += `• <b>${name.split(" ")[0]}</b> - Hit target for: ${hits.join(", ")}<br>`;
+          html += `• <b>${cfg.name.split(" ")[0]}</b> - Hit target for: ${hits.join(", ")}<br>`;
         }
       }
       document.getElementById("congratsPreview").innerHTML = html || "No target hits recorded today.";
@@ -308,21 +299,23 @@
       text += `HM: RM 133.33\n\n`;
 
       text += `Assistant BM and Pharmacist Assistant (PA)\n`;
-      text += `TS: RM 1333.33\n`;
-      text += `HB: RM 613.33\n`;
-      text += `HM: RM 133.33\n\n`;
+      text += `TS: RM 1600.00\n`;
+      text += `HB: RM 736.00\n`;
+      text += `HM: RM 160.00\n\n`;
 
       text += `🏆 Congratulation board (for those who hit personal target)\n`;
       text += `• Chai - Hit target for: TS, HB, HM\n`;
       text += `• Haniesha - Hit target for: TS, HB, HM\n`;
       text += `• Daniela - Hit target for: TS, HB, HM\n`;
-      text += `• Kenix - Hit target for: TS, HB, HM\n`;
-      text += `• Muhammad - Hit target for: TS, HM\n\n`;
+      text += `• Kenix - Hit target for: TS, HB, HM\n\n`;
 
       text += `🎯 Outlet Strategic Priorities & Action Plans:\n`;
-      text += `1. Dual House Brand Pairing: Prescribe 2 House Brand items per consult (e.g. cold OTC + Citazinc & Suppflora).\n`;
-      text += `2. Drive HB Basket Size towards RM 20.00+ via 30-day course supplements.\n`;
-      text += `3. Active Checkout PWP conversion on transactions >RM 30.\n\n`;
+      if (cachedData && cachedData.tacticalActionPlans && cachedData.tacticalActionPlans.length > 0) {
+        cachedData.tacticalActionPlans.forEach((plan, idx) => {
+          text += `${idx + 1}. ${plan}\n`;
+        });
+      }
+      text += `\n`;
 
       text += `👤 Individual Teammate Priorities:\n\n`;
       for (const [name, tip] of Object.entries(cachedData.recommendations)) {
@@ -335,8 +328,8 @@
 
     window.onload = () => {
       const savedPin = localStorage.getItem("pmg_auth_pin");
-      if (savedPin && USER_PINS[savedPin]) {
-        currentUser = USER_PINS[savedPin];
+      if (savedPin && USER_CONFIGS[savedPin]) {
+        currentUser = USER_CONFIGS[savedPin];
         document.getElementById("pinOverlay").style.display = "none";
         loadData();
       }
