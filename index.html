@@ -61,50 +61,55 @@
 
   <div style="text-align:center; margin:8px 0 14px;">
     <h1 style="font-size:1.2rem; color:var(--primary); margin:0;">PMG Pharmacy Kota Sentosa</h1>
-    <p id="lastUpdated" style="font-size:0.78rem; color:#5f6368; margin-top:3px;">Fetching Live Data...</p>
+    <p id="lastUpdated" style="font-size:0.78rem; color:#5f6368; margin-top:3px;">Loading live sheet data...</p>
   </div>
 
+  <!-- Teammate View -->
   <div class="card">
     <h2>
-      <span id="userNameHeader">👤 Loading...</span>
+      <span id="userNameHeader">👤 Loading profile...</span>
       <button class="btn btn-logout" onclick="logout()">Lock 🔒</button>
     </h2>
 
     <div class="metric-grid">
-      <div class="metric-box"><div class="label">Today TS</div><div class="val" id="valTS">RM 0.00</div></div>
-      <div class="metric-box"><div class="label">Today HB</div><div class="val" id="valHB">RM 0.00</div></div>
-      <div class="metric-box"><div class="label">Today HM</div><div class="val" id="valHM">RM 0.00</div></div>
+      <div class="metric-box"><div class="label">Today TS</div><div class="val" id="valTS">Loading...</div></div>
+      <div class="metric-box"><div class="label">Today HB</div><div class="val" id="valHB">Loading...</div></div>
+      <div class="metric-box"><div class="label">Today HM</div><div class="val" id="valHM">Loading...</div></div>
       <div class="metric-box"><div class="label">Customers Served</div><div class="val" id="valCust">0</div></div>
     </div>
 
+    <!-- Personal Target Remaining (Dynamically calculated from sheet) -->
     <div class="gap-banner">
       <b>🎯 Monthly Target Remaining (Sep 2026):</b>
       <div id="valRemainingTarget" style="margin-top:4px;">
-        • TS Target Left: <b>RM 0.00</b><br>
-        • HB Target Left: <b>RM 0.00</b><br>
-        • HM Target Left: <b>RM 0.00</b>
+        • TS Target Left: <b>Loading...</b><br>
+        • HB Target Left: <b>Loading...</b><br>
+        • HM Target Left: <b>Loading...</b>
       </div>
     </div>
 
+    <!-- 3.5% Estimated HB Commission -->
     <div class="commission-banner">
       <b>💰 Estimated HB Commission Earned Today:</b>
-      <div style="font-size:1.15rem; font-weight:700; margin-top:2px;" id="valCommission">RM 0.00</div>
+      <div style="font-size:1.15rem; font-weight:700; margin-top:2px;" id="valCommission">Loading...</div>
       <div style="font-size:0.72rem; color:#5f6368; margin-top:2px;">(Calculated at 3.5% average House Brand commission rate)</div>
     </div>
 
+    <!-- Personalized Clinical Focus -->
     <div class="personal-rec">
       <b>💡 Your Personal Clinical Focus Today:</b>
       <div id="valPersonalRec" style="margin-top:4px;">Loading recommendation...</div>
     </div>
   </div>
 
+  <!-- Manager Only Control Panel (Chai Yee Sian) -->
   <div id="managerPanel" class="card" style="border: 1px solid var(--accent-blue);">
     <h2 style="color: var(--accent-blue);">🔒 Manager Report & Screenshot Hub</h2>
     <p style="font-size:0.75rem; color:#5f6368; margin-top:-6px;">Exclusive to Pharmacist Chai Yee Sian</p>
     
     <button class="btn btn-copy" onclick="copyWhatsAppBriefing()">📋 Copy WhatsApp Briefing</button>
-    <button class="btn btn-image" onclick="downloadDirectorsReportImage()">📸 Download Directors 7-Day Screenshot</button>
-    <button class="btn btn-image" style="background:#681da8;" onclick="downloadTeammatesGapImage()">📸 Download Teammates Gap Screenshot</button>
+    <a id="btnDlDirector" class="btn btn-image" href="https://drive.google.com/file/d/1oU21bWXbkHHD6xfNFhkDEMlvwmLx1CMW/view?usp=drivesdk" target="_blank">📸 Download Directors 7-Day Screenshot</a>
+    <a id="btnDlTeammate" class="btn btn-image" style="background:#681da8;" href="https://drive.google.com/file/d/1AGlDj5R2EH1CtYi1oA41UJa9L7aWQcfv/view?usp=drivesdk" target="_blank">📸 Download Teammates Gap Screenshot</a>
 
     <div class="congrats-card" style="margin-top:12px;">
       <b>🏆 Today's Congratulation Board:</b>
@@ -124,20 +129,19 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbyDXiyZZuYYDN4e6w16HyoTXbKbLwmPCSqoJVAkuRd4iPTYQP7KGtMJZuaQ-NyyXgSZ-w/exec";
     
-    // Static User Configuration & Targets
     const USER_CONFIGS = {
-      "6688": { name: "Chai Yee Sian (William)", role: "manager", tsTgt: 30000, hbTgt: 13800, hmTgt: 3000, dTs: 1000.00, dHb: 460.00, dHm: 100.00 },
-      "1001": { name: "Jong Pei Choo", role: "staff", tsTgt: 56000, hbTgt: 25760, hmTgt: 5600, dTs: 1866.67, dHb: 858.67, dHm: 186.67 },
-      "1002": { name: "Fiona Fiena", role: "staff", tsTgt: 56000, hbTgt: 25760, hmTgt: 5600, dTs: 1866.67, dHb: 858.67, dHm: 186.67 },
-      "1003": { name: "Haniesha Louna", role: "staff", tsTgt: 30000, hbTgt: 13800, hmTgt: 3000, dTs: 1000.00, dHb: 460.00, dHm: 100.00 },
-      "1004": { name: "Daniela Janet", role: "staff", tsTgt: 56000, hbTgt: 25760, hmTgt: 5600, dTs: 1866.67, dHb: 858.67, dHm: 186.67 },
-      "1005": { name: "Nurhafizah Pauli", role: "staff", tsTgt: 56000, hbTgt: 25760, hmTgt: 5600, dTs: 1866.67, dHb: 858.67, dHm: 186.67 },
-      "1006": { name: "Muhammad Nur Farizin", role: "staff", tsTgt: 56000, hbTgt: 25760, hmTgt: 5600, dTs: 1866.67, dHb: 858.67, dHm: 186.67 },
-      "1007": { name: "Kenix Ling", role: "staff", tsTgt: 30000, hbTgt: 13800, hmTgt: 3000, dTs: 1000.00, dHb: 460.00, dHm: 100.00 }
+      "6688": { name: "Chai Yee Sian (William)", role: "manager" },
+      "1007": { name: "Kenix Ling", role: "staff" },
+      "1003": { name: "Haniesha Louna", role: "staff" },
+      "1001": { name: "Jong Pei Choo", role: "staff" },
+      "1002": { name: "Fiona Fiena", role: "staff" },
+      "1004": { name: "Daniela Janet", role: "staff" },
+      "1005": { name: "Nurhafizah Pauli", role: "staff" },
+      "1006": { name: "Muhammad Nur Farizin", role: "staff" }
     };
 
     let currentUser = null;
-    let cachedData = null; // Removed the hardcoded backup data!
+    let liveSheetData = null;
 
     function verifyPin() {
       const pin = document.getElementById("pinCode").value;
@@ -154,155 +158,137 @@
     function logout() {
       localStorage.removeItem("pmg_auth_pin");
       currentUser = null;
-      cachedData = null;
       document.getElementById("pinCode").value = "";
       document.getElementById("pinOverlay").style.display = "flex";
       document.getElementById("managerPanel").style.display = "none";
     }
 
-    // Fully dynamic live fetch function
     async function loadData() {
+      document.getElementById("lastUpdated").innerText = "Connecting to Google Sheet...";
       try {
-        const res = await fetch(API_URL);
-        cachedData = await res.json();
+        const res = await fetch(API_URL, { redirect: "follow" });
+        liveSheetData = await res.json();
         
-        document.getElementById("lastUpdated").innerText = `Updated: ${cachedData.updatedAt}`;
-        renderUserDashboard();
-        renderTeammatesTable();
-        renderCongratsPreview();
+        if (liveSheetData && liveSheetData.teammates) {
+          document.getElementById("lastUpdated").innerText = `Live Sheet Data • Updated: ${liveSheetData.updatedAt || 'Today'}`;
+          renderUserDashboard();
+          renderTeammatesTable();
+          renderCongratsPreview();
+        } else {
+          throw new Error("Empty response");
+        }
       } catch (e) {
-        document.getElementById("lastUpdated").innerText = "Error fetching live data. Check connection.";
-        console.error("Live fetch error:", e);
+        document.getElementById("lastUpdated").innerText = "Error syncing with Google Sheet. Tap Lock 🔒 to retry.";
+        console.error(e);
       }
     }
 
     function renderUserDashboard() {
-      if (!currentUser || !cachedData) return;
+      if (!currentUser || !liveSheetData || !liveSheetData.teammates) return;
       const userName = currentUser.name;
       document.getElementById("userNameHeader").innerText = `👤 ${userName}`;
 
       document.getElementById("managerPanel").style.display = currentUser.role === "manager" ? "block" : "none";
 
-      const s = (cachedData.teammates && cachedData.teammates[userName]) || { ts: 0, hb: 0, hm: 0, customers: 0 };
+      const s = liveSheetData.teammates[userName] || { ts: 0, hb: 0, hm: 0, customers: 0, tsTarget: 40000, hbTarget: 18400, hmTarget: 4000 };
 
       document.getElementById("valTS").innerText = "RM " + s.ts.toFixed(2);
       document.getElementById("valHB").innerText = "RM " + s.hb.toFixed(2);
       document.getElementById("valHM").innerText = "RM " + s.hm.toFixed(2);
       document.getElementById("valCust").innerText = s.customers;
 
-      const tsRem = Math.max(0, currentUser.tsTgt - s.ts);
-      const hbRem = Math.max(0, currentUser.hbTgt - s.hb);
-      const hmRem = Math.max(0, currentUser.hmTgt - s.hm);
+      const tsRem = Math.max(0, s.tsTarget - s.ts);
+      const hbRem = Math.max(0, s.hbTarget - s.hb);
+      const hmRem = Math.max(0, s.hmTarget - s.hm);
 
       document.getElementById("valRemainingTarget").innerHTML = `
-        • TS Target Left: <b>RM ${tsRem.toFixed(2)}</b> (Target: RM ${currentUser.tsTgt.toLocaleString()})<br>
-        • HB Target Left: <b>RM ${hbRem.toFixed(2)}</b> (Target: RM ${currentUser.hbTgt.toLocaleString()})<br>
-        • HM Target Left: <b>RM ${hmRem.toFixed(2)}</b> (Target: RM ${currentUser.hmTgt.toLocaleString()})
+        • TS Target Left: <b>RM ${tsRem.toFixed(2)}</b> (Target: RM ${s.tsTarget.toLocaleString()})<br>
+        • HB Target Left: <b>RM ${hbRem.toFixed(2)}</b> (Target: RM ${s.hbTarget.toLocaleString()})<br>
+        • HM Target Left: <b>RM ${hmRem.toFixed(2)}</b> (Target: RM ${s.hmTarget.toLocaleString()})
       `;
 
+      // 3.5% Estimated Commission
       const comm = s.hb * 0.035;
       document.getElementById("valCommission").innerText = "RM " + comm.toFixed(2);
 
-      const rec = (cachedData.recommendations && cachedData.recommendations[userName]) || "Focus on pairing OTC cough/flu items with JH Nutrition Citazinc and Suppflora.";
+      const rec = (liveSheetData.recommendations && liveSheetData.recommendations[userName]) || "Focus on pairing routine OTC transactions with House Brand supplements.";
       document.getElementById("valPersonalRec").innerText = rec;
     }
 
     function renderCongratsPreview() {
-      if (!cachedData || !cachedData.teammates) return;
+      if (!liveSheetData || !liveSheetData.teammates) return;
       let html = "";
-      for (const [pin, cfg] of Object.entries(USER_CONFIGS)) {
-        const val = cachedData.teammates[cfg.name] || { ts: 0, hb: 0, hm: 0 };
+      for (const [name, val] of Object.entries(liveSheetData.teammates)) {
         let hits = [];
-        if (val.ts >= cfg.dTs) hits.push("TS");
-        if (val.hb >= cfg.dHb) hits.push("HB");
-        if (val.hm >= cfg.dHm) hits.push("HM");
+        if (val.ts >= val.dailyTsTarget) hits.push("TS");
+        if (val.hb >= val.dailyHbTarget) hits.push("HB");
+        if (val.hm >= val.dailyHmTarget) hits.push("HM");
         if (hits.length > 0) {
-          html += `• <b>${cfg.name.split(" ")[0]}</b> - Hit target for: ${hits.join(", ")}<br>`;
+          html += `• <b>${name.split(" ")[0]}</b> - Hit target for: ${hits.join(", ")}<br>`;
         }
       }
       document.getElementById("congratsPreview").innerHTML = html || "No target hits recorded today.";
     }
 
     function renderTeammatesTable() {
-      if (!cachedData || !cachedData.teammates) return;
+      if (!liveSheetData || !liveSheetData.teammates) return;
       const tbody = document.querySelector("#teammatesTable tbody");
       tbody.innerHTML = "";
-      for (const [name, val] of Object.entries(cachedData.teammates)) {
+      for (const [name, val] of Object.entries(liveSheetData.teammates)) {
         tbody.innerHTML += `<tr>
           <td>${name.split(" ")[0]}</td>
           <td>${val.ts.toFixed(0)}</td>
           <td>${val.hb.toFixed(0)}</td>
-          <td>${((val.hb/(val.ts||1))*100).toFixed(0)}%</td>
+          <td>${((val.hb / (val.ts || 1)) * 100).toFixed(0)}%</td>
           <td>${val.customers}</td>
         </tr>`;
       }
     }
 
     function copyWhatsAppBriefing() {
-      if (!cachedData) return;
-      const s = cachedData.dailySummary;
+      if (!liveSheetData) return;
+      const s = liveSheetData.dailySummary;
       
       let text = `Date of briefing: ${s.date}\n\n`;
       text += `Target achievement:\n`;
-      text += `TS: RM ${s.totalSales.toFixed(2)} / RM 400,000 (${((s.totalSales/400000)*100).toFixed(1)}%)\n`;
-      text += `HB: RM ${s.hbSales.toFixed(2)} / RM 184,000 (${((s.hbSales/184000)*100).toFixed(1)}%)\n`;
-      text += `HM: RM ${s.hmSales.toFixed(2)} / RM 40,000 (${((s.hmSales/40000)*100).toFixed(1)}%)\n\n`;
+      text += `TS: RM ${s.totalSales.toFixed(2)} / RM 400,000 (${((s.totalSales / 400000) * 100).toFixed(1)}%)\n`;
+      text += `HB: RM ${s.hbSales.toFixed(2)} / RM 184,000 (${((s.hbSales / 184000) * 100).toFixed(1)}%)\n`;
+      text += `HM: RM ${s.hmSales.toFixed(2)} / RM 40,000 (${((s.hmSales / 40000) * 100).toFixed(1)}%)\n\n`;
 
       text += `Personal target per day:\n`;
-      text += `Pharmacist, Branch Manager, and Assistant BM\n`;
-      text += `TS: RM 1000.00\n`;
-      text += `HB: RM 460.00\n`;
-      text += `HM: RM 100.00\n\n`;
+      text += `Pharmacist, PRP & Assistant BM (7.5% pool):\n`;
+      text += `TS: RM 1000.00 | HB: RM 460.00 | HM: RM 100.00\n\n`;
 
-      text += `Pharmacist Assistant (PA)\n`;
-      text += `TS: RM 1866.67\n`;
-      text += `HB: RM 858.67\n`;
-      text += `HM: RM 186.67\n\n`;
+      text += `Pharmacist Assistants (14% pool):\n`;
+      text += `TS: RM 1866.67 | HB: RM 858.67 | HM: RM 186.67\n\n`;
 
       text += `🏆 Congratulation board (for those who hit personal target)\n`;
-      for (const [pin, cfg] of Object.entries(USER_CONFIGS)) {
-        const val = cachedData.teammates[cfg.name] || { ts: 0, hb: 0, hm: 0 };
+      for (const [name, val] of Object.entries(liveSheetData.teammates)) {
         let hits = [];
-        if (val.ts >= cfg.dTs) hits.push("TS");
-        if (val.hb >= cfg.dHb) hits.push("HB");
-        if (val.hm >= cfg.dHm) hits.push("HM");
+        if (val.ts >= val.dailyTsTarget) hits.push("TS");
+        if (val.hb >= val.dailyHbTarget) hits.push("HB");
+        if (val.hm >= val.dailyHmTarget) hits.push("HM");
         if (hits.length > 0) {
-          text += `• ${cfg.name.split(" ")[0]} - Hit target for: ${hits.join(", ")}\n`;
+          text += `• ${name.split(" ")[0]} - Hit target for: ${hits.join(", ")}\n`;
         }
       }
       text += `\n`;
 
       text += `🎯 Outlet Strategic Priorities & Action Plans:\n`;
-      if (cachedData.tacticalActionPlans && cachedData.tacticalActionPlans.length > 0) {
-        cachedData.tacticalActionPlans.forEach((plan, idx) => {
+      if (liveSheetData.tacticalActionPlans) {
+        liveSheetData.tacticalActionPlans.forEach((plan, idx) => {
           text += `${idx + 1}. ${plan}\n`;
         });
       }
       text += `\n`;
 
       text += `👤 Individual Teammate Priorities:\n\n`;
-      for (const [name, tip] of Object.entries(cachedData.recommendations)) {
+      for (const [name, tip] of Object.entries(liveSheetData.recommendations)) {
         text += `• *${name.split(" ")[0]}:* ${tip}\n\n`;
       }
 
       navigator.clipboard.writeText(text);
       alert("WhatsApp Daily Briefing copied to clipboard!");
-    }
-
-    function downloadDirectorsReportImage() {
-      if (cachedData && cachedData.directorsReportDriveUrl) {
-        window.open(cachedData.directorsReportDriveUrl, '_blank');
-      } else {
-        alert("Image link not available yet.");
-      }
-    }
-
-    function downloadTeammatesGapImage() {
-      if (cachedData && cachedData.teammatesGapDriveUrl) {
-        window.open(cachedData.teammatesGapDriveUrl, '_blank');
-      } else {
-        alert("Image link not available yet.");
-      }
     }
 
     window.onload = () => {
