@@ -135,7 +135,7 @@
     <p id="lastUpdated" style="font-size:0.78rem; color:#757575; margin-top:3px;">Connecting to Live Google Sheet...</p>
   </div>
 
-  <!-- 🏆 OVERALL OUTLET MISSION & HQ REWARD LADDER (Visible to Everyone) -->
+  <!-- 🏆 OVERALL OUTLET MISSION & HQ REWARD LADDER -->
   <div class="card" style="border: 2px solid var(--primary); background: linear-gradient(180deg, #ffffff 0%, #faf7fc 100%);">
     <h2 style="color: var(--primary); margin-bottom: 6px;">
       <span>🏆 Kota Sentosa Mission & HQ Rewards</span>
@@ -146,7 +146,7 @@
     <div style="margin-top: 8px;">
       <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700;">
         <span>STORE TOTAL SALES</span>
-        <span id="outletTsProgressText">RM 0 / RM 331,000 (0%)</span>
+        <span id="outletTsProgressText">Loading...</span>
       </div>
       <div class="progress-bar-bg"><div class="progress-bar-fill" id="outletTsBar"></div></div>
     </div>
@@ -155,7 +155,7 @@
     <div style="margin-top: 8px;">
       <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700;">
         <span>HOUSE BRAND (PORTION B)</span>
-        <span id="outletHbProgressText">RM 0 / RM 171,800 (0%)</span>
+        <span id="outletHbProgressText">Loading...</span>
       </div>
       <div class="progress-bar-bg"><div class="progress-bar-fill gold" id="outletHbBar"></div></div>
     </div>
@@ -186,8 +186,8 @@
     </div>
 
     <!-- Live Reward Status Notification -->
-    <div id="rewardStatusBanner" style="background: #e8f5e9; border-left: 4px solid #2e7d32; padding: 8px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #1b5e20;">
-      Connecting reward tracker...
+    <div id="rewardStatusBanner" style="background: #f3e5f5; border-left: 4px solid var(--primary); padding: 8px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #4a148c;">
+      Calculating reward progress...
     </div>
 
     <div style="font-size: 0.68rem; color: #757575; margin-top: 8px; line-height: 1.3;">
@@ -369,11 +369,20 @@
     }
 
     function renderOutletMission() {
-      if (!liveSheetData || !liveSheetData.dailySummary) return;
-      const s = liveSheetData.dailySummary;
+      if (!liveSheetData) return;
+      const s = liveSheetData.dailySummary || {};
 
-      const mtdTs = s.mtdTotalSales || 0;
-      const mtdHb = s.mtdHbSales || 0;
+      // Calculate exact MTD Outlet totals (direct or sum of all teammates)
+      let mtdTs = s.mtdTotalSales || 0;
+      let mtdHb = s.mtdHbSales || 0;
+
+      if (mtdTs <= 0 && liveSheetData.teammates) {
+        mtdTs = Object.values(liveSheetData.teammates).reduce((acc, tm) => acc + (tm.mtdTs || 0), 0);
+      }
+      if (mtdHb <= 0 && liveSheetData.teammates) {
+        mtdHb = Object.values(liveSheetData.teammates).reduce((acc, tm) => acc + (tm.mtdHb || 0), 0);
+      }
+
       const tsTarget = s.tsTarget || 331000.0;
       const hbTier3 = s.hbTier3Target || 171800.0;
       const hbTier2 = s.hbTier2Target || 161900.0;
@@ -436,11 +445,13 @@
 
       const s = liveSheetData.teammates[userName] || { dailyTs: 0, dailyHb: 0, dailyHm: 0, dailyCust: 0, dailyCommission: 0, mtdTs: 0, mtdHb: 0, mtdHm: 0, mtdCust: 0, mtdCommission: 0, tsTarget: 43030, hbTarget: 22334, hmTarget: 4303 };
 
+      // Top Cards show TODAY'S actual daily sales
       document.getElementById("valTS").innerText = "RM " + (s.dailyTs || 0).toFixed(2);
       document.getElementById("valHB").innerText = "RM " + (s.dailyHb || 0).toFixed(2);
       document.getElementById("valHM").innerText = "RM " + (s.dailyHm || 0).toFixed(2);
       document.getElementById("valCust").innerText = s.dailyCust || 0;
 
+      // Target remaining uses MTD cumulative
       const tsRem = Math.max(0, s.tsTarget - (s.mtdTs || 0));
       const hbRem = Math.max(0, s.hbTarget - (s.mtdHb || 0));
       const hmRem = Math.max(0, s.hmTarget - (s.mtdHm || 0));
@@ -451,6 +462,7 @@
         • HM Target Left: <b>RM ${hmRem.toFixed(2)}</b> (Target: RM ${s.hmTarget.toLocaleString()})
       `;
 
+      // Dual House Brand Commission
       document.getElementById("valDailyCommission").innerText = "RM " + (s.dailyCommission || 0).toFixed(2);
       document.getElementById("valMtdCommission").innerText = "RM " + (s.mtdCommission || 0).toFixed(2);
 
