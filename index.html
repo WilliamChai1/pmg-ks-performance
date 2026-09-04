@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0b8043">
   <title>PMG KS - Performance Portal</title>
+  <link rel="manifest" href="./manifest.json">
   <style>
     :root { 
       --primary: #0b8043; 
@@ -25,6 +26,7 @@
     .btn:active { background: var(--primary-dark); }
     .btn-image { background: #e37400; }
     .btn-copy { background: #137333; }
+    .btn-install { background: #1a73e8; margin-top: 0; margin-bottom: 8px; font-size: 0.82rem; }
     .btn-logout { background: #5f6368; padding: 6px 12px; font-size: 0.75rem; width: auto; margin: 0; }
     
     .card { background: var(--card); border-radius: 12px; padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 12px; }
@@ -44,9 +46,23 @@
     table { width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-top: 8px; }
     th, td { padding: 6px 4px; text-align: right; border-bottom: 1px solid #eee; }
     th:first-child, td:first-child { text-align: left; }
+
+    /* Install Tutorial Modal */
+    #installModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 2000; align-items: center; justify-content: center; }
+    .modal-box { background: white; border-radius: 16px; padding: 20px; width: 85%; max-width: 320px; font-size: 0.85rem; line-height: 1.5; }
   </style>
 </head>
 <body>
+
+  <!-- In-App Installation Tutorial Modal -->
+  <div id="installModal">
+    <div class="modal-box">
+      <h3 style="margin-top:0; color:var(--primary);">📲 How to Install as App</h3>
+      <p><b>On Android (Chrome):</b><br>Tap the 3 dots (<b>⋮</b>) at the top right of your browser, then tap <b>"Install app"</b> or <b>"Add to Home screen"</b>.</p>
+      <p><b>On iPhone (Safari):</b><br>Tap the <b>Share icon (⎋)</b> at the bottom, scroll down and tap <b>"Add to Home Screen ➕"</b>.</p>
+      <button class="btn" onclick="document.getElementById('installModal').style.display='none'">Got it!</button>
+    </div>
+  </div>
 
   <!-- PIN Shield -->
   <div id="pinOverlay">
@@ -56,10 +72,13 @@
       <input type="password" id="pinCode" class="pin-input" maxlength="4" placeholder="••••" autofocus>
       <button class="btn" onclick="verifyPin()">Sign In</button>
       <p id="pinError" style="color:red; font-size:0.75rem; margin-top:8px; display:none;">Invalid PIN. Contact William.</p>
+      <button class="btn btn-install" style="margin-top:12px; background:#5f6368;" onclick="triggerInstallPrompt()">📲 Install App on Phone</button>
     </div>
   </div>
 
-  <div style="text-align:center; margin:8px 0 14px;">
+  <button class="btn btn-install" id="btnTopInstall" onclick="triggerInstallPrompt()">📲 Tap to Install as Mobile App</button>
+
+  <div style="text-align:center; margin:4px 0 12px;">
     <h1 style="font-size:1.2rem; color:var(--primary); margin:0;">PMG Pharmacy Kota Sentosa</h1>
     <p id="lastUpdated" style="font-size:0.78rem; color:#5f6368; margin-top:3px;">Connecting to Live Google Sheet...</p>
   </div>
@@ -72,7 +91,7 @@
     </h2>
 
     <!-- Today's Daily Performance -->
-    <div style="font-size:0.75rem; font-weight:700; color:#5f6368; margin-top:2px;">📅 TODAY'S SALES PERFORMANCE (DAILY):</div>
+    <div style="font-size:0.78rem; font-weight:700; color:#5f6368; margin-top:2px;">📅 TODAY'S SALES PERFORMANCE (DAILY):</div>
     <div class="metric-grid">
       <div class="metric-box"><div class="label">TODAY TS</div><div class="val" id="valTS">Loading...</div></div>
       <div class="metric-box"><div class="label">TODAY HB</div><div class="val" id="valHB">Loading...</div></div>
@@ -145,19 +164,42 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbyDXiyZZuYYDN4e6w16HyoTXbKbLwmPCSqoJVAkuRd4iPTYQP7KGtMJZuaQ-NyyXgSZ-w/exec";
     
+    // Balanced Role Configurations & Updated PINs (Nurhafizah: 1617)
     const USER_CONFIGS = {
       "6688": { name: "Chai Yee Sian (William)", role: "manager" },
-      "1007": { name: "Kenix Ling", role: "staff" },
       "1003": { name: "Haniesha Louna", role: "staff" },
-      "1001": { name: "Jong Pei Choo", role: "staff" },
-      "1002": { name: "Fiona Fiena", role: "staff" },
+      "1007": { name: "Kenix Ling", role: "staff" },
       "1004": { name: "Daniela Janet", role: "staff" },
-      "1005": { name: "Nurhafizah Pauli", role: "staff" },
-      "1006": { name: "Muhammad Nur Farizin", role: "staff" }
+      "1617": { name: "Nurhafizah Pauli", role: "staff" },
+      "1006": { name: "Muhammad Nur Farizin", role: "staff" },
+      "1002": { name: "Fiona Fiena", role: "staff" },
+      "1001": { name: "Jong Pei Choo", role: "staff" }
     };
 
     let currentUser = null;
     let liveSheetData = null;
+    let deferredPrompt = null;
+
+    // PWA Install Prompt Capture
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('btnTopInstall').style.display = 'block';
+    });
+
+    function triggerInstallPrompt() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            document.getElementById('btnTopInstall').style.display = 'none';
+          }
+          deferredPrompt = null;
+        });
+      } else {
+        document.getElementById('installModal').style.display = 'flex';
+      }
+    }
 
     function verifyPin() {
       const pin = document.getElementById("pinCode").value;
@@ -214,9 +256,9 @@
 
       document.getElementById("managerPanel").style.display = currentUser.role === "manager" ? "block" : "none";
 
-      const s = liveSheetData.teammates[userName] || { dailyTs: 0, dailyHb: 0, dailyHm: 0, dailyCust: 0, dailyCommission: 0, mtdTs: 0, mtdHb: 0, mtdHm: 0, mtdCust: 0, mtdCommission: 0, tsTarget: 30000, hbTarget: 13800, hmTarget: 3000 };
+      const s = liveSheetData.teammates[userName] || { dailyTs: 0, dailyHb: 0, dailyHm: 0, dailyCust: 0, dailyCommission: 0, mtdTs: 0, mtdHb: 0, mtdHm: 0, mtdCust: 0, mtdCommission: 0, tsTarget: 43030, hbTarget: 22334, hmTarget: 4303 };
 
-      // Top Cards show TODAY'S sales
+      // Top Cards show TODAY'S actual daily sales
       document.getElementById("valTS").innerText = "RM " + (s.dailyTs || 0).toFixed(2);
       document.getElementById("valHB").innerText = "RM " + (s.dailyHb || 0).toFixed(2);
       document.getElementById("valHM").innerText = "RM " + (s.dailyHm || 0).toFixed(2);
@@ -280,16 +322,16 @@
       
       let text = `Date of briefing: ${s.date}\n\n`;
       text += `Target achievement:\n`;
-      text += `TS: RM ${s.totalSales.toFixed(2)} / RM 400,000 (${((s.totalSales / 400000) * 100).toFixed(1)}%)\n`;
-      text += `HB: RM ${s.hbSales.toFixed(2)} / RM 184,000 (${((s.hbSales / 184000) * 100).toFixed(1)}%)\n`;
-      text += `HM: RM ${s.hmSales.toFixed(2)} / RM 40,000 (${((s.hmSales / 40000) * 100).toFixed(1)}%)\n\n`;
+      text += `TS: RM ${s.totalSales.toFixed(2)} / RM 331,000 (${((s.totalSales / 331000) * 100).toFixed(1)}%)\n`;
+      text += `HB: RM ${s.hbSales.toFixed(2)} / RM 171,800 (${((s.hbSales / 171800) * 100).toFixed(1)}%)\n`;
+      text += `HM: RM ${s.hmSales.toFixed(2)} / RM 33,100 (${((s.hmSales / 33100) * 100).toFixed(1)}%)\n\n`;
 
       text += `Personal target per day:\n`;
-      text += `Pharmacist, PRP & Assistant BM (7.5% pool):\n`;
-      text += `TS: RM 1000.00 | HB: RM 460.00 | HM: RM 100.00\n\n`;
+      text += `Pharmacist & Assistant BM:\n`;
+      text += `TS: RM 1544.67 - 1655.00 | HB: RM 801.73 - 859.00 | HM: RM 154.47 - 165.50\n\n`;
 
-      text += `Pharmacist Assistants (14% pool):\n`;
-      text += `TS: RM 1866.67 | HB: RM 858.67 | HM: RM 186.67\n\n`;
+      text += `Pharmacist Assistants:\n`;
+      text += `TS: RM 1434.33 | HB: RM 744.47 | HM: RM 143.43\n\n`;
 
       text += `🏆 Congratulation board (for those who hit personal target)\n`;
       for (const [name, val] of Object.entries(liveSheetData.teammates)) {
@@ -298,7 +340,8 @@
         if (val.dailyHb >= val.dailyHbTarget) hits.push("HB");
         if (val.dailyHm >= val.dailyHmTarget) hits.push("HM");
         if (hits.length > 0) {
-          text += `• ${name.split(" ")[0]} - Hit target for: ${hits.join(", ")}\n`;
+          html_hit = `${name.split(" ")[0]} - Hit target for: ${hits.join(", ")}`;
+          text += `• ${html_hit}\n`;
         }
       }
       text += `\n`;
