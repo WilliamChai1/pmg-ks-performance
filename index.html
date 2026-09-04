@@ -3,63 +3,100 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#0b8043">
-  <title>PMG KS - Performance Portal</title>
+  <meta name="theme-color" content="#7b1fa2">
+  <title>KS Pulse - Performance Portal</title>
+  
+  <!-- PWA & Mobile Meta Tags -->
   <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/png" href="./icon-192.png">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="KS Pulse">
+
   <style>
     :root { 
-      --primary: #0b8043; 
-      --primary-dark: #075e33; 
-      --bg: #f8f9fa; 
+      --primary: #7b1fa2; 
+      --primary-dark: #4a148c; 
+      --primary-light: #9c27b0;
+      --primary-gradient: linear-gradient(135deg, #7b1fa2 0%, #ba68c8 100%);
+      --energy-accent: #e040fb;
+      --bg: #f9f8fc; 
       --card: #ffffff; 
-      --text: #202124; 
-      --accent-blue: #1a73e8; 
-      --gap-green: #137333;
+      --text: #211a2c; 
+      --accent-blue: #1976d2; 
+      --gap-green: #00796b;
     }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; padding-bottom: 75px; }
     
-    #pinOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-    .pin-box { background: white; border-radius: 16px; padding: 22px; text-align: center; width: 85%; max-width: 300px; }
-    .pin-input { font-size: 1.6rem; letter-spacing: 10px; text-align: center; width: 80%; padding: 8px; border: 2px solid #dadce0; border-radius: 8px; margin: 14px 0; }
+    #pinOverlay { position: fixed; inset: 0; background: rgba(26, 9, 51, 0.88); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .pin-box { background: white; border-radius: 20px; padding: 24px; text-align: center; width: 85%; max-width: 310px; box-shadow: 0 10px 30px rgba(123,31,162,0.25); }
+    .pin-input { font-size: 1.6rem; letter-spacing: 10px; text-align: center; width: 80%; padding: 8px; border: 2px solid #e1bee7; border-radius: 10px; margin: 14px 0; outline: none; }
+    .pin-input:focus { border-color: var(--primary); }
     
-    .btn { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 11px 14px; font-size: 0.9rem; font-weight: 600; cursor: pointer; width: 100%; box-sizing: border-box; margin-top: 8px; text-align: center; text-decoration: none; display: block; }
-    .btn:active { background: var(--primary-dark); }
-    .btn-image { background: #e37400; }
-    .btn-copy { background: #137333; }
-    .btn-install { background: #1a73e8; margin-top: 0; margin-bottom: 8px; font-size: 0.82rem; }
-    .btn-logout { background: #5f6368; padding: 6px 12px; font-size: 0.75rem; width: auto; margin: 0; }
+    .btn { background: var(--primary-gradient); color: white; border: none; border-radius: 10px; padding: 11px 14px; font-size: 0.9rem; font-weight: 700; cursor: pointer; width: 100%; box-sizing: border-box; margin-top: 8px; text-align: center; text-decoration: none; display: block; box-shadow: 0 2px 6px rgba(123,31,162,0.25); }
+    .btn:active { opacity: 0.9; }
+    .btn-image { background: linear-gradient(135deg, #f57c00 0%, #ffb74d 100%); }
+    .btn-copy { background: linear-gradient(135deg, #00897b 0%, #4db6ac 100%); }
+    .btn-logout { background: #616161; padding: 6px 12px; font-size: 0.75rem; width: auto; margin: 0; box-shadow: none; }
     
-    .card { background: var(--card); border-radius: 12px; padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 12px; }
-    .card h2 { font-size: 0.92rem; color: var(--primary); margin: 0 0 10px; display: flex; justify-content: space-between; align-items: center; }
+    .card { background: var(--card); border-radius: 14px; padding: 14px; box-shadow: 0 2px 8px rgba(123,31,162,0.06); margin-bottom: 12px; border: 1px solid #f3e5f5; }
+    .card h2 { font-size: 0.95rem; color: var(--primary); margin: 0 0 10px; display: flex; justify-content: space-between; align-items: center; }
     
-    .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-    .metric-box { background: #f1f3f4; padding: 10px; border-radius: 8px; text-align: center; }
-    .metric-box .label { font-size: 0.68rem; color: #5f6368; text-transform: uppercase; font-weight: 600; }
-    .metric-box .val { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-top: 2px; }
+    .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    .metric-box { background: #fbf9fd; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid #f3e5f5; }
+    .metric-box .label { font-size: 0.68rem; color: #7b1fa2; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+    .metric-box .val { font-size: 1.08rem; font-weight: 800; color: var(--text); margin-top: 2px; }
     
-    .gap-banner { background: #feefe3; border-left: 4px solid #e37400; padding: 10px; border-radius: 6px; font-size: 0.82rem; line-height: 1.5; margin-top: 8px; }
-    .commission-banner { background: #e6f4ea; border-left: 4px solid var(--gap-green); padding: 10px; border-radius: 6px; font-size: 0.85rem; line-height: 1.4; margin-top: 8px; color: var(--gap-green); }
-    .personal-rec { background: #e8f0fe; border-left: 4px solid var(--accent-blue); padding: 10px; border-radius: 6px; font-size: 0.82rem; line-height: 1.4; color: #1a73e8; margin-top: 8px; }
-    .congrats-card { background: #fff8e1; border-left: 4px solid #f9a825; padding: 10px; border-radius: 6px; font-size: 0.82rem; line-height: 1.5; margin-top: 8px; }
+    .gap-banner { background: #fff8e1; border-left: 4px solid #ffa000; padding: 10px; border-radius: 8px; font-size: 0.82rem; line-height: 1.5; margin-top: 8px; }
+    .commission-banner { background: #f3e5f5; border-left: 4px solid var(--primary); padding: 10px; border-radius: 8px; font-size: 0.85rem; line-height: 1.4; margin-top: 8px; color: var(--primary-dark); }
+    .personal-rec { background: #ede7f6; border-left: 4px solid #5e35b1; padding: 10px; border-radius: 8px; font-size: 0.82rem; line-height: 1.4; color: #311b92; margin-top: 8px; }
+    .congrats-card { background: #fce4ec; border-left: 4px solid #c2185b; padding: 10px; border-radius: 8px; font-size: 0.82rem; line-height: 1.5; margin-top: 8px; }
     
     #managerPanel { display: none; }
     table { width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-top: 8px; }
-    th, td { padding: 6px 4px; text-align: right; border-bottom: 1px solid #eee; }
+    th, td { padding: 6px 4px; text-align: right; border-bottom: 1px solid #f3e5f5; }
     th:first-child, td:first-child { text-align: left; }
 
-    /* Install Tutorial Modal */
+    /* Floating In-App Install Banner */
+    #pwaInstallBanner {
+      display: none;
+      position: fixed;
+      bottom: 14px;
+      left: 14px;
+      right: 14px;
+      background: #ffffff;
+      border: 2px solid var(--primary);
+      border-radius: 16px;
+      padding: 10px 14px;
+      box-shadow: 0 6px 20px rgba(123,31,162,0.25);
+      z-index: 1500;
+      align-items: center;
+      gap: 12px;
+    }
     #installModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 2000; align-items: center; justify-content: center; }
     .modal-box { background: white; border-radius: 16px; padding: 20px; width: 85%; max-width: 320px; font-size: 0.85rem; line-height: 1.5; }
   </style>
 </head>
 <body>
 
-  <!-- In-App Installation Tutorial Modal -->
+  <!-- Floating Install Banner -->
+  <div id="pwaInstallBanner">
+    <img src="./icon-192.png" style="width:42px; height:42px; border-radius:10px; flex-shrink:0;">
+    <div style="flex:1;">
+      <div style="font-weight:800; font-size:0.88rem; color:var(--primary-dark);">Install KS Pulse</div>
+      <div style="font-size:0.72rem; color:#616161;">Add to home screen for 1-tap daily access</div>
+    </div>
+    <button class="btn" style="width:auto; margin:0; padding:8px 14px; font-size:0.8rem;" onclick="triggerInstallPrompt()">Install</button>
+    <button style="background:none; border:none; font-size:1.1rem; color:#888; cursor:pointer; padding:0 4px;" onclick="document.getElementById('pwaInstallBanner').style.display='none'">✕</button>
+  </div>
+
+  <!-- iOS / Alternative Instruction Modal -->
   <div id="installModal">
     <div class="modal-box">
-      <h3 style="margin-top:0; color:var(--primary);">📲 How to Install as App</h3>
-      <p><b>On Android (Chrome):</b><br>Tap the 3 dots (<b>⋮</b>) at the top right of your browser, then tap <b>"Install app"</b> or <b>"Add to Home screen"</b>.</p>
-      <p><b>On iPhone (Safari):</b><br>Tap the <b>Share icon (⎋)</b> at the bottom, scroll down and tap <b>"Add to Home Screen ➕"</b>.</p>
+      <h3 style="margin-top:0; color:var(--primary);">⚡ Add KS Pulse to Home Screen</h3>
+      <p><b>On iPhone (Safari):</b><br>1. Tap the <b>Share icon (⎋)</b> at the bottom of Safari.<br>2. Scroll down and tap <b>"Add to Home Screen ➕"</b>.<br>3. Tap <b>"Add"</b> at the top right.</p>
+      <p><b>On Android (Chrome):</b><br>Tap the 3 dots (<b>⋮</b>) at the top right, then tap <b>"Install app"</b> or <b>"Add to Home screen"</b>.</p>
       <button class="btn" onclick="document.getElementById('installModal').style.display='none'">Got it!</button>
     </div>
   </div>
@@ -67,20 +104,19 @@
   <!-- PIN Shield -->
   <div id="pinOverlay">
     <div class="pin-box">
-      <h2 style="margin:0; color:var(--primary); font-size:1.15rem;">PMG Kota Sentosa</h2>
-      <p style="font-size:0.8rem; color:#5f6368;">Enter Your Personal 4-Digit PIN</p>
+      <img src="./icon-192.png" style="width:64px; height:64px; border-radius:16px; margin-bottom:8px; box-shadow: 0 4px 12px rgba(123,31,162,0.2);">
+      <h2 style="margin:0; color:var(--primary); font-size:1.2rem; font-weight:800;">KS Pulse</h2>
+      <p style="font-size:0.78rem; color:#616161; margin-top:2px;">Enter Your 4-Digit Personal PIN</p>
       <input type="password" id="pinCode" class="pin-input" maxlength="4" placeholder="••••" autofocus>
-      <button class="btn" onclick="verifyPin()">Sign In</button>
-      <p id="pinError" style="color:red; font-size:0.75rem; margin-top:8px; display:none;">Invalid PIN. Contact William.</p>
-      <button class="btn btn-install" style="margin-top:12px; background:#5f6368;" onclick="triggerInstallPrompt()">📲 Install App on Phone</button>
+      <button class="btn" onclick="verifyPin()">Unlock Portal ⚡</button>
+      <p id="pinError" style="color:#d32f2f; font-size:0.75rem; margin-top:8px; display:none;">Invalid PIN. Contact William.</p>
+      <button class="btn" style="margin-top:10px; background:#eeeeee; color:#424242; font-size:0.75rem; padding:8px; box-shadow:none;" onclick="triggerInstallPrompt()">📲 Install App on Phone</button>
     </div>
   </div>
 
-  <button class="btn btn-install" id="btnTopInstall" onclick="triggerInstallPrompt()">📲 Tap to Install as Mobile App</button>
-
-  <div style="text-align:center; margin:4px 0 12px;">
-    <h1 style="font-size:1.2rem; color:var(--primary); margin:0;">PMG Pharmacy Kota Sentosa</h1>
-    <p id="lastUpdated" style="font-size:0.78rem; color:#5f6368; margin-top:3px;">Connecting to Live Google Sheet...</p>
+  <div style="text-align:center; margin:4px 0 14px;">
+    <h1 style="font-size:1.25rem; color:var(--primary); margin:0; font-weight:800;">⚡ KS Pulse Performance Hub</h1>
+    <p id="lastUpdated" style="font-size:0.78rem; color:#757575; margin-top:3px;">Connecting to Live Google Sheet...</p>
   </div>
 
   <!-- Teammate View -->
@@ -91,7 +127,7 @@
     </h2>
 
     <!-- Today's Daily Performance -->
-    <div style="font-size:0.78rem; font-weight:700; color:#5f6368; margin-top:2px;">📅 TODAY'S SALES PERFORMANCE (DAILY):</div>
+    <div style="font-size:0.78rem; font-weight:800; color:var(--primary); margin-top:2px;">📅 TODAY'S PERFORMANCE (DAILY):</div>
     <div class="metric-grid">
       <div class="metric-box"><div class="label">TODAY TS</div><div class="val" id="valTS">Loading...</div></div>
       <div class="metric-box"><div class="label">TODAY HB</div><div class="val" id="valHB">Loading...</div></div>
@@ -111,20 +147,20 @@
 
     <!-- Dual House Brand Commission Tracker -->
     <div class="commission-banner">
-      <div style="font-weight: 700; font-size: 0.88rem; margin-bottom: 6px; color: var(--primary-dark);">
+      <div style="font-weight: 800; font-size: 0.88rem; margin-bottom: 6px; color: var(--primary-dark);">
         💰 House Brand Commission Tracker (~3.5% Avg):
       </div>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-        <div style="background: white; padding: 8px; border-radius: 8px; text-align: center; border: 1px solid #c6efce;">
-          <div style="font-size: 0.65rem; color: #5f6368; font-weight: 700;">TODAY'S COMMISSION</div>
-          <div style="font-size: 1.12rem; font-weight: 700; color: #137333; margin-top: 2px;" id="valDailyCommission">RM 0.00</div>
+        <div style="background: white; padding: 8px; border-radius: 10px; text-align: center; border: 1px solid #ce93d8;">
+          <div style="font-size: 0.65rem; color: #7b1fa2; font-weight: 800;">TODAY'S EARNINGS</div>
+          <div style="font-size: 1.15rem; font-weight: 800; color: #00796b; margin-top: 2px;" id="valDailyCommission">RM 0.00</div>
         </div>
-        <div style="background: white; padding: 8px; border-radius: 8px; text-align: center; border: 1px solid #c6efce;">
-          <div style="font-size: 0.65rem; color: #5f6368; font-weight: 700;">MTD ACCUMULATED</div>
-          <div style="font-size: 1.12rem; font-weight: 700; color: #0b8043; margin-top: 2px;" id="valMtdCommission">RM 0.00</div>
+        <div style="background: white; padding: 8px; border-radius: 10px; text-align: center; border: 1px solid #ce93d8;">
+          <div style="font-size: 0.65rem; color: #7b1fa2; font-weight: 800;">MTD ACCUMULATED</div>
+          <div style="font-size: 1.15rem; font-weight: 800; color: var(--primary); margin-top: 2px;" id="valMtdCommission">RM 0.00</div>
         </div>
       </div>
-      <div style="font-size: 0.72rem; color: #5f6368; margin-top: 6px;">
+      <div style="font-size: 0.72rem; color: #6a1b9a; margin-top: 6px;">
         💡 Every RM 100 in House Brand products adds ~RM 3.50 straight to your payout!
       </div>
     </div>
@@ -137,13 +173,13 @@
   </div>
 
   <!-- Manager Only Control Panel (Chai Yee Sian) -->
-  <div id="managerPanel" class="card" style="border: 1px solid var(--accent-blue);">
-    <h2 style="color: var(--accent-blue);">🔒 Manager Report & Screenshot Hub</h2>
-    <p style="font-size:0.75rem; color:#5f6368; margin-top:-6px;">Exclusive to Pharmacist Chai Yee Sian</p>
+  <div id="managerPanel" class="card" style="border: 1px solid #ab47bc;">
+    <h2 style="color: #6a1b9a;">🔒 Manager Report & Screenshot Hub</h2>
+    <p style="font-size:0.75rem; color:#616161; margin-top:-6px;">Exclusive to Pharmacist Chai Yee Sian</p>
     
     <button class="btn btn-copy" onclick="copyWhatsAppBriefing()">📋 Copy WhatsApp Briefing</button>
-    <a id="btnDlDirector" class="btn btn-image" href="#" target="_blank">📸 Download Directors 7-Day Screenshot</a>
-    <a id="btnDlTeammate" class="btn btn-image" style="background:#681da8;" href="#" target="_blank">📸 Download Teammates Gap Screenshot</a>
+    <a id="btnDlDirector" class="btn btn-image" href="https://drive.google.com/file/d/1UtMRyQ3LO-G-KiCxskFWxFa-mge0TFUD/view?usp=drivesdk" target="_blank">📸 Download Directors 7-Day Screenshot</a>
+    <a id="btnDlTeammate" class="btn btn-image" style="background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%);" href="https://drive.google.com/file/d/1aoAeYAbJ1yWdvsR96GdiQE82ukVtbu34/view?usp=drivesdk" target="_blank">📸 Download Teammates Gap Screenshot</a>
 
     <div class="congrats-card" style="margin-top:12px;">
       <b>🏆 Today's Congratulation Board:</b>
@@ -151,7 +187,7 @@
     </div>
 
     <div style="overflow-x:auto; margin-top:12px;">
-      <div style="font-size:0.75rem; font-weight:700; color:#5f6368; margin-bottom:4px;">📊 TEAMMATES MTD CUMULATIVE SUMMARY:</div>
+      <div style="font-size:0.78rem; font-weight:800; color:var(--primary); margin-bottom:4px;">📊 TEAMMATES MTD CUMULATIVE SUMMARY:</div>
       <table id="teammatesTable">
         <thead>
           <tr><th>Name</th><th>TS (RM)</th><th>HB (RM)</th><th>HB %</th><th>Cust</th></tr>
@@ -164,7 +200,6 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbyDXiyZZuYYDN4e6w16HyoTXbKbLwmPCSqoJVAkuRd4iPTYQP7KGtMJZuaQ-NyyXgSZ-w/exec";
     
-    // Balanced Role Configurations & Updated PINs (Nurhafizah: 1617)
     const USER_CONFIGS = {
       "6688": { name: "Chai Yee Sian (William)", role: "manager" },
       "1003": { name: "Haniesha Louna", role: "staff" },
@@ -180,11 +215,20 @@
     let liveSheetData = null;
     let deferredPrompt = null;
 
-    // PWA Install Prompt Capture
+    // Service Worker Registration for PWA Installation
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('SW Registered: ', reg.scope))
+          .catch(err => console.log('SW Registration failed: ', err));
+      });
+    }
+
+    // Capture Native Browser Install Prompt
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      document.getElementById('btnTopInstall').style.display = 'block';
+      document.getElementById('pwaInstallBanner').style.display = 'flex';
     });
 
     function triggerInstallPrompt() {
@@ -192,7 +236,7 @@
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choiceResult) => {
           if (choiceResult.outcome === 'accepted') {
-            document.getElementById('btnTopInstall').style.display = 'none';
+            document.getElementById('pwaInstallBanner').style.display = 'none';
           }
           deferredPrompt = null;
         });
@@ -340,8 +384,7 @@
         if (val.dailyHb >= val.dailyHbTarget) hits.push("HB");
         if (val.dailyHm >= val.dailyHmTarget) hits.push("HM");
         if (hits.length > 0) {
-          html_hit = `${name.split(" ")[0]} - Hit target for: ${hits.join(", ")}`;
-          text += `• ${html_hit}\n`;
+          text += `• ${name.split(" ")[0]} - Hit target for: ${hits.join(", ")}\n`;
         }
       }
       text += `\n`;
