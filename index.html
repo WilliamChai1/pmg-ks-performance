@@ -339,4 +339,395 @@
       { n: 'G4', d: 0.32 }, { n: 'G4', d: 0.16 }, { n: 'G4', d: 0.16 }, { n: 'A4', d: 0.16 },
       { n: 'Bb4', d: 0.32 }, { n: 'Bb4', d: 0.16 }, { n: 'A4', d: 0.16 }, { n: 'G4', d: 0.16 }, { n: 'A4', d: 0.32 }, { n: 'D4', d: 0.32 },
       { n: 'D4', d: 0.16 }, { n: 'E4', d: 0.16 }, { n: 'F4', d: 0.32 }, { n: 'G4', d: 0.32 }, { n: 'A4', d: 0.32 },
-      { n: 'D4', d: 0.22
+      { n: 'D4', d: 0.22 }, { n: 'F4', d: 0.22 }, { n: 'E4', d: 0.32 }, { n: 'D4', d: 0.16 }, { n: 'C4', d: 0.16 }, { n: 'D4', d: 0.70 }
+    ];
+
+    function playNote(freq, duration, time) {
+      if (!audioCtx || audioCtx.state !== 'running') return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      // Brass / heroic synthesizer waveform
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, time);
+
+      // Low-pass filter for warm horn/brass acoustic tone
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(1400, time);
+
+      gain.gain.setValueAtTime(0.001, time);
+      gain.gain.exponentialRampToValueAtTime(0.18, time + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, time + duration - 0.03);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(time);
+      osc.stop(time + duration);
+    }
+
+    function startSynthesizedPiratesTheme() {
+      stopMusic();
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      audioCtx = new AudioContext();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      isMusicPlaying = true;
+      updateMusicButtonUI();
+
+      function scheduleLoop() {
+        if (!isMusicPlaying || !audioCtx) return;
+        let now = audioCtx.currentTime + 0.05;
+        let totalDuration = 0;
+
+        PIRATE_MELODY.forEach(item => {
+          const freq = NOTE_FREQS[item.n];
+          if (freq) playNote(freq, item.d, now + totalDuration);
+          totalDuration += item.d;
+        });
+
+        synthInterval = setTimeout(() => {
+          if (isMusicPlaying) scheduleLoop();
+        }, totalDuration * 1000);
+      }
+
+      scheduleLoop();
+    }
+
+    function stopMusic() {
+      isMusicPlaying = false;
+      if (synthInterval) {
+        clearTimeout(synthInterval);
+        synthInterval = null;
+      }
+      if (audioCtx) {
+        try { audioCtx.close(); } catch(e) {}
+        audioCtx = null;
+      }
+      updateMusicButtonUI();
+    }
+
+    function toggleMusic() {
+      if (isMusicPlaying) {
+        stopMusic();
+      } else {
+        startSynthesizedPiratesTheme();
+      }
+    }
+
+    function updateMusicButtonUI() {
+      const btn = document.getElementById('musicToggleBtn');
+      if (!btn) return;
+      if (isMusicPlaying) {
+        btn.innerHTML = '🎵 Pirates Theme: ON';
+        btn.className = 'music-pill playing';
+      } else {
+        btn.innerHTML = '🔇 Music: OFF';
+        btn.className = 'music-pill';
+      }
+    }
+
+    // --- PWA Service Worker ---
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('SW Registered: ', reg.scope))
+          .catch(err => console.log('SW Registration failed: ', err));
+      });
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('pwaInstallBanner').style.display = 'flex';
+    });
+
+    function triggerInstallPrompt() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            document.getElementById('pwaInstallBanner').style.display = 'none';
+          }
+          deferredPrompt = null;
+        });
+      } else {
+        document.getElementById('installModal').style.display = 'flex';
+      }
+    }
+
+    function verifyPin() {
+      const pin = document.getElementById("pinCode").value;
+      if (USER_CONFIGS[pin]) {
+        currentUser = USER_CONFIGS[pin];
+        localStorage.setItem("pmg_auth_pin", pin);
+        document.getElementById("pinOverlay").style.display = "none";
+        
+        // Start Pirates Theme upon successful user PIN unlock gesture
+        startSynthesizedPiratesTheme();
+        
+        loadData();
+      } else {
+        document.getElementById("pinError").style.display = "block";
+      }
+    }
+
+    function logout() {
+      stopMusic();
+      localStorage.removeItem("pmg_auth_pin");
+      currentUser = null;
+      document.getElementById("pinCode").value = "";
+      document.getElementById("pinOverlay").style.display = "flex";
+      document.getElementById("managerPanel").style.display = "none";
+    }
+
+    async function loadData() {
+      document.getElementById("lastUpdated").innerText = "Connecting to Google Sheet...";
+      try {
+        const res = await fetch(API_URL, { redirect: "follow" });
+        liveSheetData = await res.json();
+        
+        if (liveSheetData && liveSheetData.teammates) {
+          document.getElementById("lastUpdated").innerText = `Live Sheet Data • Updated: ${liveSheetData.updatedAt || 'Today'}`;
+          
+          if (liveSheetData.directorsReportDriveUrl) {
+            document.getElementById("btnDlDirector").href = liveSheetData.directorsReportDriveUrl;
+          }
+          if (liveSheetData.teammatesGapDriveUrl) {
+            document.getElementById("btnDlTeammate").href = liveSheetData.teammatesGapDriveUrl;
+          }
+
+          renderOutletMission();
+          renderUserDashboard();
+          renderTeammatesTable();
+          renderCongratsPreview();
+        } else {
+          throw new Error("Empty response");
+        }
+      } catch (e) {
+        document.getElementById("lastUpdated").innerText = "Sync issue. Tap Lock 🔒 to retry.";
+        console.error(e);
+      }
+    }
+
+    function renderOutletMission() {
+      if (!liveSheetData) return;
+      const s = liveSheetData.dailySummary || {};
+
+      let mtdTs = s.mtdTotalSales || 0;
+      let mtdHb = s.mtdHbSales || 0;
+
+      if (mtdTs <= 0 && liveSheetData.teammates) {
+        mtdTs = Object.values(liveSheetData.teammates).reduce((acc, tm) => acc + (tm.mtdTs || 0), 0);
+      }
+      if (mtdHb <= 0 && liveSheetData.teammates) {
+        mtdHb = Object.values(liveSheetData.teammates).reduce((acc, tm) => acc + (tm.mtdHb || 0), 0);
+      }
+
+      const tsTarget = s.tsTarget || 331000.0;
+      const hbTier3 = s.hbTier3Target || 171800.0;
+      const hbTier2 = s.hbTier2Target || 161900.0;
+      const hbTier1 = s.hbTier1Target || 152750.0;
+
+      const tsPct = Math.min(100, (mtdTs / tsTarget) * 100);
+      const hbPct = Math.min(100, (mtdHb / hbTier3) * 100);
+
+      document.getElementById("outletTsProgressText").innerText = `RM ${mtdTs.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} / RM ${tsTarget.toLocaleString()} (${tsPct.toFixed(1)}%)`;
+      document.getElementById("outletTsBar").style.width = tsPct + "%";
+
+      document.getElementById("outletHbProgressText").innerText = `RM ${mtdHb.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} / RM ${hbTier3.toLocaleString()} (${hbPct.toFixed(1)}%)`;
+      document.getElementById("outletHbBar").style.width = hbPct + "%";
+
+      const day = s.dayOfMonth || 5;
+      const expTsPace = (tsTarget / 30) * day;
+      const expHbPace = (hbTier3 / 30) * day;
+      const tsDiff = mtdTs - expTsPace;
+      const hbDiff = mtdHb - expHbPace;
+
+      document.getElementById("outletTsPacingBadge").innerHTML = tsDiff >= 0 ? 
+        `<span class="status-badge badge-ontrack">🟢 ON TRACK (+RM ${Math.abs(tsDiff).toFixed(0)} ahead of Day ${day} pace)</span>` : 
+        `<span class="status-badge badge-behind">⚠️ -RM ${Math.abs(tsDiff).toFixed(0)} vs Day ${day} pace</span>`;
+
+      document.getElementById("outletHbPacingBadge").innerHTML = hbDiff >= 0 ? 
+        `<span class="status-badge badge-ahead">🚀 AHEAD (+RM ${Math.abs(hbDiff).toFixed(0)} vs Day ${day} Tier 3 pace)</span>` : 
+        `<span class="status-badge badge-behind">⚡ PUSH NEEDED (-RM ${Math.abs(hbDiff).toFixed(0)} vs Day ${day} Tier 3 pace)</span>`;
+
+      // Render Tiers & Status
+      const t1Box = document.getElementById("tier1Box");
+      const t2Box = document.getElementById("tier2Box");
+      const t3Box = document.getElementById("tier3Box");
+      const t1Badge = document.getElementById("tier1Badge");
+      const t2Badge = document.getElementById("tier2Badge");
+      const t3Badge = document.getElementById("tier3Badge");
+      const statusBanner = document.getElementById("rewardStatusBanner");
+
+      if (mtdHb >= hbTier3) {
+        t1Box.className = "tier-box unlocked"; t1Badge.className = "tier-badge badge-unlocked"; t1Badge.innerText = "UNLOCKED";
+        t2Box.className = "tier-box unlocked"; t2Badge.className = "tier-badge badge-unlocked"; t2Badge.innerText = "UNLOCKED";
+        t3Box.className = "tier-box unlocked"; t3Badge.className = "tier-badge badge-unlocked"; t3Badge.innerText = "UNLOCKED 🏆";
+        statusBanner.innerHTML = "🏆 <b>TIER 3 MAX REWARD UNLOCKED!</b> Full RM 500.00 cash bonus achieved for each teammate!";
+        statusBanner.style.background = "#e8f5e9"; statusBanner.style.borderColor = "#2e7d32"; statusBanner.style.color = "#1b5e20";
+      } else if (mtdHb >= hbTier2) {
+        t1Box.className = "tier-box unlocked"; t1Badge.className = "tier-badge badge-unlocked"; t1Badge.innerText = "UNLOCKED";
+        t2Box.className = "tier-box unlocked"; t2Badge.className = "tier-badge badge-unlocked"; t2Badge.innerText = "UNLOCKED";
+        t3Box.className = "tier-box active"; t3Badge.className = "tier-badge badge-locked"; t3Badge.innerText = "NEXT GOAL";
+        const rem = hbTier3 - mtdHb;
+        statusBanner.innerHTML = `🎉 <b>TIER 2 UNLOCKED (+RM 375 reward)!</b> RM ${rem.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} more to unlock <b>TIER 3 (+RM 500 reward)</b>!`;
+        statusBanner.style.background = "#fff8e1"; statusBanner.style.borderColor = "#ffa000"; statusBanner.style.color = "#e65100";
+      } else if (mtdHb >= hbTier1) {
+        t1Box.className = "tier-box unlocked"; t1Badge.className = "tier-badge badge-unlocked"; t1Badge.innerText = "UNLOCKED";
+        t2Box.className = "tier-box active"; t2Badge.className = "tier-badge badge-locked"; t2Badge.innerText = "NEXT GOAL";
+        t3Box.className = "tier-box"; t3Badge.className = "tier-badge badge-locked"; t3Badge.innerText = "LOCKED";
+        const rem = hbTier2 - mtdHb;
+        statusBanner.innerHTML = `🎉 <b>TIER 1 UNLOCKED (+RM 250 reward)!</b> RM ${rem.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} more to unlock <b>TIER 2 (+RM 375 reward)</b>!`;
+        statusBanner.style.background = "#e0f2f1"; statusBanner.style.borderColor = "#00897b"; statusBanner.style.color = "#004d40";
+      } else {
+        t1Box.className = "tier-box active"; t1Badge.className = "tier-badge badge-locked"; t1Badge.innerText = "IN PROGRESS";
+        t2Box.className = "tier-box"; t2Badge.className = "tier-badge badge-locked"; t2Badge.innerText = "LOCKED";
+        t3Box.className = "tier-box"; t3Badge.className = "tier-badge badge-locked"; t3Badge.innerText = "LOCKED";
+        const rem = hbTier1 - mtdHb;
+        statusBanner.innerHTML = `🎯 <b>RM ${rem.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} more in HB</b> to unlock <b>TIER 1 (RM 250 reward per person)</b>!`;
+        statusBanner.style.background = "#f3e5f5"; statusBanner.style.borderColor = "#7b1fa2"; statusBanner.style.color = "#4a148c";
+      }
+    }
+
+    function renderUserDashboard() {
+      if (!currentUser || !liveSheetData || !liveSheetData.teammates) return;
+      const userName = currentUser.name;
+      document.getElementById("userNameHeader").innerText = `👤 ${userName}`;
+
+      document.getElementById("managerPanel").style.display = currentUser.role === "manager" ? "block" : "none";
+
+      const s = liveSheetData.teammates[userName] || { dailyTs: 0, dailyHb: 0, dailyHm: 0, dailyCust: 0, dailyCommission: 0, mtdTs: 0, mtdHb: 0, mtdHm: 0, mtdCust: 0, mtdCommission: 0, tsTarget: 43030, hbTarget: 22334, hmTarget: 4303 };
+
+      document.getElementById("valTS").innerText = "RM " + (s.dailyTs || 0).toFixed(2);
+      document.getElementById("valHB").innerText = "RM " + (s.dailyHb || 0).toFixed(2);
+      document.getElementById("valHM").innerText = "RM " + (s.dailyHm || 0).toFixed(2);
+      document.getElementById("valCust").innerText = s.dailyCust || 0;
+
+      const tsRem = Math.max(0, s.tsTarget - (s.mtdTs || 0));
+      const hbRem = Math.max(0, s.hbTarget - (s.mtdHb || 0));
+      const hmRem = Math.max(0, s.hmTarget - (s.mtdHm || 0));
+
+      document.getElementById("valRemainingTarget").innerHTML = `
+        • TS Target Left: <b>RM ${tsRem.toFixed(2)}</b> (Target: RM ${s.tsTarget.toLocaleString()})<br>
+        • HB Target Left: <b>RM ${hbRem.toFixed(2)}</b> (Target: RM ${s.hbTarget.toLocaleString()})<br>
+        • HM Target Left: <b>RM ${hmRem.toFixed(2)}</b> (Target: RM ${s.hmTarget.toLocaleString()})
+      `;
+
+      const day = (liveSheetData.dailySummary && liveSheetData.dailySummary.dayOfMonth) || 5;
+      const expectedPace = (s.tsTarget / 30) * day;
+      const pacingDiff = (s.mtdTs || 0) - expectedPace;
+
+      if (pacingDiff >= 500) {
+        document.getElementById("valPersonalPacing").innerHTML = `<span class="status-badge badge-ahead">🚀 AHEAD OF PACE (+RM ${pacingDiff.toFixed(0)} above Day ${day} target)</span>`;
+      } else if (pacingDiff >= -250) {
+        document.getElementById("valPersonalPacing").innerHTML = `<span class="status-badge badge-ontrack">🟢 ON TRACK (On pace for Day ${day})</span>`;
+      } else {
+        document.getElementById("valPersonalPacing").innerHTML = `<span class="status-badge badge-behind">⚡ PUSH NEEDED (-RM ${Math.abs(pacingDiff).toFixed(0)} vs Day ${day} target)</span>`;
+      }
+
+      document.getElementById("valDailyCommission").innerText = "RM " + (s.dailyCommission || 0).toFixed(2);
+      document.getElementById("valMtdCommission").innerText = "RM " + (s.mtdCommission || 0).toFixed(2);
+
+      const rec = (liveSheetData.recommendations && liveSheetData.recommendations[userName]) || "Focus on pairing routine OTC transactions with House Brand supplements.";
+      document.getElementById("valPersonalRec").innerText = rec;
+    }
+
+    function renderCongratsPreview() {
+      if (!liveSheetData || !liveSheetData.teammates) return;
+      let html = "";
+      for (const [name, val] of Object.entries(liveSheetData.teammates)) {
+        let hits = [];
+        if (val.dailyTs >= val.dailyTsTarget) hits.push("TS");
+        if (val.dailyHb >= val.dailyHbTarget) hits.push("HB");
+        if (val.dailyHm >= val.dailyHmTarget) hits.push("HM");
+        if (hits.length > 0) {
+          html += `• <b>${name.split(" ")[0]}</b> - Hit target for: ${hits.join(", ")}<br>`;
+        }
+      }
+      document.getElementById("congratsPreview").innerHTML = html || "No target hits recorded today.";
+    }
+
+    function renderTeammatesTable() {
+      if (!liveSheetData || !liveSheetData.teammates) return;
+      const tbody = document.querySelector("#teammatesTable tbody");
+      tbody.innerHTML = "";
+      for (const [name, val] of Object.entries(liveSheetData.teammates)) {
+        const mtdTs = val.mtdTs || 0;
+        const mtdHb = val.mtdHb || 0;
+        const mtdCust = val.mtdCust || 0;
+        tbody.innerHTML += `<tr>
+          <td>${name.split(" ")[0]}</td>
+          <td>${mtdTs.toFixed(0)}</td>
+          <td>${mtdHb.toFixed(0)}</td>
+          <td>${((mtdHb / (mtdTs || 1)) * 100).toFixed(0)}%</td>
+          <td>${mtdCust}</td>
+        </tr>`;
+      }
+    }
+
+    function copyWhatsAppBriefing() {
+      if (!liveSheetData) return;
+      const s = liveSheetData.dailySummary;
+      
+      let text = `Date of briefing: ${s.date}\n\n`;
+      text += `Target achievement:\n`;
+      text += `TS: RM ${s.totalSales.toFixed(2)} / RM 331,000 (${((s.totalSales / 331000) * 100).toFixed(1)}%)\n`;
+      text += `HB: RM ${s.hbSales.toFixed(2)} / RM 171,800 (${((s.hbSales / 171800) * 100).toFixed(1)}%)\n`;
+      text += `HM: RM ${s.hmSales.toFixed(2)} / RM 33,100 (${((s.hmSales / 33100) * 100).toFixed(1)}%)\n\n`;
+
+      text += `Personal target per day:\n`;
+      text += `Pharmacist & Assistant BM:\n`;
+      text += `TS: RM 1544.67 - 1655.00 | HB: RM 801.73 - 859.00 | HM: RM 154.47 - 165.50\n\n`;
+
+      text += `Pharmacist Assistants:\n`;
+      text += `TS: RM 1434.33 | HB: RM 744.47 | HM: RM 143.43\n\n`;
+
+      text += `🏆 Congratulation board (for those who hit personal target)\n`;
+      for (const [name, val] of Object.entries(liveSheetData.teammates)) {
+        let hits = [];
+        if (val.dailyTs >= val.dailyTsTarget) hits.push("TS");
+        if (val.dailyHb >= val.dailyHbTarget) hits.push("HB");
+        if (val.dailyHm >= val.dailyHmTarget) hits.push("HM");
+        if (hits.length > 0) {
+          text += `• ${name.split(" ")[0]} - Hit target for: ${hits.join(", ")}\n`;
+        }
+      }
+      text += `\n`;
+
+      text += `🎯 Outlet Strategic Priorities & Action Plans:\n`;
+      if (liveSheetData.tacticalActionPlans) {
+        liveSheetData.tacticalActionPlans.forEach((plan, idx) => {
+          text += `${idx + 1}. ${plan}\n`;
+        });
+      }
+      text += `\n`;
+
+      text += `👤 Individual Teammate Priorities:\n\n`;
+      for (const [name, tip] of Object.entries(liveSheetData.recommendations)) {
+        text += `• *${name.split(" ")[0]}:* ${tip}\n\n`;
+      }
+
+      navigator.clipboard.writeText(text);
+      alert("WhatsApp Daily Briefing copied to clipboard!");
+    }
+
+    window.onload = () => {
+      const savedPin = localStorage.getItem("pmg_auth_pin");
+      if (savedPin && USER_CONFIGS[savedPin]) {
+        currentUser = USER_CONFIGS[savedPin];
+        document.getElementById("pinOverlay").style.display = "none";
+        
+        // Auto-resume music on re-entry if desired
+        startSynthesizedPiratesTheme();
+        
+        loadData();
+      }
+    };
+  </script>
+</body>
+</html>
