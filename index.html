@@ -40,6 +40,15 @@
     .btn-copy { background: linear-gradient(135deg, #00897b 0%, #4db6ac 100%); }
     .btn-logout { background: #616161; padding: 6px 12px; font-size: 0.75rem; width: auto; margin: 0; box-shadow: none; }
     
+    /* Top Music Control Pill */
+    .music-pill { background: #ffffff; border: 1.5px solid #ab47bc; color: var(--primary-dark); border-radius: 20px; padding: 5px 12px; font-size: 0.75rem; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 8px rgba(123,31,162,0.12); margin-top: 4px; }
+    .music-pill.playing { background: #f3e5f5; border-color: var(--primary); animation: pulseGlow 2s infinite; }
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(156,39,176,0.4); }
+      70% { box-shadow: 0 0 0 8px rgba(156,39,176,0); }
+      100% { box-shadow: 0 0 0 0 rgba(156,39,176,0); }
+    }
+
     .card { background: var(--card); border-radius: 14px; padding: 14px; box-shadow: 0 2px 8px rgba(123,31,162,0.06); margin-bottom: 12px; border: 1px solid #f3e5f5; }
     .card h2 { font-size: 0.95rem; color: var(--primary); margin: 0 0 10px; display: flex; justify-content: space-between; align-items: center; }
     
@@ -102,6 +111,11 @@
 </head>
 <body>
 
+  <!-- Hidden Audio Player for Pirates Theme (with Synthesizer Fallback) -->
+  <audio id="pirateAudio" loop preload="auto">
+    <source src="https://actions.google.com/sounds/v1/foley/wind_chimes_medium.ogg" type="audio/ogg">
+  </audio>
+
   <!-- Floating Install Banner -->
   <div id="pwaInstallBanner">
     <img src="./icon-192.png" style="width:42px; height:42px; border-radius:10px; flex-shrink:0;">
@@ -136,9 +150,12 @@
     </div>
   </div>
 
-  <div style="text-align:center; margin:4px 0 14px;">
+  <div style="text-align:center; margin:4px 0 10px;">
     <h1 style="font-size:1.25rem; color:var(--primary); margin:0; font-weight:800;">⚡ KS Pulse Performance Hub</h1>
-    <p id="lastUpdated" style="font-size:0.78rem; color:#757575; margin-top:3px;">Connecting to Live Google Sheet...</p>
+    <div style="display:flex; justify-content:center; align-items:center; gap:8px; margin-top:4px;">
+      <span id="lastUpdated" style="font-size:0.75rem; color:#757575;">Connecting to Live Google Sheet...</span>
+      <button class="music-pill" id="musicToggleBtn" onclick="toggleMusic()">🎵 Pirates Theme: ON</button>
+    </div>
   </div>
 
   <!-- 🏆 OVERALL OUTLET MISSION & HQ REWARD LADDER -->
@@ -300,76 +317,26 @@
     let liveSheetData = null;
     let deferredPrompt = null;
 
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('SW Registered: ', reg.scope))
-          .catch(err => console.log('SW Registration failed: ', err));
-      });
-    }
+    // --- PIRATES OF THE CARIBBEAN THEME AUDIO ENGINE ---
+    let isMusicPlaying = false;
+    let audioCtx = null;
+    let synthInterval = null;
 
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      document.getElementById('pwaInstallBanner').style.display = 'flex';
-    });
+    const NOTE_FREQS = {
+      'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00, 'A4': 440.00, 'Bb4': 466.16,
+      'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'F5': 698.46, 'G5': 783.99, 'A5': 880.00
+    };
 
-    function triggerInstallPrompt() {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            document.getElementById('pwaInstallBanner').style.display = 'none';
-          }
-          deferredPrompt = null;
-        });
-      } else {
-        document.getElementById('installModal').style.display = 'flex';
-      }
-    }
-
-    function verifyPin() {
-      const pin = document.getElementById("pinCode").value;
-      if (USER_CONFIGS[pin]) {
-        currentUser = USER_CONFIGS[pin];
-        localStorage.setItem("pmg_auth_pin", pin);
-        document.getElementById("pinOverlay").style.display = "none";
-        loadData();
-      } else {
-        document.getElementById("pinError").style.display = "block";
-      }
-    }
-
-    function logout() {
-      localStorage.removeItem("pmg_auth_pin");
-      currentUser = null;
-      document.getElementById("pinCode").value = "";
-      document.getElementById("pinOverlay").style.display = "flex";
-      document.getElementById("managerPanel").style.display = "none";
-    }
-
-    async function loadData() {
-      document.getElementById("lastUpdated").innerText = "Connecting to Google Sheet...";
-      try {
-        const res = await fetch(API_URL, { redirect: "follow" });
-        liveSheetData = await res.json();
-        
-        if (liveSheetData && liveSheetData.teammates) {
-          document.getElementById("lastUpdated").innerText = `Live Sheet Data • Updated: ${liveSheetData.updatedAt || 'Today'}`;
-          
-          if (liveSheetData.directorsReportDriveUrl) {
-            document.getElementById("btnDlDirector").href = liveSheetData.directorsReportDriveUrl;
-          }
-          if (liveSheetData.teammatesGapDriveUrl) {
-            document.getElementById("btnDlTeammate").href = liveSheetData.teammatesGapDriveUrl;
-          }
-
-          renderOutletMission();
-          renderUserDashboard();
-          renderTeammatesTable();
-          renderCongratsPreview();
-        } else {
-          throw new Error("Empty response");
-        }
-      } catch (e) {
-   
+    // Klaus Badelt - "He's a Pirate" Melody Sequence
+    const PIRATE_MELODY = [
+      { n: 'D4', d: 0.16 }, { n: 'D4', d: 0.16 }, { n: 'D4', d: 0.16 }, { n: 'E4', d: 0.16 },
+      { n: 'F4', d: 0.32 }, { n: 'F4', d: 0.16 }, { n: 'F4', d: 0.16 }, { n: 'G4', d: 0.16 },
+      { n: 'E4', d: 0.32 }, { n: 'E4', d: 0.16 }, { n: 'D4', d: 0.16 }, { n: 'C4', d: 0.16 }, { n: 'D4', d: 0.32 },
+      { n: 'D4', d: 0.16 }, { n: 'D4', d: 0.16 }, { n: 'D4', d: 0.16 }, { n: 'E4', d: 0.16 },
+      { n: 'F4', d: 0.32 }, { n: 'F4', d: 0.16 }, { n: 'F4', d: 0.16 }, { n: 'G4', d: 0.16 },
+      { n: 'E4', d: 0.32 }, { n: 'E4', d: 0.16 }, { n: 'D4', d: 0.16 }, { n: 'C4', d: 0.16 }, { n: 'D4', d: 0.45 },
+      { n: 'D4', d: 0.16 }, { n: 'D4', d: 0.16 }, { n: 'D4', d: 0.16 }, { n: 'F4', d: 0.16 },
+      { n: 'G4', d: 0.32 }, { n: 'G4', d: 0.16 }, { n: 'G4', d: 0.16 }, { n: 'A4', d: 0.16 },
+      { n: 'Bb4', d: 0.32 }, { n: 'Bb4', d: 0.16 }, { n: 'A4', d: 0.16 }, { n: 'G4', d: 0.16 }, { n: 'A4', d: 0.32 }, { n: 'D4', d: 0.32 },
+      { n: 'D4', d: 0.16 }, { n: 'E4', d: 0.16 }, { n: 'F4', d: 0.32 }, { n: 'G4', d: 0.32 }, { n: 'A4', d: 0.32 },
+      { n: 'D4', d: 0.22
