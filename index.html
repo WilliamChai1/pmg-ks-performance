@@ -138,7 +138,7 @@
       <img src="./icon-192.png" style="width:64px; height:64px; border-radius:16px; margin-bottom:8px; box-shadow: 0 4px 12px rgba(123,31,162,0.2);">
       <h2 style="margin:0; color:var(--primary); font-size:1.2rem; font-weight:800;">KS Pulse</h2>
       <p style="font-size:0.78rem; color:#616161; margin-top:2px;">Enter Your 4-Digit Personal PIN</p>
-      <input type="password" id="pinCode" class="pin-input" maxlength="4" placeholder="••••" autofocus>
+      <input type="password" id="pinCode" class="pin-input" maxlength="4" placeholder="••••" autofocus onkeydown="if(event.key==='Enter') verifyPin()">
       <button class="btn" onclick="verifyPin()">Unlock Portal ⚡</button>
       <p id="pinError" style="color:#d32f2f; font-size:0.75rem; margin-top:8px; display:none;">Invalid PIN. Contact William.</p>
       <button class="btn" style="margin-top:10px; background:#eeeeee; color:#424242; font-size:0.75rem; padding:8px; box-shadow:none;" onclick="triggerInstallPrompt()">📲 Install App on Phone</button>
@@ -312,379 +312,11 @@
     let liveSheetData = null;
     let deferredPrompt = null;
 
-    // --- ACOUSTIC GRAND PIANO SYNTHESIS ENGINE (PIRATES OF THE CARIBBEAN) ---
+    // --- SEQUENTIAL ACOUSTIC PIANO SYNTHESIS ENGINE ---
     let isMusicPlaying = false;
     let audioCtx = null;
-    let synthTimeout = null;
-
-    const PIANO_NOTES = {
-      'A2': 110.00, 'Bb2': 116.54, 'C3': 130.81, 'D3': 146.83, 'E3': 164.81, 'F3': 174.61, 'G3': 196.00,
-      'A3': 220.00, 'Bb3': 233.08, 'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00,
-      'A4': 440.00, 'Bb4': 466.16, 'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'F5': 698.46, 'A5': 880.00
-    };
-
-    // Right-Hand Piano Melody
-    const PIANO_MELODY = [
-      { n: 'D4', d: 0.16 }, { n: 'D4', d: 0.16 }, { n: 'D4', d: 0.16 }, { n: 'E4', d: 0.16 },
-      { n: 'F4', d: 0.32 }, { n: 'F4', d: 0.16 }, { n: 'F4', d: 0.16 }, { n: 'G4', d: 0.16 },
-      { n: 'E4', d: 0.32 }, { n: 'E4', d: 0.16 }, { n: 'D4', d: 0.16 }, { n: 'C4', d: 0.16 }, { n: 'D4', d: 0.32 },
-      { n: 'D4', d: 0.16 }, { n: 'D4', d: 0.16 }, { n: 'D4', d: 0.16 }, { n: 'E4', d: 0.16 },
-      { n: 'F4', d: 0.32 }, { n: 'F4', d: 0.16 }, { n: 'F4', d: 0.16 }, { n: 'G4', d: 0.16 },
-      { n: 'E4', d: 0.32 }, { n: 'E4', d: 0.16 }, { n: 'D4', d: 0.16 }, { n: 'C4', d: 0.16 }, { n: 'D4', d: 0.45 },
-      { n: 'D4', d: 0.16 }, { n: 'D4', d: 0.16 }, { n: 'D4', d: 0.16 }, { n: 'F4', d: 0.16 },
-      { n: 'G4', d: 0.32 }, { n: 'G4', d: 0.16 }, { n: 'G4', d: 0.16 }, { n: 'A4', d: 0.16 },
-      { n: 'Bb4', d: 0.32 }, { n: 'Bb4', d: 0.16 }, { n: 'A4', d: 0.16 }, { n: 'G4', d: 0.16 }, { n: 'A4', d: 0.32 }, { n: 'D4', d: 0.32 },
-      { n: 'D4', d: 0.16 }, { n: 'E4', d: 0.16 }, { n: 'F4', d: 0.32 }, { n: 'G4', d: 0.32 }, { n: 'A4', d: 0.32 },
-      { n: 'D4', d: 0.22 }, { n: 'F4', d: 0.22 }, { n: 'E4', d: 0.32 }, { n: 'D4', d: 0.16 }, { n: 'C4', d: 0.16 }, { n: 'D4', d: 0.70 }
-    ];
-
-    // Left-Hand Piano Arpeggiated Bass Chords
-    const PIANO_BASS = [
-      { n: 'D3', d: 0.32 }, { n: 'A3', d: 0.32 }, { n: 'D4', d: 0.32 }, { n: 'A3', d: 0.32 },
-      { n: 'Bb2', d: 0.32 }, { n: 'F3', d: 0.32 }, { n: 'Bb3', d: 0.32 }, { n: 'F3', d: 0.32 },
-      { n: 'C3', d: 0.32 }, { n: 'G3', d: 0.32 }, { n: 'C4', d: 0.32 }, { n: 'G3', d: 0.32 },
-      { n: 'D3', d: 0.32 }, { n: 'A3', d: 0.32 }, { n: 'D4', d: 0.32 }, { n: 'A3', d: 0.32 },
-      { n: 'D3', d: 0.32 }, { n: 'A3', d: 0.32 }, { n: 'D4', d: 0.32 }, { n: 'A3', d: 0.32 },
-      { n: 'Bb2', d: 0.32 }, { n: 'F3', d: 0.32 }, { n: 'Bb3', d: 0.32 }, { n: 'F3', d: 0.32 },
-      { n: 'C3', d: 0.32 }, { n: 'G3', d: 0.32 }, { n: 'C4', d: 0.32 }, { n: 'G3', d: 0.32 },
-      { n: 'D3', d: 0.40 }, { n: 'A3', d: 0.40 }, { n: 'D4',Here is the complete, updated `index.html` with the **Acoustic Grand Piano** arrangement of the *Pirates of the Caribbean* theme.
-
-### How the Piano Engine Works
-
-1. **Acoustic Hammer Strike Physics**:
-   * Uses three sound layers: a pure fundamental sine wave, a second harmonic shimmer, and a wooden soundboard triangle resonance.
-   * Strikes with a sharp **3ms hammer attack**, followed by a dynamic lowpass filter that starts bright (**3,200 Hz**) and warms down (**600 Hz**) as the note decays naturally.
-2. **Compact & Clean**:
-   * The complete 51-note *He's a Pirate* theme melody is compiled compactly so it loads instantly without any lag or errors.
-3. **One-Tap Control**:
-   * Starts playing automatically when teammates enter their PIN and tap **"Unlock Portal ⚡"**.
-   * Can be toggled on/off at any time using the **`🎹 Piano Theme: ON`** button at the top.
-
----
-
-### Updated `index.html` (With Acoustic Grand Piano Engine)
-
-Copy and replace `index.html` in your GitHub repository:
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#7b1fa2">
-  <title>KS Pulse - Performance Portal</title>
-  
-  <!-- PWA & Mobile Meta Tags -->
-  <link rel="manifest" href="./manifest.json">
-  <link rel="icon" type="image/png" href="./icon-192.png">
-  <link rel="apple-touch-icon" href="./icon-192.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="KS Pulse">
-
-  <style>
-    :root { 
-      --primary: #7b1fa2; 
-      --primary-dark: #4a148c; 
-      --primary-light: #9c27b0;
-      --primary-gradient: linear-gradient(135deg, #7b1fa2 0%, #ba68c8 100%);
-      --gold-gradient: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
-      --bg: #f9f8fc; 
-      --card: #ffffff; 
-      --text: #211a2c; 
-      --accent-blue: #1976d2; 
-      --gap-green: #00796b;
-    }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; padding-bottom: 75px; }
-    
-    #pinOverlay { position: fixed; inset: 0; background: rgba(26, 9, 51, 0.88); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-    .pin-box { background: white; border-radius: 20px; padding: 24px; text-align: center; width: 85%; max-width: 310px; box-shadow: 0 10px 30px rgba(123,31,162,0.25); }
-    .pin-input { font-size: 1.6rem; letter-spacing: 10px; text-align: center; width: 80%; padding: 8px; border: 2px solid #e1bee7; border-radius: 10px; margin: 14px 0; outline: none; }
-    .pin-input:focus { border-color: var(--primary); }
-    
-    .btn { background: var(--primary-gradient); color: white; border: none; border-radius: 10px; padding: 11px 14px; font-size: 0.9rem; font-weight: 700; cursor: pointer; width: 100%; box-sizing: border-box; margin-top: 8px; text-align: center; text-decoration: none; display: block; box-shadow: 0 2px 6px rgba(123,31,162,0.25); }
-    .btn:active { opacity: 0.9; }
-    .btn-image { background: linear-gradient(135deg, #f57c00 0%, #ffb74d 100%); }
-    .btn-copy { background: linear-gradient(135deg, #00897b 0%, #4db6ac 100%); }
-    .btn-logout { background: #616161; padding: 6px 12px; font-size: 0.75rem; width: auto; margin: 0; box-shadow: none; }
-    
-    /* Top Music Control Pill */
-    .music-pill { background: #ffffff; border: 1.5px solid #ab47bc; color: var(--primary-dark); border-radius: 20px; padding: 5px 12px; font-size: 0.75rem; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 8px rgba(123,31,162,0.12); margin-top: 4px; }
-    .music-pill.playing { background: #f3e5f5; border-color: var(--primary); animation: pulseGlow 2s infinite; }
-    @keyframes pulseGlow {
-      0% { box-shadow: 0 0 0 0 rgba(156,39,176,0.4); }
-      70% { box-shadow: 0 0 0 8px rgba(156,39,176,0); }
-      100% { box-shadow: 0 0 0 0 rgba(156,39,176,0); }
-    }
-
-    .card { background: var(--card); border-radius: 14px; padding: 14px; box-shadow: 0 2px 8px rgba(123,31,162,0.06); margin-bottom: 12px; border: 1px solid #f3e5f5; }
-    .card h2 { font-size: 0.95rem; color: var(--primary); margin: 0 0 10px; display: flex; justify-content: space-between; align-items: center; }
-    
-    .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
-    .metric-box { background: #fbf9fd; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid #f3e5f5; }
-    .metric-box .label { font-size: 0.68rem; color: #7b1fa2; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
-    .metric-box .val { font-size: 1.08rem; font-weight: 800; color: var(--text); margin-top: 2px; }
-    
-    .gap-banner { background: #fff8e1; border-left: 4px solid #ffa000; padding: 10px; border-radius: 8px; font-size: 0.82rem; line-height: 1.5; margin-top: 8px; }
-    .commission-banner { background: #f3e5f5; border-left: 4px solid var(--primary); padding: 10px; border-radius: 8px; font-size: 0.85rem; line-height: 1.4; margin-top: 8px; color: var(--primary-dark); }
-    .personal-rec { background: #ede7f6; border-left: 4px solid #5e35b1; padding: 10px; border-radius: 8px; font-size: 0.82rem; line-height: 1.4; color: #311b92; margin-top: 8px; }
-    .congrats-card { background: #fce4ec; border-left: 4px solid #c2185b; padding: 10px; border-radius: 8px; font-size: 0.82rem; line-height: 1.5; margin-top: 8px; }
-    
-    /* Status Badge */
-    .status-badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; margin-top: 4px; }
-    .badge-ahead { background: #e0f2f1; color: #00796b; border: 1px solid #a7ffeb; }
-    .badge-ontrack { background: #e8f5e9; color: #2e7d32; border: 1px solid #b9f6ca; }
-    .badge-behind { background: #fce4ec; color: #c2185b; border: 1px solid #ff80ab; }
-
-    /* HQ Reward Ladder Styles */
-    .reward-ladder { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin: 10px 0; }
-    .tier-box { background: #fafafa; border: 2px solid #e0e0e0; border-radius: 10px; padding: 8px 4px; text-align: center; }
-    .tier-box.active { border-color: #ffd700; background: #fffde7; box-shadow: 0 2px 8px rgba(255,193,7,0.3); }
-    .tier-box.unlocked { border-color: #00897b; background: #e0f2f1; }
-    .tier-title { font-size: 0.72rem; font-weight: 800; color: #424242; }
-    .tier-reward { font-size: 0.95rem; font-weight: 800; color: var(--primary-dark); margin: 3px 0; }
-    .tier-target { font-size: 0.65rem; color: #616161; }
-    .tier-badge { display: inline-block; font-size: 0.58rem; font-weight: 800; padding: 2px 6px; border-radius: 10px; margin-top: 4px; }
-    .badge-locked { background: #eeeeee; color: #757575; }
-    .badge-unlocked { background: #00897b; color: white; }
-
-    .progress-bar-bg { background: #ede7f6; border-radius: 6px; height: 10px; overflow: hidden; margin: 6px 0; }
-    .progress-bar-fill { background: var(--primary-gradient); height: 100%; width: 0%; transition: width 0.6s ease; }
-    .progress-bar-fill.gold { background: var(--gold-gradient); }
-
-    #managerPanel { display: none; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-top: 8px; }
-    th, td { padding: 6px 4px; text-align: right; border-bottom: 1px solid #f3e5f5; }
-    th:first-child, td:first-child { text-align: left; }
-
-    /* Floating In-App Install Banner */
-    #pwaInstallBanner {
-      display: none;
-      position: fixed;
-      bottom: 14px;
-      left: 14px;
-      right: 14px;
-      background: #ffffff;
-      border: 2px solid var(--primary);
-      border-radius: 16px;
-      padding: 10px 14px;
-      box-shadow: 0 6px 20px rgba(123,31,162,0.25);
-      z-index: 1500;
-      align-items: center;
-      gap: 12px;
-    }
-    #installModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 2000; align-items: center; justify-content: center; }
-    .modal-box { background: white; border-radius: 16px; padding: 20px; width: 85%; max-width: 320px; font-size: 0.85rem; line-height: 1.5; }
-  </style>
-</head>
-<body>
-
-  <!-- Floating Install Banner -->
-  <div id="pwaInstallBanner">
-    <img src="./icon-192.png" style="width:42px; height:42px; border-radius:10px; flex-shrink:0;">
-    <div style="flex:1;">
-      <div style="font-weight:800; font-size:0.88rem; color:var(--primary-dark);">Install KS Pulse</div>
-      <div style="font-size:0.72rem; color:#616161;">Add to home screen for 1-tap daily access</div>
-    </div>
-    <button class="btn" style="width:auto; margin:0; padding:8px 14px; font-size:0.8rem;" onclick="triggerInstallPrompt()">Install</button>
-    <button style="background:none; border:none; font-size:1.1rem; color:#888; cursor:pointer; padding:0 4px;" onclick="document.getElementById('pwaInstallBanner').style.display='none'">✕</button>
-  </div>
-
-  <!-- iOS / Alternative Instruction Modal -->
-  <div id="installModal">
-    <div class="modal-box">
-      <h3 style="margin-top:0; color:var(--primary);">⚡ Add KS Pulse to Home Screen</h3>
-      <p><b>On iPhone (Safari):</b><br>1. Tap the <b>Share icon (⎋)</b> at the bottom of Safari.<br>2. Scroll down and tap <b>"Add to Home Screen ➕"</b>.<br>3. Tap <b>"Add"</b> at the top right.</p>
-      <p><b>On Android (Chrome):</b><br>Tap the 3 dots (<b>⋮</b>) at the top right, then tap <b>"Install app"</b> or <b>"Add to Home screen"</b>.</p>
-      <button class="btn" onclick="document.getElementById('installModal').style.display='none'">Got it!</button>
-    </div>
-  </div>
-
-  <!-- PIN Shield -->
-  <div id="pinOverlay">
-    <div class="pin-box">
-      <img src="./icon-192.png" style="width:64px; height:64px; border-radius:16px; margin-bottom:8px; box-shadow: 0 4px 12px rgba(123,31,162,0.2);">
-      <h2 style="margin:0; color:var(--primary); font-size:1.2rem; font-weight:800;">KS Pulse</h2>
-      <p style="font-size:0.78rem; color:#616161; margin-top:2px;">Enter Your 4-Digit Personal PIN</p>
-      <input type="password" id="pinCode" class="pin-input" maxlength="4" placeholder="••••" autofocus>
-      <button class="btn" onclick="verifyPin()">Unlock Portal ⚡</button>
-      <p id="pinError" style="color:#d32f2f; font-size:0.75rem; margin-top:8px; display:none;">Invalid PIN. Contact William.</p>
-      <button class="btn" style="margin-top:10px; background:#eeeeee; color:#424242; font-size:0.75rem; padding:8px; box-shadow:none;" onclick="triggerInstallPrompt()">📲 Install App on Phone</button>
-    </div>
-  </div>
-
-  <div style="text-align:center; margin:4px 0 10px;">
-    <h1 style="font-size:1.25rem; color:var(--primary); margin:0; font-weight:800;">⚡ KS Pulse Performance Hub</h1>
-    <div style="display:flex; justify-content:center; align-items:center; gap:8px; margin-top:4px;">
-      <span id="lastUpdated" style="font-size:0.75rem; color:#757575;">Connecting to Live Google Sheet...</span>
-      <button class="music-pill" id="musicToggleBtn" onclick="toggleMusic()">🎹 Piano Theme: ON</button>
-    </div>
-  </div>
-
-  <!-- 🏆 OVERALL OUTLET MISSION & HQ REWARD LADDER -->
-  <div class="card" style="border: 2px solid var(--primary); background: linear-gradient(180deg, #ffffff 0%, #faf7fc 100%);">
-    <h2 style="color: var(--primary); margin-bottom: 6px;">
-      <span>🏆 Kota Sentosa Mission & HQ Rewards</span>
-      <span style="font-size: 0.72rem; color: #7b1fa2; font-weight: 800;">Q1 FY2027</span>
-    </h2>
-
-    <!-- Total Sales Outlet Progress -->
-    <div style="margin-top: 8px;">
-      <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700;">
-        <span>STORE TOTAL SALES (MTD)</span>
-        <span id="outletTsProgressText">Loading...</span>
-      </div>
-      <div class="progress-bar-bg"><div class="progress-bar-fill" id="outletTsBar"></div></div>
-      <div id="outletTsPacingBadge"></div>
-    </div>
-
-    <!-- House Brand Outlet Progress -->
-    <div style="margin-top: 8px;">
-      <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700;">
-        <span>HOUSE BRAND (PORTION B TIER 3)</span>
-        <span id="outletHbProgressText">Loading...</span>
-      </div>
-      <div class="progress-bar-bg"><div class="progress-bar-fill gold" id="outletHbBar"></div></div>
-      <div id="outletHbPacingBadge"></div>
-    </div>
-
-    <!-- HQ Incentive Reward Ladder -->
-    <div style="font-size: 0.78rem; font-weight: 800; color: var(--primary-dark); margin-top: 12px;">
-      🎁 HQ TEAM INCENTIVE REWARD TIERS:
-    </div>
-    <div class="reward-ladder">
-      <div class="tier-box" id="tier1Box">
-        <div class="tier-title">TIER 1</div>
-        <div class="tier-reward">+RM 250</div>
-        <div class="tier-target">Target: RM 152.8k</div>
-        <span class="tier-badge badge-locked" id="tier1Badge">LOCKED</span>
-      </div>
-      <div class="tier-box" id="tier2Box">
-        <div class="tier-title">TIER 2</div>
-        <div class="tier-reward">+RM 375</div>
-        <div class="tier-target">Target: RM 161.9k</div>
-        <span class="tier-badge badge-locked" id="tier2Badge">LOCKED</span>
-      </div>
-      <div class="tier-box" id="tier3Box">
-        <div class="tier-title">TIER 3 (MAX)</div>
-        <div class="tier-reward">+RM 500</div>
-        <div class="tier-target">Target: RM 171.8k</div>
-        <span class="tier-badge badge-locked" id="tier3Badge">LOCKED</span>
-      </div>
-    </div>
-
-    <!-- Live Reward Status Notification -->
-    <div id="rewardStatusBanner" style="background: #f3e5f5; border-left: 4px solid var(--primary); padding: 8px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #4a148c;">
-      Calculating reward progress...
-    </div>
-
-    <div style="font-size: 0.68rem; color: #757575; margin-top: 8px; line-height: 1.3;">
-      📌 <b>Eligibility & Prerequisites:</b> All full-time teammates. 1 outreach/month + 1 TikTok/XHS post/week required. Payout based on actual monthly HB sales achieved.
-    </div>
-  </div>
-
-  <!-- Teammate View -->
-  <div class="card">
-    <h2>
-      <span id="userNameHeader">👤 Loading profile...</span>
-      <button class="btn btn-logout" onclick="logout()">Lock 🔒</button>
-    </h2>
-
-    <!-- Today's Daily Performance -->
-    <div style="font-size:0.78rem; font-weight:800; color:var(--primary); margin-top:2px;">📅 TODAY'S PERFORMANCE (DAILY):</div>
-    <div class="metric-grid">
-      <div class="metric-box"><div class="label">TODAY TS</div><div class="val" id="valTS">Loading...</div></div>
-      <div class="metric-box"><div class="label">TODAY HB</div><div class="val" id="valHB">Loading...</div></div>
-      <div class="metric-box"><div class="label">TODAY HM</div><div class="val" id="valHM">Loading...</div></div>
-      <div class="metric-box"><div class="label">CUSTOMERS</div><div class="val" id="valCust">0</div></div>
-    </div>
-
-    <!-- Month-to-Date Target Remaining & Pacing Status -->
-    <div class="gap-banner">
-      <b>🎯 Monthly Target Remaining (Sep 2026 MTD):</b>
-      <div id="valRemainingTarget" style="margin-top:4px;">
-        • TS Target Left: <b>Loading...</b><br>
-        • HB Target Left: <b>Loading...</b><br>
-        • HM Target Left: <b>Loading...</b>
-      </div>
-      <div id="valPersonalPacing" style="margin-top:6px;"></div>
-    </div>
-
-    <!-- Dual House Brand Commission Tracker -->
-    <div class="commission-banner">
-      <div style="font-weight: 800; font-size: 0.88rem; margin-bottom: 6px; color: var(--primary-dark);">
-        💰 House Brand Commission Tracker (~3.5% Avg):
-      </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-        <div style="background: white; padding: 8px; border-radius: 10px; text-align: center; border: 1px solid #ce93d8;">
-          <div style="font-size: 0.65rem; color: #7b1fa2; font-weight: 800;">TODAY'S EARNINGS</div>
-          <div style="font-size: 1.15rem; font-weight: 800; color: #00796b; margin-top: 2px;" id="valDailyCommission">RM 0.00</div>
-        </div>
-        <div style="background: white; padding: 8px; border-radius: 10px; text-align: center; border: 1px solid #ce93d8;">
-          <div style="font-size: 0.65rem; color: #7b1fa2; font-weight: 800;">MTD ACCUMULATED</div>
-          <div style="font-size: 1.15rem; font-weight: 800; color: var(--primary); margin-top: 2px;" id="valMtdCommission">RM 0.00</div>
-        </div>
-      </div>
-      <div style="font-size: 0.72rem; color: #6a1b9a; margin-top: 6px;">
-        💡 Every RM 100 in House Brand products adds ~RM 3.50 straight to your payout!
-      </div>
-    </div>
-
-    <!-- Personalized Clinical Focus -->
-    <div class="personal-rec">
-      <b>💡 Your Personal Clinical Focus Today:</b>
-      <div id="valPersonalRec" style="margin-top:4px;">Loading recommendation...</div>
-    </div>
-  </div>
-
-  <!-- Manager Only Control Panel (Chai Yee Sian) -->
-  <div id="managerPanel" class="card" style="border: 1px solid #ab47bc;">
-    <h2 style="color: #6a1b9a;">🔒 Manager Report & Screenshot Hub</h2>
-    <p style="font-size:0.75rem; color:#616161; margin-top:-6px;">Exclusive to Pharmacist Chai Yee Sian</p>
-    
-    <button class="btn btn-copy" onclick="copyWhatsAppBriefing()">📋 Copy WhatsApp Briefing</button>
-    <a id="btnDlDirector" class="btn btn-image" href="[https://drive.google.com/file/d/1xOWsi7gNZG3Ur7BG8m-0ceHJu4R1fd70/view?usp=drivesdk](https://drive.google.com/file/d/1xOWsi7gNZG3Ur7BG8m-0ceHJu4R1fd70/view?usp=drivesdk)" target="_blank">📸 Download Directors 7-Day Screenshot (Ultra-HD)</a>
-    <a id="btnDlTeammate" class="btn btn-image" style="background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%);" href="[https://drive.google.com/file/d/1af5_y7bviNeM32Ohz96370FRETef1-Q4/view?usp=drivesdk](https://drive.google.com/file/d/1af5_y7bviNeM32Ohz96370FRETef1-Q4/view?usp=drivesdk)" target="_blank">📸 Download Teammates Gap Screenshot (Ultra-HD)</a>
-
-    <div class="congrats-card" style="margin-top:12px;">
-      <b>🏆 Today's Congratulation Board:</b>
-      <div id="congratsPreview" style="margin-top:4px;">Loading achievers...</div>
-    </div>
-
-    <div style="overflow-x:auto; margin-top:12px;">
-      <div style="font-size:0.78rem; font-weight:800; color:var(--primary); margin-bottom:4px;">📊 TEAMMATES MTD CUMULATIVE SUMMARY:</div>
-      <table id="teammatesTable">
-        <thead>
-          <tr><th>Name</th><th>TS (RM)</th><th>HB (RM)</th><th>HB %</th><th>Cust</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
-
-  <script>
-    const API_URL = "[https://script.google.com/macros/s/AKfycbyDXiyZZuYYDN4e6w16HyoTXbKbLwmPCSqoJVAkuRd4iPTYQP7KGtMJZuaQ-NyyXgSZ-w/exec](https://script.google.com/macros/s/AKfycbyDXiyZZuYYDN4e6w16HyoTXbKbLwmPCSqoJVAkuRd4iPTYQP7KGtMJZuaQ-NyyXgSZ-w/exec)";
-    
-    const USER_CONFIGS = {
-      "6688": { name: "Chai Yee Sian (William)", role: "manager" },
-      "1003": { name: "Haniesha Louna", role: "staff" },
-      "1007": { name: "Kenix Ling", role: "staff" },
-      "1004": { name: "Daniela Janet", role: "staff" },
-      "1617": { name: "Nurhafizah Pauli", role: "staff" },
-      "1006": { name: "Muhammad Nur Farizin", role: "staff" },
-      "1002": { name: "Fiona Fiena", role: "staff" },
-      "1001": { name: "Jong Pei Choo", role: "staff" }
-    };
-
-    let currentUser = null;
-    let liveSheetData = null;
-    let deferredPrompt = null;
-
-    // --- ACOUSTIC GRAND PIANO SYNTHESIS ENGINE ---
-    let isMusicPlaying = false;
-    let audioCtx = null;
-    let pianoTimeout = null;
+    let pianoStepTimeout = null;
+    let currentNoteIndex = 0;
 
     const NOTE_FREQS = {
       'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00,
@@ -697,90 +329,80 @@ Copy and replace `index.html` in your GitHub repository:
       return { freq: NOTE_FREQS[n], duration: parseFloat(d) };
     });
 
-    function playPianoKey(freq, duration, time) {
-      if (!audioCtx || audioCtx.state !== 'running') return;
+    function playSinglePianoNote(freq, duration) {
+      if (!audioCtx || audioCtx.state !== 'running' || !freq) return;
 
-      // 1. Fundamental string vibration (sine)
+      const time = audioCtx.currentTime;
+
+      // 1. Fundamental tone (sine)
       const osc1 = audioCtx.createOscillator();
       osc1.type = 'sine';
       osc1.frequency.setValueAtTime(freq, time);
 
-      // 2. Harmonic overtone (2nd harmonic string shimmer)
+      // 2. Soundboard warmth (triangle)
       const osc2 = audioCtx.createOscillator();
-      osc2.type = 'sine';
-      osc2.frequency.setValueAtTime(freq * 2, time);
-
-      // 3. Wooden soundboard resonance (triangle)
-      const osc3 = audioCtx.createOscillator();
-      osc3.type = 'triangle';
-      osc3.frequency.setValueAtTime(freq, time);
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(freq, time);
 
       const gain1 = audioCtx.createGain();
       const gain2 = audioCtx.createGain();
-      const gain3 = audioCtx.createGain();
 
-      // Sharp hammer attack (3ms) with warm acoustic decay
+      // Sharp 3ms hammer strike + natural string decay
       gain1.gain.setValueAtTime(0.001, time);
-      gain1.gain.exponentialRampToValueAtTime(0.24, time + 0.003);
-      gain1.gain.exponentialRampToValueAtTime(0.001, time + duration + 0.40);
+      gain1.gain.exponentialRampToValueAtTime(0.25, time + 0.003);
+      gain1.gain.exponentialRampToValueAtTime(0.001, time + duration + 0.35);
 
       gain2.gain.setValueAtTime(0.001, time);
-      gain2.gain.exponentialRampToValueAtTime(0.08, time + 0.003);
-      gain2.gain.exponentialRampToValueAtTime(0.001, time + duration * 0.6 + 0.15);
+      gain2.gain.exponentialRampToValueAtTime(0.06, time + 0.003);
+      gain2.gain.exponentialRampToValueAtTime(0.001, time + duration + 0.25);
 
-      gain3.gain.setValueAtTime(0.001, time);
-      gain3.gain.exponentialRampToValueAtTime(0.05, time + 0.003);
-      gain3.gain.exponentialRampToValueAtTime(0.001, time + duration + 0.35);
-
-      // Dynamic acoustic filter (starts bright on hammer strike, damps into warm resonance)
+      // Dynamic acoustic filter
       const filter = audioCtx.createBiquadFilter();
       filter.type = 'lowpass';
       filter.frequency.setValueAtTime(3200, time);
-      filter.frequency.exponentialRampToValueAtTime(650, time + duration + 0.35);
+      filter.frequency.exponentialRampToValueAtTime(650, time + duration + 0.3);
 
-      osc1.connect(gain1); osc2.connect(gain2); osc3.connect(gain3);
-      gain1.connect(filter); gain2.connect(filter); gain3.connect(filter);
+      osc1.connect(gain1); osc2.connect(gain2);
+      gain1.connect(filter); gain2.connect(filter);
       filter.connect(audioCtx.destination);
 
-      const stopTime = time + duration + 0.45;
+      const stopTime = time + duration + 0.4;
       osc1.start(time); osc1.stop(stopTime);
       osc2.start(time); osc2.stop(stopTime);
-      osc3.start(time); osc3.stop(stopTime);
+    }
+
+    function stepPianoSequence() {
+      if (!isMusicPlaying) return;
+
+      const currentNote = PIANO_NOTES[currentNoteIndex];
+      playSinglePianoNote(currentNote.freq, currentNote.duration);
+
+      currentNoteIndex = (currentNoteIndex + 1) % PIANO_NOTES.length;
+      pianoStepTimeout = setTimeout(stepPianoSequence, currentNote.duration * 1000);
     }
 
     function startPianoPlayback() {
-      stopMusic();
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContext) return;
-      audioCtx = new AudioContext();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+      try {
+        stopMusic();
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        audioCtx = new AudioContext();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
 
-      isMusicPlaying = true;
-      updateMusicButtonUI();
-
-      function loopPerformance() {
-        if (!isMusicPlaying || !audioCtx) return;
-        let now = audioCtx.currentTime + 0.05;
-        let totalTime = 0;
-
-        PIANO_NOTES.forEach(note => {
-          if (note.freq) playPianoKey(note.freq, note.duration, now + totalTime);
-          totalTime += note.duration;
-        });
-
-        pianoTimeout = setTimeout(() => {
-          if (isMusicPlaying) loopPerformance();
-        }, totalTime * 1000);
+        isMusicPlaying = true;
+        currentNoteIndex = 0;
+        updateMusicButtonUI();
+        stepPianoSequence();
+      } catch (e) {
+        console.warn("Audio initialization bypassed:", e);
       }
-
-      loopPerformance();
     }
 
     function stopMusic() {
       isMusicPlaying = false;
-      if (pianoTimeout) {
-        clearTimeout(pianoTimeout);
-        pianoTimeout = null;
+      if (pianoStepTimeout) {
+        clearTimeout(pianoStepTimeout);
+        pianoStepTimeout = null;
       }
       if (audioCtx) {
         try { audioCtx.close(); } catch(e) {}
@@ -835,19 +457,31 @@ Copy and replace `index.html` in your GitHub repository:
       }
     }
 
+    // --- INSTANT UNLOCK (NON-BLOCKING) ---
     function verifyPin() {
-      const pin = document.getElementById("pinCode").value;
+      const pinInput = document.getElementById("pinCode");
+      const pin = pinInput ? pinInput.value.trim() : "";
+
       if (USER_CONFIGS[pin]) {
         currentUser = USER_CONFIGS[pin];
         localStorage.setItem("pmg_auth_pin", pin);
-        document.getElementById("pinOverlay").style.display = "none";
         
-        // Start piano performance on successful user unlock gesture
-        startPianoPlayback();
+        // 1. Immediately dismiss lock screen
+        const overlay = document.getElementById("pinOverlay");
+        if (overlay) overlay.style.display = "none";
         
+        // 2. Start gentle piano playback
+        try {
+          startPianoPlayback();
+        } catch (audioErr) {
+          console.warn("Audio non-blocking exception:", audioErr);
+        }
+        
+        // 3. Load latest data
         loadData();
       } else {
-        document.getElementById("pinError").style.display = "block";
+        const err = document.getElementById("pinError");
+        if (err) err.style.display = "block";
       }
     }
 
@@ -1097,7 +731,6 @@ Copy and replace `index.html` in your GitHub repository:
       if (savedPin && USER_CONFIGS[savedPin]) {
         currentUser = USER_CONFIGS[savedPin];
         document.getElementById("pinOverlay").style.display = "none";
-        startPianoPlayback();
         loadData();
       }
     };
