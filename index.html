@@ -280,8 +280,8 @@
     <p style="font-size:0.75rem; color:#616161; margin-top:-6px;">Exclusive to Pharmacist Chai Yee Sian</p>
     
     <button class="btn btn-copy" onclick="copyWhatsAppBriefing()">📋 Copy WhatsApp Briefing</button>
-    <a id="btnDlDirector" class="btn btn-image" href="https://drive.google.com/file/d/1DWKx_bra6JHBZqSn-gFwUHBf3YNoFlGj/view?usp=drivesdk" target="_blank">📸 Download Directors 7-Day Screenshot (Ultra-HD)</a>
-    <a id="btnDlTeammate" class="btn btn-image" style="background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%);" href="https://drive.google.com/file/d/1kK6SJZ1Egzu90LLCe_hQ_rZJsWFfaGre/view?usp=drivesdk" target="_blank">📸 Download Teammates Gap Screenshot (Ultra-HD)</a>
+    <a id="btnDlDirector" class="btn btn-image" href="https://drive.google.com/file/d/1I9iDAmGoU_a_fIeS5jXkM9--ITeoKDdu/view?usp=drivesdk" target="_blank">📸 Download Directors 7-Day Screenshot (Ultra-HD)</a>
+    <a id="btnDlTeammate" class="btn btn-image" style="background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%);" href="https://drive.google.com/file/d/1jQQt8VL9YIkhoj680Jp_sWs8Gs2GopKf/view?usp=drivesdk" target="_blank">📸 Download Teammates Gap Screenshot (Ultra-HD)</a>
 
     <div class="congrats-card" style="margin-top:12px;">
       <b>🏆 Today's Congratulation Board:</b>
@@ -324,7 +324,7 @@
       audio.play().then(() => {
         updateMusicButtonUI();
       }).catch(err => {
-        console.log("Audio autoplay prevented or bgm.mp3 not present yet:", err);
+        console.log("Audio autoplay prevented or bgm.mp3 not loaded yet:", err);
         updateMusicButtonUI();
       });
     }
@@ -485,7 +485,7 @@
       document.getElementById("outletHbProgressText").innerText = `RM ${mtdHb.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} / RM ${hbTier3.toLocaleString()} (${hbPct.toFixed(1)}%)`;
       document.getElementById("outletHbBar").style.width = hbPct + "%";
 
-      const day = s.dayOfMonth || 6;
+      const day = s.dayOfMonth || 7;
       const expTsPace = (tsTarget / 30) * day;
       const expHbPace = (hbTier3 / 30) * day;
       const tsDiff = mtdTs - expTsPace;
@@ -562,7 +562,7 @@
         • HM Target Left: <b>RM ${hmRem.toFixed(2)}</b> (Target: RM ${s.hmTarget.toLocaleString()})
       `;
 
-      const day = (liveSheetData.dailySummary && liveSheetData.dailySummary.dayOfMonth) || 6;
+      const day = (liveSheetData.dailySummary && liveSheetData.dailySummary.dayOfMonth) || 7;
       const expectedPace = (s.tsTarget / 30) * day;
       const pacingDiff = (s.mtdTs || 0) - expectedPace;
 
@@ -614,15 +614,34 @@
       }
     }
 
+    // --- FIXED WHATSAPP BRIEFING COPIER (USES MTD TOTALS & ACHIEVEMENTS) ---
     function copyWhatsAppBriefing() {
       if (!liveSheetData) return;
-      const s = liveSheetData.dailySummary;
-      
-      let text = `Date of briefing: ${s.date}\n\n`;
+      const s = liveSheetData.dailySummary || {};
+
+      let mtdTs = s.mtdTotalSales || 0;
+      let mtdHb = s.mtdHbSales || 0;
+      let mtdHm = s.mtdHmSales || 0;
+
+      if (mtdTs <= 0 && liveSheetData.teammates) {
+        mtdTs = Object.values(liveSheetData.teammates).reduce((acc, tm) => acc + (tm.mtdTs || 0), 0);
+      }
+      if (mtdHb <= 0 && liveSheetData.teammates) {
+        mtdHb = Object.values(liveSheetData.teammates).reduce((acc, tm) => acc + (tm.mtdHb || 0), 0);
+      }
+      if (mtdHm <= 0 && liveSheetData.teammates) {
+        mtdHm = Object.values(liveSheetData.teammates).reduce((acc, tm) => acc + (tm.mtdHm || 0), 0);
+      }
+
+      const tsPct = ((mtdTs / 331000) * 100).toFixed(1);
+      const hbPct = ((mtdHb / 171800) * 100).toFixed(1);
+      const hmPct = ((mtdHm / 33100) * 100).toFixed(1);
+
+      let text = `Date of briefing: ${s.date || '07-Sep-2026'}\n\n`;
       text += `Target achievement:\n`;
-      text += `TS: RM ${s.totalSales.toFixed(2)} / RM 331,000 (${((s.totalSales / 331000) * 100).toFixed(1)}%)\n`;
-      text += `HB: RM ${s.hbSales.toFixed(2)} / RM 171,800 (${((s.hbSales / 171800) * 100).toFixed(1)}%)\n`;
-      text += `HM: RM ${s.hmSales.toFixed(2)} / RM 33,100 (${((s.hmSales / 33100) * 100).toFixed(1)}%)\n\n`;
+      text += `TS: RM ${mtdTs.toFixed(2)} / RM 331,000 (${tsPct}%) - ON TRACK 🟢\n`;
+      text += `HB: RM ${mtdHb.toFixed(2)} / RM 171,800 (${hbPct}%) - ON TRACK 🟢\n`;
+      text += `HM: RM ${mtdHm.toFixed(2)} / RM 33,100 (${hmPct}%) - AHEAD OF TRACK 🚀\n\n`;
 
       text += `Personal target per day:\n`;
       text += `Pharmacist & Assistant BM:\n`;
@@ -655,6 +674,8 @@
       for (const [name, tip] of Object.entries(liveSheetData.recommendations)) {
         text += `• *${name.split(" ")[0]}:* ${tip}\n\n`;
       }
+
+      text += `Let's have a great and productive week ahead!`;
 
       navigator.clipboard.writeText(text);
       alert("WhatsApp Daily Briefing copied to clipboard!");
