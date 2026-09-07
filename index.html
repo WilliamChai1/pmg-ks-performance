@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#7b1fa2">
-  <title>KS Pulse - Performance Portal</title>
+  <title>KS Pulse - Performance & Pet Portal</title>
   
   <!-- PWA & Mobile Meta Tags -->
   <link rel="manifest" href="./manifest.json">
@@ -21,13 +21,14 @@
       --primary-light: #9c27b0;
       --primary-gradient: linear-gradient(135deg, #7b1fa2 0%, #ba68c8 100%);
       --gold-gradient: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
+      --pet-gradient: linear-gradient(180deg, #f3e5f5 0%, #ede7f6 100%);
       --bg: #f9f8fc; 
       --card: #ffffff; 
       --text: #211a2c; 
       --accent-blue: #1976d2; 
       --gap-green: #00796b;
     }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; padding-bottom: 75px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; padding-bottom: 85px; }
     
     #pinOverlay { position: fixed; inset: 0; background: rgba(26, 9, 51, 0.88); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
     .pin-box { background: white; border-radius: 20px; padding: 24px; text-align: center; width: 85%; max-width: 310px; box-shadow: 0 10px 30px rgba(123,31,162,0.25); }
@@ -40,15 +41,6 @@
     .btn-copy { background: linear-gradient(135deg, #00897b 0%, #4db6ac 100%); }
     .btn-logout { background: #616161; padding: 6px 12px; font-size: 0.75rem; width: auto; margin: 0; box-shadow: none; }
     
-    /* Top Music Control Pill */
-    .music-pill { background: #ffffff; border: 1.5px solid #ab47bc; color: var(--primary-dark); border-radius: 20px; padding: 5px 12px; font-size: 0.75rem; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 8px rgba(123,31,162,0.12); margin-top: 4px; }
-    .music-pill.playing { background: #f3e5f5; border-color: var(--primary); animation: pulseGlow 2s infinite; }
-    @keyframes pulseGlow {
-      0% { box-shadow: 0 0 0 0 rgba(156,39,176,0.4); }
-      70% { box-shadow: 0 0 0 8px rgba(156,39,176,0); }
-      100% { box-shadow: 0 0 0 0 rgba(156,39,176,0); }
-    }
-
     .card { background: var(--card); border-radius: 14px; padding: 14px; box-shadow: 0 2px 8px rgba(123,31,162,0.06); margin-bottom: 12px; border: 1px solid #f3e5f5; }
     .card h2 { font-size: 0.95rem; color: var(--primary); margin: 0 0 10px; display: flex; justify-content: space-between; align-items: center; }
     
@@ -68,7 +60,7 @@
     .badge-ontrack { background: #e8f5e9; color: #2e7d32; border: 1px solid #b9f6ca; }
     .badge-behind { background: #fce4ec; color: #c2185b; border: 1px solid #ff80ab; }
 
-    /* HQ Reward Ladder Styles */
+    /* HQ Reward Ladder */
     .reward-ladder { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin: 10px 0; }
     .tier-box { background: #fafafa; border: 2px solid #e0e0e0; border-radius: 10px; padding: 8px 4px; text-align: center; }
     .tier-box.active { border-color: #ffd700; background: #fffde7; box-shadow: 0 2px 8px rgba(255,193,7,0.3); }
@@ -89,53 +81,82 @@
     th, td { padding: 6px 4px; text-align: right; border-bottom: 1px solid #f3e5f5; }
     th:first-child, td:first-child { text-align: left; }
 
-    /* Floating In-App Install Banner */
-    #pwaInstallBanner {
-      display: none;
-      position: fixed;
-      bottom: 14px;
-      left: 14px;
-      right: 14px;
-      background: #ffffff;
-      border: 2px solid var(--primary);
-      border-radius: 16px;
-      padding: 10px 14px;
-      box-shadow: 0 6px 20px rgba(123,31,162,0.25);
-      z-index: 1500;
-      align-items: center;
-      gap: 12px;
+    /* --- TAMAGOTCHI PET STYLES --- */
+    #petView { display: none; }
+    .pet-habitat { background: var(--pet-gradient); border: 2px solid #ce93d8; border-radius: 20px; padding: 20px 14px; text-align: center; position: relative; overflow: hidden; box-shadow: inset 0 2px 10px rgba(123,31,162,0.08); margin-bottom: 12px; }
+    .pet-avatar { font-size: 4.8rem; display: inline-block; cursor: pointer; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .pet-bounce { animation: petIdle 2.2s infinite ease-in-out; }
+    @keyframes petIdle {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-10px) scale(1.05); }
     }
-    #installModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 2000; align-items: center; justify-content: center; }
-    .modal-box { background: white; border-radius: 16px; padding: 20px; width: 85%; max-width: 320px; font-size: 0.85rem; line-height: 1.5; }
+    .pet-eating { animation: petEat 0.4s 3 ease-in-out; }
+    @keyframes petEat {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2) rotate(-6deg); }
+    }
+    .poop-item { font-size: 2.2rem; position: absolute; right: 28px; bottom: 24px; animation: poopWiggle 1.5s infinite; cursor: pointer; }
+    @keyframes poopWiggle {
+      0%, 100% { transform: rotate(0); }
+      50% { transform: rotate(12deg) scale(1.1); }
+    }
+    .pet-speech { background: white; border: 1.5px solid #ce93d8; border-radius: 14px; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; color: var(--primary-dark); display: inline-block; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    
+    .pet-meters { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
+    .meter-card { background: white; border-radius: 12px; padding: 8px 6px; text-align: center; border: 1px solid #e1bee7; }
+    .meter-label { font-size: 0.65rem; font-weight: 800; color: #6a1b9a; margin-bottom: 4px; }
+    .meter-bar-bg { background: #f3e5f5; border-radius: 6px; height: 8px; overflow: hidden; }
+    .meter-bar-fill { height: 100%; border-radius: 6px; transition: width 0.4s ease; }
+    .fill-hunger { background: linear-gradient(90deg, #ff5252, #ff7675); }
+    .fill-happy { background: linear-gradient(90deg, #ffb300, #fed330); }
+    .fill-clean { background: linear-gradient(90deg, #00b894, #55efc4); }
+
+    .pet-actions { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
+    .btn-pet { background: white; border: 2px solid #ba68c8; color: var(--primary-dark); border-radius: 14px; padding: 10px 4px; font-size: 0.72rem; font-weight: 800; cursor: pointer; text-align: center; box-shadow: 0 2px 6px rgba(123,31,162,0.1); transition: all 0.15s ease; }
+    .btn-pet:active { transform: scale(0.92); background: #f3e5f5; }
+
+    /* --- FIXED BOTTOM NAVIGATION BAR --- */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border-top: 1.5px solid #e1bee7;
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0;
+      z-index: 900;
+      box-shadow: 0 -4px 14px rgba(123,31,162,0.08);
+    }
+    .nav-tab {
+      background: none;
+      border: none;
+      color: #757575;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      width: 45%;
+      padding: 4px 0;
+      border-radius: 10px;
+    }
+    .nav-tab.active {
+      color: var(--primary);
+      background: #f3e5f5;
+    }
+    .nav-tab .tab-icon { font-size: 1.3rem; }
   </style>
 </head>
 <body>
 
-  <!-- Custom BGM Audio Element -->
+  <!-- Audio Element -->
   <audio id="bgmAudio" loop preload="auto">
     <source src="./bgm.mp3" type="audio/mpeg">
   </audio>
-
-  <!-- Floating Install Banner -->
-  <div id="pwaInstallBanner">
-    <img src="./icon-192.png" style="width:42px; height:42px; border-radius:10px; flex-shrink:0;">
-    <div style="flex:1;">
-      <div style="font-weight:800; font-size:0.88rem; color:var(--primary-dark);">Install KS Pulse</div>
-      <div style="font-size:0.72rem; color:#616161;">Add to home screen for 1-tap daily access</div>
-    </div>
-    <button class="btn" style="width:auto; margin:0; padding:8px 14px; font-size:0.8rem;" onclick="triggerInstallPrompt()">Install</button>
-    <button style="background:none; border:none; font-size:1.1rem; color:#888; cursor:pointer; padding:0 4px;" onclick="document.getElementById('pwaInstallBanner').style.display='none'">✕</button>
-  </div>
-
-  <!-- iOS / Alternative Instruction Modal -->
-  <div id="installModal">
-    <div class="modal-box">
-      <h3 style="margin-top:0; color:var(--primary);">⚡ Add KS Pulse to Home Screen</h3>
-      <p><b>On iPhone (Safari):</b><br>1. Tap the <b>Share icon (⎋)</b> at the bottom of Safari.<br>2. Scroll down and tap <b>"Add to Home Screen ➕"</b>.<br>3. Tap <b>"Add"</b> at the top right.</p>
-      <p><b>On Android (Chrome):</b><br>Tap the 3 dots (<b>⋮</b>) at the top right, then tap <b>"Install app"</b> or <b>"Add to Home screen"</b>.</p>
-      <button class="btn" onclick="document.getElementById('installModal').style.display='none'">Got it!</button>
-    </div>
-  </div>
 
   <!-- PIN Shield -->
   <div id="pinOverlay">
@@ -146,7 +167,6 @@
       <input type="password" id="pinCode" class="pin-input" maxlength="4" placeholder="••••" autofocus onkeydown="if(event.key==='Enter') verifyPin()">
       <button class="btn" onclick="verifyPin()">Unlock Portal ⚡</button>
       <p id="pinError" style="color:#d32f2f; font-size:0.75rem; margin-top:8px; display:none;">Invalid PIN. Contact William.</p>
-      <button class="btn" style="margin-top:10px; background:#eeeeee; color:#424242; font-size:0.75rem; padding:8px; box-shadow:none;" onclick="triggerInstallPrompt()">📲 Install App on Phone</button>
     </div>
   </div>
 
@@ -154,149 +174,231 @@
     <h1 style="font-size:1.25rem; color:var(--primary); margin:0; font-weight:800;">⚡ KS Pulse Performance Hub</h1>
     <div style="display:flex; justify-content:center; align-items:center; gap:8px; margin-top:4px;">
       <span id="lastUpdated" style="font-size:0.75rem; color:#757575;">Connecting to Live Google Sheet...</span>
-      <button class="music-pill" id="musicToggleBtn" onclick="toggleMusic()">🎵 BGM: OFF</button>
+      <button class="btn-logout" id="musicToggleBtn" onclick="toggleMusic()" style="background:#f3e5f5; color:var(--primary-dark); font-weight:800; border-radius:14px; border:1px solid #ab47bc;">🎵 BGM: OFF</button>
     </div>
   </div>
 
-  <!-- 🏆 OVERALL OUTLET MISSION & HQ REWARD LADDER -->
-  <div class="card" style="border: 2px solid var(--primary); background: linear-gradient(180deg, #ffffff 0%, #faf7fc 100%);">
-    <h2 style="color: var(--primary); margin-bottom: 6px;">
-      <span>🏆 Kota Sentosa Mission & HQ Rewards</span>
-      <span style="font-size: 0.72rem; color: #7b1fa2; font-weight: 800;">Q1 FY2027</span>
-    </h2>
+  <!-- ==================== TAB 1: PERFORMANCE DASHBOARD ==================== -->
+  <div id="performanceView">
+    <!-- 🏆 OVERALL OUTLET MISSION & HQ REWARD LADDER -->
+    <div class="card" style="border: 2px solid var(--primary); background: linear-gradient(180deg, #ffffff 0%, #faf7fc 100%);">
+      <h2 style="color: var(--primary); margin-bottom: 6px;">
+        <span>🏆 Kota Sentosa Mission & HQ Rewards</span>
+        <span style="font-size: 0.72rem; color: #7b1fa2; font-weight: 800;">Q1 FY2027</span>
+      </h2>
 
-    <!-- Total Sales Outlet Progress -->
-    <div style="margin-top: 8px;">
-      <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700;">
-        <span>STORE TOTAL SALES (MTD)</span>
-        <span id="outletTsProgressText">Loading...</span>
-      </div>
-      <div class="progress-bar-bg"><div class="progress-bar-fill" id="outletTsBar"></div></div>
-      <div id="outletTsPacingBadge"></div>
-    </div>
-
-    <!-- House Brand Outlet Progress -->
-    <div style="margin-top: 8px;">
-      <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700;">
-        <span>HOUSE BRAND (PORTION B TIER 3)</span>
-        <span id="outletHbProgressText">Loading...</span>
-      </div>
-      <div class="progress-bar-bg"><div class="progress-bar-fill gold" id="outletHbBar"></div></div>
-      <div id="outletHbPacingBadge"></div>
-    </div>
-
-    <!-- HQ Incentive Reward Ladder -->
-    <div style="font-size: 0.78rem; font-weight: 800; color: var(--primary-dark); margin-top: 12px;">
-      🎁 HQ TEAM INCENTIVE REWARD TIERS:
-    </div>
-    <div class="reward-ladder">
-      <div class="tier-box" id="tier1Box">
-        <div class="tier-title">TIER 1</div>
-        <div class="tier-reward">+RM 250</div>
-        <div class="tier-target">Target: RM 152.8k</div>
-        <span class="tier-badge badge-locked" id="tier1Badge">LOCKED</span>
-      </div>
-      <div class="tier-box" id="tier2Box">
-        <div class="tier-title">TIER 2</div>
-        <div class="tier-reward">+RM 375</div>
-        <div class="tier-target">Target: RM 161.9k</div>
-        <span class="tier-badge badge-locked" id="tier2Badge">LOCKED</span>
-      </div>
-      <div class="tier-box" id="tier3Box">
-        <div class="tier-title">TIER 3 (MAX)</div>
-        <div class="tier-reward">+RM 500</div>
-        <div class="tier-target">Target: RM 171.8k</div>
-        <span class="tier-badge badge-locked" id="tier3Badge">LOCKED</span>
-      </div>
-    </div>
-
-    <!-- Live Reward Status Notification -->
-    <div id="rewardStatusBanner" style="background: #f3e5f5; border-left: 4px solid var(--primary); padding: 8px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #4a148c;">
-      Calculating reward progress...
-    </div>
-
-    <div style="font-size: 0.68rem; color: #757575; margin-top: 8px; line-height: 1.3;">
-      📌 <b>Eligibility & Prerequisites:</b> All full-time teammates. 1 outreach/month + 1 TikTok/XHS post/week required. Payout based on actual monthly HB sales achieved.
-    </div>
-  </div>
-
-  <!-- Teammate View -->
-  <div class="card">
-    <h2>
-      <span id="userNameHeader">👤 Loading profile...</span>
-      <button class="btn btn-logout" onclick="logout()">Lock 🔒</button>
-    </h2>
-
-    <!-- Today's Daily Performance -->
-    <div style="font-size:0.78rem; font-weight:800; color:var(--primary); margin-top:2px;">📅 TODAY'S PERFORMANCE (DAILY):</div>
-    <div class="metric-grid">
-      <div class="metric-box"><div class="label">TODAY TS</div><div class="val" id="valTS">Loading...</div></div>
-      <div class="metric-box"><div class="label">TODAY HB</div><div class="val" id="valHB">Loading...</div></div>
-      <div class="metric-box"><div class="label">TODAY HM</div><div class="val" id="valHM">Loading...</div></div>
-      <div class="metric-box"><div class="label">CUSTOMERS</div><div class="val" id="valCust">0</div></div>
-    </div>
-
-    <!-- Month-to-Date Target Remaining & Pacing Status -->
-    <div class="gap-banner">
-      <b>🎯 Monthly Target Remaining (Sep 2026 MTD):</b>
-      <div id="valRemainingTarget" style="margin-top:4px;">
-        • TS Target Left: <b>Loading...</b><br>
-        • HB Target Left: <b>Loading...</b><br>
-        • HM Target Left: <b>Loading...</b>
-      </div>
-      <div id="valPersonalPacing" style="margin-top:6px;"></div>
-    </div>
-
-    <!-- Dual House Brand Commission Tracker -->
-    <div class="commission-banner">
-      <div style="font-weight: 800; font-size: 0.88rem; margin-bottom: 6px; color: var(--primary-dark);">
-        💰 House Brand Commission Tracker (~3.5% Avg):
-      </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-        <div style="background: white; padding: 8px; border-radius: 10px; text-align: center; border: 1px solid #ce93d8;">
-          <div style="font-size: 0.65rem; color: #7b1fa2; font-weight: 800;">TODAY'S EARNINGS</div>
-          <div style="font-size: 1.15rem; font-weight: 800; color: #00796b; margin-top: 2px;" id="valDailyCommission">RM 0.00</div>
+      <!-- Total Sales Outlet Progress -->
+      <div style="margin-top: 8px;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700;">
+          <span>STORE TOTAL SALES (MTD)</span>
+          <span id="outletTsProgressText">Loading...</span>
         </div>
-        <div style="background: white; padding: 8px; border-radius: 10px; text-align: center; border: 1px solid #ce93d8;">
-          <div style="font-size: 0.65rem; color: #7b1fa2; font-weight: 800;">MTD ACCUMULATED</div>
-          <div style="font-size: 1.15rem; font-weight: 800; color: var(--primary); margin-top: 2px;" id="valMtdCommission">RM 0.00</div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="outletTsBar"></div></div>
+        <div id="outletTsPacingBadge"></div>
+      </div>
+
+      <!-- House Brand Outlet Progress -->
+      <div style="margin-top: 8px;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700;">
+          <span>HOUSE BRAND (PORTION B TIER 3)</span>
+          <span id="outletHbProgressText">Loading...</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill gold" id="outletHbBar"></div></div>
+        <div id="outletHbPacingBadge"></div>
+      </div>
+
+      <!-- HQ Incentive Reward Ladder -->
+      <div style="font-size: 0.78rem; font-weight: 800; color: var(--primary-dark); margin-top: 12px;">
+        🎁 HQ TEAM INCENTIVE REWARD TIERS:
+      </div>
+      <div class="reward-ladder">
+        <div class="tier-box" id="tier1Box">
+          <div class="tier-title">TIER 1</div>
+          <div class="tier-reward">+RM 250</div>
+          <div class="tier-target">Target: RM 152.8k</div>
+          <span class="tier-badge badge-locked" id="tier1Badge">LOCKED</span>
+        </div>
+        <div class="tier-box" id="tier2Box">
+          <div class="tier-title">TIER 2</div>
+          <div class="tier-reward">+RM 375</div>
+          <div class="tier-target">Target: RM 161.9k</div>
+          <span class="tier-badge badge-locked" id="tier2Badge">LOCKED</span>
+        </div>
+        <div class="tier-box" id="tier3Box">
+          <div class="tier-title">TIER 3 (MAX)</div>
+          <div class="tier-reward">+RM 500</div>
+          <div class="tier-target">Target: RM 171.8k</div>
+          <span class="tier-badge badge-locked" id="tier3Badge">LOCKED</span>
         </div>
       </div>
-      <div style="font-size: 0.72rem; color: #6a1b9a; margin-top: 6px;">
-        💡 Every RM 100 in House Brand products adds ~RM 3.50 straight to your payout!
+
+      <!-- Live Reward Status Notification -->
+      <div id="rewardStatusBanner" style="background: #f3e5f5; border-left: 4px solid var(--primary); padding: 8px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #4a148c;">
+        Calculating reward progress...
+      </div>
+
+      <div style="font-size: 0.68rem; color: #757575; margin-top: 8px; line-height: 1.3;">
+        📌 <b>Eligibility & Prerequisites:</b> All full-time teammates. 1 outreach/month + 1 TikTok/XHS post/week required. Payout based on actual monthly HB sales achieved.
       </div>
     </div>
 
-    <!-- Personalized Clinical Focus -->
-    <div class="personal-rec">
-      <b>💡 Your Personal Clinical Focus Today:</b>
-      <div id="valPersonalRec" style="margin-top:4px;">Loading recommendation...</div>
+    <!-- Teammate View -->
+    <div class="card">
+      <h2>
+        <span id="userNameHeader">👤 Loading profile...</span>
+        <button class="btn btn-logout" onclick="logout()">Lock 🔒</button>
+      </h2>
+
+      <!-- Today's Daily Performance -->
+      <div style="font-size:0.78rem; font-weight:800; color:var(--primary); margin-top:2px;">📅 TODAY'S PERFORMANCE (DAILY):</div>
+      <div class="metric-grid">
+        <div class="metric-box"><div class="label">TODAY TS</div><div class="val" id="valTS">Loading...</div></div>
+        <div class="metric-box"><div class="label">TODAY HB</div><div class="val" id="valHB">Loading...</div></div>
+        <div class="metric-box"><div class="label">TODAY HM</div><div class="val" id="valHM">Loading...</div></div>
+        <div class="metric-box"><div class="label">CUSTOMERS</div><div class="val" id="valCust">0</div></div>
+      </div>
+
+      <!-- Month-to-Date Target Remaining & Pacing Status -->
+      <div class="gap-banner">
+        <b>🎯 Monthly Target Remaining (Sep 2026 MTD):</b>
+        <div id="valRemainingTarget" style="margin-top:4px;">
+          • TS Target Left: <b>Loading...</b><br>
+          • HB Target Left: <b>Loading...</b><br>
+          • HM Target Left: <b>Loading...</b>
+        </div>
+        <div id="valPersonalPacing" style="margin-top:6px;"></div>
+      </div>
+
+      <!-- Dual House Brand Commission Tracker -->
+      <div class="commission-banner">
+        <div style="font-weight: 800; font-size: 0.88rem; margin-bottom: 6px; color: var(--primary-dark);">
+          💰 House Brand Commission Tracker (~3.5% Avg):
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div style="background: white; padding: 8px; border-radius: 10px; text-align: center; border: 1px solid #ce93d8;">
+            <div style="font-size: 0.65rem; color: #7b1fa2; font-weight: 800;">TODAY'S EARNINGS</div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: #00796b; margin-top: 2px;" id="valDailyCommission">RM 0.00</div>
+          </div>
+          <div style="background: white; padding: 8px; border-radius: 10px; text-align: center; border: 1px solid #ce93d8;">
+            <div style="font-size: 0.65rem; color: #7b1fa2; font-weight: 800;">MTD ACCUMULATED</div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: var(--primary); margin-top: 2px;" id="valMtdCommission">RM 0.00</div>
+          </div>
+        </div>
+        <div style="font-size: 0.72rem; color: #6a1b9a; margin-top: 6px;">
+          💡 Every RM 100 in House Brand products adds ~RM 3.50 straight to your payout!
+        </div>
+      </div>
+
+      <!-- Personalized Clinical Focus -->
+      <div class="personal-rec">
+        <b>💡 Your Personal Clinical Focus Today:</b>
+        <div id="valPersonalRec" style="margin-top:4px;">Loading recommendation...</div>
+      </div>
+    </div>
+
+    <!-- Manager Only Control Panel (Chai Yee Sian) -->
+    <div id="managerPanel" class="card" style="border: 1px solid #ab47bc;">
+      <h2 style="color: #6a1b9a;">🔒 Manager Report & Screenshot Hub</h2>
+      <p style="font-size:0.75rem; color:#616161; margin-top:-6px;">Exclusive to Pharmacist Chai Yee Sian</p>
+      
+      <button class="btn btn-copy" onclick="copyWhatsAppBriefing()">📋 Copy WhatsApp Briefing</button>
+      <a id="btnDlDirector" class="btn btn-image" href="https://drive.google.com/file/d/1I9iDAmGoU_a_fIeS5jXkM9--ITeoKDdu/view?usp=drivesdk" target="_blank">📸 Download Directors 7-Day Screenshot (Ultra-HD)</a>
+      <a id="btnDlTeammate" class="btn btn-image" style="background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%);" href="https://drive.google.com/file/d/1jQQt8VL9YIkhoj680Jp_sWs8Gs2GopKf/view?usp=drivesdk" target="_blank">📸 Download Teammates Gap Screenshot (Ultra-HD)</a>
+
+      <div class="congrats-card" style="margin-top:12px;">
+        <b>🏆 Today's Congratulation Board:</b>
+        <div id="congratsPreview" style="margin-top:4px;">Loading achievers...</div>
+      </div>
+
+      <div style="overflow-x:auto; margin-top:12px;">
+        <div style="font-size:0.78rem; font-weight:800; color:var(--primary); margin-bottom:4px;">📊 TEAMMATES MTD CUMULATIVE SUMMARY:</div>
+        <table id="teammatesTable">
+          <thead>
+            <tr><th>Name</th><th>TS (RM)</th><th>HB (RM)</th><th>HB %</th><th>Cust</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- Manager Only Control Panel (Chai Yee Sian) -->
-  <div id="managerPanel" class="card" style="border: 1px solid #ab47bc;">
-    <h2 style="color: #6a1b9a;">🔒 Manager Report & Screenshot Hub</h2>
-    <p style="font-size:0.75rem; color:#616161; margin-top:-6px;">Exclusive to Pharmacist Chai Yee Sian</p>
-    
-    <button class="btn btn-copy" onclick="copyWhatsAppBriefing()">📋 Copy WhatsApp Briefing</button>
-    <a id="btnDlDirector" class="btn btn-image" href="https://drive.google.com/file/d/1I9iDAmGoU_a_fIeS5jXkM9--ITeoKDdu/view?usp=drivesdk" target="_blank">📸 Download Directors 7-Day Screenshot (Ultra-HD)</a>
-    <a id="btnDlTeammate" class="btn btn-image" style="background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%);" href="https://drive.google.com/file/d/1jQQt8VL9YIkhoj680Jp_sWs8Gs2GopKf/view?usp=drivesdk" target="_blank">📸 Download Teammates Gap Screenshot (Ultra-HD)</a>
+  <!-- ==================== TAB 2: VIRTUAL PET (TAMAGOTCHI) ==================== -->
+  <div id="petView">
+    <div class="card">
+      <h2>
+        <span>🐾 <span id="petNameTitle">My KS Buddy</span></span>
+        <span style="font-size:0.75rem; color:#6a1b9a; font-weight:800;" id="petStageBadge">Baby Hatchling</span>
+      </h2>
 
-    <div class="congrats-card" style="margin-top:12px;">
-      <b>🏆 Today's Congratulation Board:</b>
-      <div id="congratsPreview" style="margin-top:4px;">Loading achievers...</div>
-    </div>
+      <!-- Level & EXP Progress -->
+      <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:800; margin-bottom:4px;">
+        <span id="petLevelText">Level 1</span>
+        <span id="petExpText">EXP: 0 / 50</span>
+      </div>
+      <div class="progress-bar-bg" style="margin-bottom:12px;">
+        <div class="progress-bar-fill" id="petExpBar" style="width:0%;"></div>
+      </div>
 
-    <div style="overflow-x:auto; margin-top:12px;">
-      <div style="font-size:0.78rem; font-weight:800; color:var(--primary); margin-bottom:4px;">📊 TEAMMATES MTD CUMULATIVE SUMMARY:</div>
-      <table id="teammatesTable">
-        <thead>
-          <tr><th>Name</th><th>TS (RM)</th><th>HB (RM)</th><th>HB %</th><th>Cust</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <!-- Interactive Pet Room / Habitat -->
+      <div class="pet-habitat" id="petRoom">
+        <div class="pet-speech" id="petSpeechBubble">Hello! Feed me a healthy snack! 🍎</div>
+        <br>
+        <div class="pet-avatar pet-bounce" id="petAvatar" onclick="petClickReact()">🐣</div>
+        <div class="poop-item" id="poopElement" style="display:none;" onclick="cleanPet()" title="Tap to clean poop!">💩</div>
+      </div>
+
+      <!-- Vital Meters -->
+      <div class="pet-meters">
+        <div class="meter-card">
+          <div class="meter-label">HUNGER ❤️</div>
+          <div class="meter-bar-bg"><div class="meter-bar-fill fill-hunger" id="meterHunger" style="width:80%;"></div></div>
+          <div style="font-size:0.65rem; color:#555; margin-top:2px;" id="textHunger">80%</div>
+        </div>
+        <div class="meter-card">
+          <div class="meter-label">HAPPY ⭐</div>
+          <div class="meter-bar-bg"><div class="meter-bar-fill fill-happy" id="meterHappy" style="width:80%;"></div></div>
+          <div style="font-size:0.65rem; color:#555; margin-top:2px;" id="textHappy">80%</div>
+        </div>
+        <div class="meter-card">
+          <div class="meter-label">CLEAN ✨</div>
+          <div class="meter-bar-bg"><div class="meter-bar-fill fill-clean" id="meterClean" style="width:100%;"></div></div>
+          <div style="font-size:0.65rem; color:#555; margin-top:2px;" id="textClean">100%</div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="pet-actions">
+        <button class="btn-pet" onclick="feedPet()">🍎<br>Feed Snack<br><span style="font-size:0.6rem; color:#888;">+15 EXP</span></button>
+        <button class="btn-pet" onclick="playWithPet()">🎾<br>Play Ball<br><span style="font-size:0.6rem; color:#888;">+10 EXP</span></button>
+        <button class="btn-pet" onclick="cleanPet()">🧹<br>Clean Room<br><span style="font-size:0.6rem; color:#888;">+20 EXP</span></button>
+        <button class="btn-pet" onclick="sleepPet()" id="btnSleep">💤<br>Sleep / Rest<br><span style="font-size:0.6rem; color:#888;">Energy</span></button>
+      </div>
+
+      <!-- Daily Sales Goal Integration -->
+      <div id="petSalesFeastBox" style="background:#e8f5e9; border:1.5px solid #2e7d32; border-radius:12px; padding:10px; margin-top:14px; display:flex; align-items:center; justify-content:space-between;">
+        <div>
+          <div style="font-size:0.75rem; font-weight:800; color:#1b5e20;">🌟 DAILY TARGET PET FEAST</div>
+          <div style="font-size:0.68rem; color:#2e7d32;">Hit TS, HB, or HM today to unlock +50 Bonus EXP!</div>
+        </div>
+        <button class="btn" id="btnClaimFeast" style="width:auto; margin:0; padding:6px 10px; font-size:0.72rem; background:#2e7d32;" onclick="claimTargetFeast()">Claim 🎁</button>
+      </div>
+
+      <div style="font-size:0.68rem; color:#888; text-align:center; margin-top:10px;">
+        💡 Your pet grows as you level up! Pet status is saved securely on your phone.
+      </div>
     </div>
+  </div>
+
+  <!-- ==================== FIXED BOTTOM NAVIGATION BAR ==================== -->
+  <div class="bottom-nav">
+    <button class="nav-tab active" id="tabNavPerf" onclick="switchAppTab('perf')">
+      <span class="tab-icon">📊</span>
+      <span>Performance</span>
+    </button>
+    <button class="nav-tab" id="tabNavPet" onclick="switchAppTab('pet')">
+      <span class="tab-icon">🐾</span>
+      <span>My Pet</span>
+    </button>
   </div>
 
   <script>
@@ -315,83 +417,283 @@
 
     let currentUser = null;
     let liveSheetData = null;
-    let deferredPrompt = null;
 
-    // --- PURE BGM AUDIO CONTROLLER ---
+    // --- TAB SWITCHING ---
+    function switchAppTab(tab) {
+      const perfView = document.getElementById('performanceView');
+      const petView = document.getElementById('petView');
+      const navPerf = document.getElementById('tabNavPerf');
+      const navPet = document.getElementById('tabNavPet');
+
+      if (tab === 'pet') {
+        perfView.style.display = 'none';
+        petView.style.display = 'block';
+        navPerf.className = 'nav-tab';
+        navPet.className = 'nav-tab active';
+        refreshPetUI();
+      } else {
+        perfView.style.display = 'block';
+        petView.style.display = 'none';
+        navPerf.className = 'nav-tab active';
+        navPet.className = 'nav-tab';
+      }
+    }
+
+    // --- TAMAGOTCHI PET ENGINE (PERSISTENT PER TEAMMATE) ---
+    const PET_STAGES = [
+      { minLvl: 1, name: "Baby Hatchling", avatar: "🐣" },
+      { minLvl: 4, name: "Playful Kitty", avatar: "🐱" },
+      { minLvl: 8, name: "Energetic Fox", avatar: "🦊" },
+      { minLvl: 12, name: "Mighty Lion", avatar: "🦁" },
+      { minLvl: 20, name: "Legendary Dragon", avatar: "🐉" }
+    ];
+
+    let currentPet = null;
+
+    function getPetStorageKey() {
+      const name = currentUser ? currentUser.name : "guest";
+      return "ks_pet_" + name.replace(/[^a-zA-Z0-9]/g, "_");
+    }
+
+    function loadPetData() {
+      const key = getPetStorageKey();
+      const saved = localStorage.getItem(key);
+      const now = Date.now();
+
+      if (saved) {
+        try {
+          currentPet = JSON.parse(saved);
+        } catch(e) { currentPet = null; }
+      }
+
+      if (!currentPet) {
+        currentPet = {
+          name: (currentUser ? currentUser.name.split(" ")[0] : "My") + "'s Buddy",
+          level: 1,
+          exp: 0,
+          hunger: 80,
+          happiness: 80,
+          cleanliness: 100,
+          hasPoop: false,
+          isSleeping: false,
+          lastUpdated: now,
+          lastFeastDate: ""
+        };
+      }
+
+      // Time decay calculation (hunger & hygiene decay realistically while away)
+      const elapsedHours = (now - (currentPet.lastUpdated || now)) / (1000 * 60 * 60);
+      if (elapsedHours > 0.5) {
+        const decaySteps = Math.floor(elapsedHours / 2);
+        if (decaySteps > 0) {
+          currentPet.hunger = Math.max(10, currentPet.hunger - decaySteps * 12);
+          currentPet.happiness = Math.max(10, currentPet.happiness - decaySteps * 10);
+          if (decaySteps >= 2) currentPet.hasPoop = true;
+          currentPet.lastUpdated = now;
+        }
+      }
+      savePetData();
+      refreshPetUI();
+    }
+
+    function savePetData() {
+      if (!currentPet) return;
+      currentPet.lastUpdated = Date.now();
+      localStorage.setItem(getPetStorageKey(), JSON.stringify(currentPet));
+    }
+
+    function getPetStage(level) {
+      let stage = PET_STAGES[0];
+      for (let s of PET_STAGES) {
+        if (level >= s.minLvl) stage = s;
+      }
+      return stage;
+    }
+
+    function addPetExp(pts) {
+      if (!currentPet) return;
+      currentPet.exp += pts;
+      const reqExp = currentPet.level * 50;
+      if (currentPet.exp >= reqExp) {
+        currentPet.level++;
+        currentPet.exp -= reqExp;
+        const newStage = getPetStage(currentPet.level);
+        showPetSpeech(`🎉 LEVEL UP! Now Level ${currentPet.level} (${newStage.name})!`);
+      }
+      savePetData();
+      refreshPetUI();
+    }
+
+    function refreshPetUI() {
+      if (!currentPet) return;
+      const stage = getPetStage(currentPet.level);
+
+      document.getElementById('petNameTitle').innerText = currentPet.name;
+      document.getElementById('petStageBadge').innerText = stage.name;
+      document.getElementById('petLevelText').innerText = `Level ${currentPet.level}`;
+
+      const reqExp = currentPet.level * 50;
+      document.getElementById('petExpText').innerText = `EXP: ${currentPet.exp} / ${reqExp}`;
+      document.getElementById('petExpBar').style.width = Math.min(100, (currentPet.exp / reqExp) * 100) + "%";
+
+      // Avatar & Status
+      const avatarEl = document.getElementById('petAvatar');
+      if (currentPet.isSleeping) {
+        avatarEl.innerText = "💤";
+        document.getElementById('btnSleep').innerHTML = "☀️<br>Wake Up<br><span style='font-size:0.6rem; color:#888;'>Active</span>";
+      } else {
+        avatarEl.innerText = stage.avatar;
+        document.getElementById('btnSleep').innerHTML = "💤<br>Sleep / Rest<br><span style='font-size:0.6rem; color:#888;'>Energy</span>";
+      }
+
+      // Poop display
+      document.getElementById('poopElement').style.display = currentPet.hasPoop ? "block" : "none";
+
+      // Meters
+      document.getElementById('meterHunger').style.width = currentPet.hunger + "%";
+      document.getElementById('textHunger').innerText = Math.round(currentPet.hunger) + "%";
+      document.getElementById('meterHappy').style.width = currentPet.happiness + "%";
+      document.getElementById('textHappy').innerText = Math.round(currentPet.happiness) + "%";
+      document.getElementById('meterClean').style.width = (currentPet.hasPoop ? 30 : 100) + "%";
+      document.getElementById('textClean').innerText = (currentPet.hasPoop ? "30%" : "100%");
+
+      // Check Target Feast status
+      checkDailyTargetFeast();
+    }
+
+    function showPetSpeech(msg) {
+      const el = document.getElementById('petSpeechBubble');
+      el.innerText = msg;
+      el.style.transform = "scale(1.1)";
+      setTimeout(() => el.style.transform = "scale(1)", 200);
+    }
+
+    function feedPet() {
+      if (!currentPet) return;
+      if (currentPet.hunger >= 100) {
+        showPetSpeech("I'm already completely full! Let's play instead! 🎾");
+        return;
+      }
+      currentPet.hunger = Math.min(100, currentPet.hunger + 25);
+      showPetSpeech("Yum! That vitamin snack was delicious! 🍎 (+15 EXP)");
+      const av = document.getElementById('petAvatar');
+      av.className = "pet-avatar pet-eating";
+      setTimeout(() => av.className = "pet-avatar pet-bounce", 1200);
+      addPetExp(15);
+    }
+
+    function playWithPet() {
+      if (!currentPet) return;
+      if (currentPet.isSleeping) {
+        showPetSpeech("Shh... I'm sleeping! Wake me up first! 💤");
+        return;
+      }
+      currentPet.happiness = Math.min(100, currentPet.happiness + 20);
+      currentPet.hunger = Math.max(5, currentPet.hunger - 6);
+      showPetSpeech("Yay! Playing catch is so much fun! ⭐ (+10 EXP)");
+      addPetExp(10);
+    }
+
+    function cleanPet() {
+      if (!currentPet) return;
+      if (!currentPet.hasPoop) {
+        showPetSpeech("The room is sparkling clean already! ✨");
+        return;
+      }
+      currentPet.hasPoop = false;
+      currentPet.cleanliness = 100;
+      showPetSpeech("Thank you for cleaning! All fresh and tidy! 🧹 (+20 EXP)");
+      addPetExp(20);
+    }
+
+    function sleepPet() {
+      if (!currentPet) return;
+      currentPet.isSleeping = !currentPet.isSleeping;
+      if (currentPet.isSleeping) {
+        showPetSpeech("Good night! Sweet dreams... 💤");
+      } else {
+        showPetSpeech("Good morning! Ready for a great day! ☀️");
+      }
+      savePetData();
+      refreshPetUI();
+    }
+
+    function petClickReact() {
+      if (!currentPet) return;
+      const cheers = [
+        "I love hanging out with you! ❤️",
+        "Keep up the great work at the pharmacy! 💊",
+        "Let's hit our House Brand target today! 🎯",
+        "You're the best! ⭐"
+      ];
+      const randomMsg = cheers[Math.floor(Math.random() * cheers.length)];
+      showPetSpeech(randomMsg);
+      playWithPet();
+    }
+
+    function checkDailyTargetFeast() {
+      if (!currentPet || !currentUser || !liveSheetData || !liveSheetData.teammates) return;
+      const todayDate = (liveSheetData.dailySummary && liveSheetData.dailySummary.date) || "Today";
+      const s = liveSheetData.teammates[currentUser.name];
+      const btn = document.getElementById('btnClaimFeast');
+
+      if (!s || !btn) return;
+      const hitAny = (s.dailyTs >= s.dailyTsTarget) || (s.dailyHb >= s.dailyHbTarget) || (s.dailyHm >= s.dailyHmTarget);
+
+      if (currentPet.lastFeastDate === todayDate) {
+        btn.innerText = "Claimed ✅";
+        btn.disabled = true;
+        btn.style.background = "#757575";
+      } else if (hitAny) {
+        btn.innerText = "Claim 🎁";
+        btn.disabled = false;
+        btn.style.background = "#2e7d32";
+      } else {
+        btn.innerText = "Locked 🔒";
+        btn.disabled = true;
+        btn.style.background = "#9e9e9e";
+      }
+    }
+
+    function claimTargetFeast() {
+      if (!currentPet || !liveSheetData) return;
+      const todayDate = (liveSheetData.dailySummary && liveSheetData.dailySummary.date) || "Today";
+      currentPet.lastFeastDate = todayDate;
+      currentPet.hunger = 100;
+      currentPet.happiness = 100;
+      showPetSpeech("🏆 WOW! Target Feast claimed! Fully energized! (+50 Bonus EXP) 🌟");
+      addPetExp(50);
+      refreshPetUI();
+    }
+
+    // --- BGM CONTROLLER ---
     function startBgm() {
       const audio = document.getElementById('bgmAudio');
       if (!audio) return;
-      audio.play().then(() => {
-        updateMusicButtonUI();
-      }).catch(err => {
-        console.log("Audio autoplay prevented or bgm.mp3 not loaded yet:", err);
-        updateMusicButtonUI();
-      });
+      audio.play().then(() => updateMusicButtonUI()).catch(e => updateMusicButtonUI());
     }
 
     function stopMusic() {
       const audio = document.getElementById('bgmAudio');
-      if (audio) {
-        audio.pause();
-        audio.currentTime = 0;
-      }
+      if (audio) { audio.pause(); audio.currentTime = 0; }
       updateMusicButtonUI();
     }
 
     function toggleMusic() {
       const audio = document.getElementById('bgmAudio');
       if (!audio) return;
-      if (audio.paused) {
-        startBgm();
-      } else {
-        audio.pause();
-        updateMusicButtonUI();
-      }
+      if (audio.paused) startBgm();
+      else { audio.pause(); updateMusicButtonUI(); }
     }
 
     function updateMusicButtonUI() {
       const btn = document.getElementById('musicToggleBtn');
       const audio = document.getElementById('bgmAudio');
       if (!btn) return;
-      if (audio && !audio.paused) {
-        btn.innerHTML = '🎵 BGM: ON';
-        btn.className = 'music-pill playing';
-      } else {
-        btn.innerHTML = '🔇 BGM: OFF';
-        btn.className = 'music-pill';
-      }
+      btn.innerHTML = (audio && !audio.paused) ? '🎵 BGM: ON' : '🔇 BGM: OFF';
     }
 
-    // --- PWA Service Worker ---
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('SW Registered: ', reg.scope))
-          .catch(err => console.log('SW Registration failed: ', err));
-      });
-    }
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      document.getElementById('pwaInstallBanner').style.display = 'flex';
-    });
-
-    function triggerInstallPrompt() {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            document.getElementById('pwaInstallBanner').style.display = 'none';
-          }
-          deferredPrompt = null;
-        });
-      } else {
-        document.getElementById('installModal').style.display = 'flex';
-      }
-    }
-
-    // --- NON-BLOCKING PIN UNLOCK ---
+    // --- PIN UNLOCK ---
     function verifyPin() {
       const pinInput = document.getElementById("pinCode");
       const pin = pinInput ? pinInput.value.trim() : "";
@@ -400,18 +702,11 @@
         currentUser = USER_CONFIGS[pin];
         localStorage.setItem("pmg_auth_pin", pin);
         
-        // 1. Immediately hide lock screen
         const overlay = document.getElementById("pinOverlay");
         if (overlay) overlay.style.display = "none";
         
-        // 2. Play custom BGM
-        try {
-          startBgm();
-        } catch (audioErr) {
-          console.warn("Audio non-blocking exception:", audioErr);
-        }
-        
-        // 3. Load latest data
+        try { startBgm(); } catch(e) {}
+        loadPetData();
         loadData();
       } else {
         const err = document.getElementById("pinError");
@@ -448,12 +743,10 @@
           renderUserDashboard();
           renderTeammatesTable();
           renderCongratsPreview();
-        } else {
-          throw new Error("Empty response");
+          checkDailyTargetFeast();
         }
       } catch (e) {
         document.getElementById("lastUpdated").innerText = "Sync issue. Tap Lock 🔒 to retry.";
-        console.error(e);
       }
     }
 
@@ -499,7 +792,7 @@
         `<span class="status-badge badge-ahead">🚀 AHEAD (+RM ${Math.abs(hbDiff).toFixed(0)} vs Day ${day} Tier 3 pace)</span>` : 
         `<span class="status-badge badge-behind">⚡ PUSH NEEDED (-RM ${Math.abs(hbDiff).toFixed(0)} vs Day ${day} Tier 3 pace)</span>`;
 
-      // Render Tiers & Status
+      // Reward Status
       const t1Box = document.getElementById("tier1Box");
       const t2Box = document.getElementById("tier2Box");
       const t3Box = document.getElementById("tier3Box");
@@ -513,28 +806,24 @@
         t2Box.className = "tier-box unlocked"; t2Badge.className = "tier-badge badge-unlocked"; t2Badge.innerText = "UNLOCKED";
         t3Box.className = "tier-box unlocked"; t3Badge.className = "tier-badge badge-unlocked"; t3Badge.innerText = "UNLOCKED 🏆";
         statusBanner.innerHTML = "🏆 <b>TIER 3 MAX REWARD UNLOCKED!</b> Full RM 500.00 cash bonus achieved for each teammate!";
-        statusBanner.style.background = "#e8f5e9"; statusBanner.style.borderColor = "#2e7d32"; statusBanner.style.color = "#1b5e20";
       } else if (mtdHb >= hbTier2) {
         t1Box.className = "tier-box unlocked"; t1Badge.className = "tier-badge badge-unlocked"; t1Badge.innerText = "UNLOCKED";
         t2Box.className = "tier-box unlocked"; t2Badge.className = "tier-badge badge-unlocked"; t2Badge.innerText = "UNLOCKED";
         t3Box.className = "tier-box active"; t3Badge.className = "tier-badge badge-locked"; t3Badge.innerText = "NEXT GOAL";
         const rem = hbTier3 - mtdHb;
         statusBanner.innerHTML = `🎉 <b>TIER 2 UNLOCKED (+RM 375 reward)!</b> RM ${rem.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} more to unlock <b>TIER 3 (+RM 500 reward)</b>!`;
-        statusBanner.style.background = "#fff8e1"; statusBanner.style.borderColor = "#ffa000"; statusBanner.style.color = "#e65100";
       } else if (mtdHb >= hbTier1) {
         t1Box.className = "tier-box unlocked"; t1Badge.className = "tier-badge badge-unlocked"; t1Badge.innerText = "UNLOCKED";
         t2Box.className = "tier-box active"; t2Badge.className = "tier-badge badge-locked"; t2Badge.innerText = "NEXT GOAL";
         t3Box.className = "tier-box"; t3Badge.className = "tier-badge badge-locked"; t3Badge.innerText = "LOCKED";
         const rem = hbTier2 - mtdHb;
         statusBanner.innerHTML = `🎉 <b>TIER 1 UNLOCKED (+RM 250 reward)!</b> RM ${rem.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} more to unlock <b>TIER 2 (+RM 375 reward)</b>!`;
-        statusBanner.style.background = "#e0f2f1"; statusBanner.style.borderColor = "#00897b"; statusBanner.style.color = "#004d40";
       } else {
         t1Box.className = "tier-box active"; t1Badge.className = "tier-badge badge-locked"; t1Badge.innerText = "IN PROGRESS";
         t2Box.className = "tier-box"; t2Badge.className = "tier-badge badge-locked"; t2Badge.innerText = "LOCKED";
         t3Box.className = "tier-box"; t3Badge.className = "tier-badge badge-locked"; t3Badge.innerText = "LOCKED";
         const rem = hbTier1 - mtdHb;
         statusBanner.innerHTML = `🎯 <b>RM ${rem.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} more in HB</b> to unlock <b>TIER 1 (RM 250 reward per person)</b>!`;
-        statusBanner.style.background = "#f3e5f5"; statusBanner.style.borderColor = "#7b1fa2"; statusBanner.style.color = "#4a148c";
       }
     }
 
@@ -614,7 +903,6 @@
       }
     }
 
-    // --- FIXED WHATSAPP BRIEFING COPIER (USES MTD TOTALS & ACHIEVEMENTS) ---
     function copyWhatsAppBriefing() {
       if (!liveSheetData) return;
       const s = liveSheetData.dailySummary || {};
@@ -687,6 +975,7 @@
         currentUser = USER_CONFIGS[savedPin];
         document.getElementById("pinOverlay").style.display = "none";
         try { startBgm(); } catch(e) {}
+        loadPetData();
         loadData();
       }
     };
