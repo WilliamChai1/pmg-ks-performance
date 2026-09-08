@@ -31,8 +31,8 @@
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; padding-bottom: 85px; }
     
     #pinOverlay { position: fixed; inset: 0; background: rgba(26, 9, 51, 0.92); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 2000; }
-    .pin-box { background: white; border-radius: 20px; padding: 24px 20px; text-align: center; width: 88%; max-width: 320px; box-shadow: 0 10px 30px rgba(123,31,162,0.3); }
-    .pin-input { font-size: 1.6rem; letter-spacing: 10px; text-align: center; width: 80%; padding: 8px; border: 2px solid #e1bee7; border-radius: 10px; margin: 10px 0; outline: none; }
+    .pin-box { background: white; border-radius: 20px; padding: 24px 20px; text-align: center; width: 88%; max-width: 310px; box-shadow: 0 10px 30px rgba(123,31,162,0.3); }
+    .pin-input { font-size: 1.6rem; letter-spacing: 10px; text-align: center; width: 80%; padding: 8px; border: 2px solid #e1bee7; border-radius: 10px; margin: 12px 0; outline: none; }
     .pin-input:focus { border-color: var(--primary); }
     
     .btn { background: var(--primary-gradient); color: white; border: none; border-radius: 10px; padding: 11px 14px; font-size: 0.9rem; font-weight: 700; cursor: pointer; width: 100%; box-sizing: border-box; margin-top: 8px; text-align: center; text-decoration: none; display: block; box-shadow: 0 2px 6px rgba(123,31,162,0.25); }
@@ -180,36 +180,19 @@
     <source src="./bgm.mp3" type="audio/mpeg">
   </audio>
 
-  <!-- PIN Shield with Direct Teammate Select Option -->
+  <!-- Confidential PIN Shield (Strict Personal Auth) -->
   <div id="pinOverlay">
     <div class="pin-box">
       <img src="./icon-192.png" style="width:58px; height:58px; border-radius:14px; margin-bottom:4px; box-shadow: 0 4px 12px rgba(123,31,162,0.2);">
       <h2 style="margin:0; color:var(--primary); font-size:1.15rem; font-weight:800;">KS Pulse Portal</h2>
-      <p style="font-size:0.75rem; color:#616161; margin:2px 0 8px;">Enter PIN or Select Your Name:</p>
+      <p style="font-size:0.75rem; color:#616161; margin:4px 0 10px;">Enter Your 4-Digit Personal PIN</p>
       
-      <!-- Option 1: 4-digit PIN -->
       <input type="password" id="pinCode" class="pin-input" maxlength="4" placeholder="••••" autofocus onkeydown="if(event.key==='Enter') verifyPin()">
-      <button class="btn" onclick="verifyPin()">Unlock with PIN ⚡</button>
+      <button class="btn" onclick="verifyPin()">Unlock Portal ⚡</button>
 
-      <!-- Option 2: Quick Name Select (1-Tap Bypass) -->
-      <div style="margin-top:12px; padding-top:10px; border-top:1px dashed #ce93d8;">
-        <div style="font-size:0.72rem; font-weight:800; color:var(--primary); margin-bottom:4px;">OR QUICK SELECT PROFILE:</div>
-        <select id="quickProfileSelect" style="width:100%; padding:8px; border-radius:8px; border:1.5px solid #ab47bc; font-size:0.8rem; font-weight:700; color:#333; outline:none; background:#fafafa;">
-          <option value="6688">Chai Yee Sian (William) - PIC</option>
-          <option value="1001">Jong Pei Choo</option>
-          <option value="1003">Haniesha Louna</option>
-          <option value="1002">Fiona Fiena</option>
-          <option value="1007">Kenix Ling</option>
-          <option value="1004">Daniela Janet</option>
-          <option value="1617">Nurhafizah Pauli</option>
-          <option value="1006">Muhammad Nur Farizin</option>
-        </select>
-        <button class="btn btn-copy" style="margin-top:6px; padding:8px;" onclick="quickSelectLogin()">⚡ One-Tap Login</button>
-      </div>
-
-      <p id="pinError" style="color:#d32f2f; font-size:0.75rem; margin-top:8px; display:none;">Invalid PIN. Try again or use Quick Select.</p>
+      <p id="pinError" style="color:#d32f2f; font-size:0.75rem; margin-top:8px; display:none;">Invalid PIN. Please try again.</p>
       
-      <button class="btn-logout" style="margin-top:12px; width:100%; background:#e0e0e0; color:#555;" onclick="clearAppCache()">🗑️ Reset Cache & Reload</button>
+      <button class="btn-logout" style="margin-top:14px; width:100%; background:#eeeeee; color:#777; font-size:0.7rem;" onclick="clearAppCache()">🗑️ Reset Cache & Reload</button>
     </div>
   </div>
 
@@ -277,10 +260,10 @@
       </div>
     </div>
 
-    <!-- Teammate View -->
+    <!-- Personal Dashboard -->
     <div class="card">
       <h2>
-        <span id="userNameHeader">👤 Teammate Profile</span>
+        <span id="userNameHeader">👤 Personal Profile</span>
         <button class="btn btn-logout" onclick="logout()">Lock 🔒</button>
       </h2>
 
@@ -294,7 +277,7 @@
 
       <div class="gap-banner">
         <b>🎯 Monthly Target Remaining (Sep 2026 MTD):</b>
-        <div id="valRemainingTarget" style="margin-top:4px;">Calculating target balances...</div>
+        <div id="valRemainingTarget" style="margin-top:4px;">Enter PIN to view</div>
         <div id="valPersonalPacing" style="margin-top:6px;"></div>
       </div>
 
@@ -320,7 +303,7 @@
       </div>
     </div>
 
-    <!-- Manager Control Panel -->
+    <!-- Manager Control Panel (Strictly PIN 6688 Only) -->
     <div id="managerPanel" class="card" style="border: 1px solid #ab47bc;">
       <h2 style="color: #6a1b9a;">🔒 Manager Report & Screenshot Hub</h2>
       <button class="btn btn-copy" onclick="copyWhatsAppBriefing()">📋 Copy WhatsApp Briefing</button>
@@ -512,7 +495,7 @@
       "1001": { name: "Jong Pei Choo", role: "staff" }
     };
 
-    // --- INSTANT OFFLINE BASELINE (Zero Waiting / Zero "Loading...") ---
+    // --- INSTANT OFFLINE BASELINE (Zero Waiting) ---
     const BASELINE_FEED = {
       updatedAt: "07-Sep-2026 (Verified Actuals)",
       outlet: "PMG Pharmacy Kota Sentosa",
@@ -593,7 +576,7 @@
     };
 
     let currentUser = null;
-    let liveSheetData = BASELINE_FEED; // Pre-load baseline immediately
+    let liveSheetData = BASELINE_FEED;
 
     // SAFE DOM HELPERS
     function setSafeText(id, text) {
@@ -1355,45 +1338,36 @@
       btn.innerHTML = (audio && !audio.paused) ? '🎵 BGM: ON' : '🔇 BGM: OFF';
     }
 
-    // --- INSTANT LOGIN HANDLER ---
-    function executeLogin(pin) {
+    // --- STRICT PERSONAL PIN LOGIN ---
+    function verifyPin() {
+      const pinInput = document.getElementById("pinCode");
+      const pin = pinInput ? pinInput.value.trim() : "";
+
       if (USER_CONFIGS[pin]) {
         currentUser = USER_CONFIGS[pin];
         try { localStorage.setItem("pmg_auth_pin", pin); } catch(e) {}
         
-        // 1. Instantly dismiss lock screen
+        // Hide lock screen
         const overlay = document.getElementById("pinOverlay");
         if (overlay) overlay.style.display = "none";
         
-        // 2. Instantly render dashboard with baseline data (0 wait time!)
+        // Populate personal dashboard immediately
         renderOutletMission();
         renderUserDashboard();
         renderTeammatesTable();
         renderCongratsPreview();
         
-        // 3. Initialize games
+        // Initialize personal game saves
         try { loadPetData(); } catch(e) {}
         try { loadFarmData(); } catch(e) {}
         try { startBgm(); } catch(e) {}
         
-        // 4. Silently query Google Sheets for latest updates
+        // Quietly check Google Sheets in background
         loadData();
       } else {
         const err = document.getElementById("pinError");
         if (err) err.style.display = "block";
       }
-    }
-
-    function verifyPin() {
-      const pinInput = document.getElementById("pinCode");
-      const pin = pinInput ? pinInput.value.trim() : "";
-      executeLogin(pin);
-    }
-
-    function quickSelectLogin() {
-      const sel = document.getElementById("quickProfileSelect");
-      const pin = sel ? sel.value : "6688";
-      executeLogin(pin);
     }
 
     function clearAppCache() {
@@ -1405,6 +1379,18 @@
       stopMusic();
       try { localStorage.removeItem("pmg_auth_pin"); } catch(e) {}
       currentUser = null;
+      
+      // Scrub sensitive numbers from the screen before locking
+      setSafeText("userNameHeader", "👤 Personal Profile");
+      setSafeText("valTS", "RM 0.00");
+      setSafeText("valHB", "RM 0.00");
+      setSafeText("valHM", "RM 0.00");
+      setSafeText("valCust", "0");
+      setSafeText("valDailyCommission", "RM 0.00");
+      setSafeText("valMtdCommission", "RM 0.00");
+      setSafeHtml("valRemainingTarget", "Enter PIN to view");
+      setSafeText("valPersonalRec", "Enter PIN to view");
+
       const pIn = document.getElementById("pinCode"); if (pIn) pIn.value = "";
       const pOv = document.getElementById("pinOverlay"); if (pOv) pOv.style.display = "flex";
       const mP = document.getElementById("managerPanel"); if (mP) mP.style.display = "none";
@@ -1511,6 +1497,7 @@
       const userName = currentUser.name;
       setSafeText("userNameHeader", `👤 ${userName}`);
 
+      // Manager Hub visibility is restricted to manager PIN (6688)
       const mP = document.getElementById("managerPanel");
       if (mP) mP.style.display = (currentUser.role === "manager") ? "block" : "none";
 
@@ -1565,7 +1552,7 @@
     }
 
     function renderTeammatesTable() {
-      if (!liveSheetData || !liveSheetData.teammates) return;
+      if (!liveSheetData || !liveSheetData.teammates || !currentUser || currentUser.role !== "manager") return;
       const tbody = document.querySelector("#teammatesTable tbody");
       if (!tbody) return;
       tbody.innerHTML = "";
@@ -1631,9 +1618,17 @@
       text += `\n`;
 
       text += `🎯 Outlet Strategic Priorities & Action Plans:\n`;
-      text += `1. Dual House Brand Pairing: Proactively pair localized joint pain queries with Arthri-Flex + Taiwan Herbal Ginger Patches.\n`;
-      text += `2. Sustain HB Basket Size above RM 20.00+ by routinely recommending 30-day course maintenance packs.\n`;
-      text += `3. Active Checkout PWP conversion on transactions >RM 30.\n\n`;
+      if (liveSheetData.tacticalActionPlans) {
+        liveSheetData.tacticalActionPlans.forEach((plan, idx) => {
+          text += `${idx + 1}. ${plan}\n`;
+        });
+      }
+      text += `\n`;
+
+      text += `👤 Individual Teammate Priorities:\n\n`;
+      for (const [name, tip] of Object.entries(liveSheetData.recommendations || {})) {
+        text += `• *${name.split(" ")[0]}:* ${tip}\n\n`;
+      }
 
       navigator.clipboard.writeText(text);
       alert("WhatsApp Daily Briefing copied to clipboard!");
@@ -1643,7 +1638,17 @@
       try {
         const savedPin = localStorage.getItem("pmg_auth_pin");
         if (savedPin && USER_CONFIGS[savedPin]) {
-          executeLogin(savedPin);
+          currentUser = USER_CONFIGS[savedPin];
+          const overlay = document.getElementById("pinOverlay");
+          if (overlay) overlay.style.display = "none";
+          renderOutletMission();
+          renderUserDashboard();
+          renderTeammatesTable();
+          renderCongratsPreview();
+          try { loadPetData(); } catch(e) {}
+          try { loadFarmData(); } catch(e) {}
+          try { startBgm(); } catch(e) {}
+          loadData();
         }
       } catch (err) {
         console.warn("Auto-login bypassed:", err);
