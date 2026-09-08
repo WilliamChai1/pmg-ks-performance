@@ -165,16 +165,16 @@
     </div>
   </div>
 
-  <!-- TAB 2: VIRTUAL PET -->
+  <!-- TAB 2: VIRTUAL PET (LIVING BUDDY HABITAT) -->
   <div id="petView">
     <div class="card">
       <h2>
         <span>🐾 <span id="petNameTitle">My KS Buddy</span></span>
-        <button class="btn-logout" style="background:#e1bee7; color:var(--primary-dark); font-weight:800;" onclick="openRealmSelectModal()">Change Realm 🔄</button>
+        <button class="btn-logout" style="background:#ffcdd2; color:#b71c1c; font-weight:800;" onclick="resetPetToEgg()">🥚 Re-hatch (Reset)</button>
       </h2>
 
       <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:800; margin-bottom:4px;">
-        <span id="petStageBadge" style="color:var(--primary);">Baby Hatchling</span>
+        <span id="petStageBadge" style="color:var(--primary);">Pulsating Mystery Egg</span>
         <span id="petLevelText">Level 1</span>
         <span id="petExpText">EXP: 0 / 50</span>
       </div>
@@ -184,11 +184,16 @@
 
       <div class="pet-habitat" id="petRoom">
         <div class="pet-speech" id="petSpeechBubble">Answer a House Brand quiz to care for me! 🌟</div>
-        <br>
-        <div class="pet-avatar-wrapper">
-          <div class="pet-avatar pet-bounce" id="petAvatar" onclick="triggerPetCare('play')">🐣</div>
-          <div class="equipped-badge" id="petEquippedAccessory"></div>
+        <div class="pet-habitat-floor"></div>
+
+        <div class="pet-roam-track">
+          <div class="pet-actor" id="petActor" onclick="triggerSignatureAction()">
+            <div class="action-effect-badge" id="petActionEffect">✨</div>
+            <div class="pet-figure" id="petFigure">🥚</div>
+            <div class="equipped-badge" id="petEquippedAccessory"></div>
+          </div>
         </div>
+
         <div class="poop-item" id="poopElement" style="display:none;" onclick="triggerPetCare('clean')" title="Tap to clean poop!">💩</div>
       </div>
 
@@ -285,19 +290,6 @@
     </div>
   </div>
 
-  <!-- REALM SELECTOR MODAL -->
-  <div class="shop-modal" id="realmModal">
-    <div class="shop-card" style="text-align:center;">
-      <h3 style="margin-top:0; color:var(--primary);">✨ Choose Your Evolution Realm</h3>
-      <div style="font-size:0.75rem; color:#555; margin-bottom:12px;">Choose which species lineage your pet evolves into!</div>
-      <button class="btn" style="background:#ab47bc; margin-bottom:8px;" onclick="setPetRealm('anime')">⚡ Anime Legends (Demon Slayer, Pikachu)</button>
-      <button class="btn" style="background:#e65100; margin-bottom:8px;" onclick="setPetRealm('dino')">🦖 Prehistoric Dinosaurs (Raptor, T-Rex)</button>
-      <button class="btn" style="background:#1565c0; margin-bottom:8px;" onclick="setPetRealm('movie')">🦸 Movie & Pop Heroes (Panda, Sorcerer)</button>
-      <button class="btn" style="background:#00897b; margin-bottom:8px;" onclick="setPetRealm('mythic')">🦄 Mythical Beasts (Unicorn, Phoenix, Dragon)</button>
-      <button class="btn-logout" style="margin-top:8px;" onclick="closeShopModals()">Cancel</button>
-    </div>
-  </div>
-
   <!-- QUIZ MODAL -->
   <div id="quizModal">
     <div class="quiz-card">
@@ -322,7 +314,7 @@
     </button>
   </div>
 
- <!-- Modular Scripts -->
+  <!-- Modular Scripts in Proper Dependency Order -->
   <script src="./app.js"></script>
   <script src="./quiz-bank.js"></script>
   <script src="./pet.js"></script>
