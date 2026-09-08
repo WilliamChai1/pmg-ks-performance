@@ -203,7 +203,7 @@
     </div>
   </div>
 
-  <!-- ==================== TAB 1: PERFORMANCE DASHBOARD ==================== -->
+  <!-- TAB 1: PERFORMANCE DASHBOARD -->
   <div id="performanceView">
     <div class="card" style="border: 2px solid var(--primary); background: linear-gradient(180deg, #ffffff 0%, #faf7fc 100%);">
       <h2 style="color: var(--primary); margin-bottom: 6px;">
@@ -322,7 +322,7 @@
     </div>
   </div>
 
-  <!-- ==================== TAB 2: VIRTUAL PET ==================== -->
+  <!-- TAB 2: VIRTUAL PET -->
   <div id="petView">
     <div class="card">
       <h2>
@@ -339,7 +339,6 @@
         <div class="progress-bar-fill" id="petExpBar" style="width:0%;"></div>
       </div>
 
-      <!-- Habitat with Equipped Accessories -->
       <div class="pet-habitat" id="petRoom">
         <div class="pet-speech" id="petSpeechBubble">Answer a House Brand quiz to care for me! 🌟</div>
         <br>
@@ -387,7 +386,7 @@
     </div>
   </div>
 
-  <!-- ==================== TAB 3: KS HERBAL FARM ==================== -->
+  <!-- TAB 3: KS HERBAL FARM -->
   <div id="farmView">
     <div class="card" style="border: 2px solid #81c784;">
       <h2>
@@ -419,7 +418,7 @@
     </div>
   </div>
 
-  <!-- PET WARDROBE SHOP MODAL -->
+  <!-- WARDROBE MODAL -->
   <div class="shop-modal" id="wardrobeModal">
     <div class="shop-card">
       <h3 style="margin-top:0; color:var(--primary); display:flex; justify-content:space-between;">
@@ -431,7 +430,7 @@
     </div>
   </div>
 
-  <!-- FARM DECOR SHOP MODAL -->
+  <!-- FARM DECOR MODAL -->
   <div class="shop-modal" id="decorModal">
     <div class="shop-card">
       <h3 style="margin-top:0; color:#2e7d32; display:flex; justify-content:space-between;">
@@ -443,7 +442,7 @@
     </div>
   </div>
 
-  <!-- PET REALM SELECTOR MODAL -->
+  <!-- REALM SELECTOR MODAL -->
   <div class="shop-modal" id="realmModal">
     <div class="shop-card" style="text-align:center;">
       <h3 style="margin-top:0; color:var(--primary);">✨ Choose Your Evolution Realm</h3>
@@ -456,7 +455,7 @@
     </div>
   </div>
 
-  <!-- HOUSE BRAND CLINICAL QUIZ MODAL -->
+  <!-- QUIZ MODAL -->
   <div id="quizModal">
     <div class="quiz-card">
       <div class="quiz-sku-badge" id="quizSkuBadge">House Brand Quiz</div>
@@ -604,7 +603,6 @@
     function openPetWardrobeModal() {
       const grid = document.getElementById('wardrobeShopGrid');
       grid.innerHTML = "";
-      const coins = getAvailableHbCoins();
 
       PET_ACCESSORIES.forEach(item => {
         const isOwned = currentPet.ownedAccessories && currentPet.ownedAccessories.includes(item.id);
@@ -617,7 +615,7 @@
           <b>${item.name}</b>
           <div style="color:#666; font-size:0.65rem; margin:2px 0;">${item.desc}</div>
           <div style="font-weight:800; color:#f57f17; margin:4px 0;">🪙 ${item.price} Coins</div>
-          <button class="btn" style="padding:6px; font-size:0.7rem; margin:0; background:${isEquipped ? '#c62828' : (isOwned ? '#00796b' : 'var(--primary-gradient)')}" onclick="handleWardrobeClick('${item.id}', ${item.price})">
+          <button class="btn" style="padding:6px; font-size:0.7rem; margin:0; background:${isEquipped ? '#c62828' : (isOwned ? '#00796b' : 'var(--primary-gradient)')}" onclick="handleWardrobeClick('${item.id}',${item.price})">
             ${isEquipped ? 'Unequip ✕' : (isOwned ? 'Equip 👘' : 'Buy 🪙')}
           </button>
         `;
@@ -707,7 +705,7 @@
       document.getElementById('realmModal').style.display = "none";
     }
 
-    // --- 50-QUESTION MASTER CLINICAL QUIZ BANK ---
+    // --- 50-QUESTION MASTER CLINICAL QUIZ BANK (WITH GLYCOWAY) ---
     let HB_QUIZ_BANK = [
       { sku: "Nutribridge Suppflora", q: "What is the primary clinical benefit of Nutribridge Suppflora Probiotics?", options: ["Restore intestinal microflora & relieve bloating", "Suppress dry night cough", "Reduce elevated blood pressure", "Relieve acute migraine"], ans: 0, tip: "Suppflora restores gut microbiome balance, especially after antibiotics or for indigestion." },
       { sku: "Biowell B'llox", q: "Which House Brand product is recommended for rapid acid reflux and gastric discomfort?", options: ["Biowell B'llox Gastric Relief", "VK King Kong Balm", "Livemore Lutein & Bilberry", "JH Nutrition Omega-3"], ans: 0, tip: "B'llox buffers stomach acid and provides soothing mucoprotective gastric relief." },
@@ -718,7 +716,7 @@
       { sku: "JH Nutrition Citazinc", q: "What is the key synergistic formula in JH Nutrition Citazinc?", options: ["Vitamin C + Elemental Zinc", "Glucosamine + Chondroitin", "Calcium + Vitamin D3", "Omega-3 + CoQ10"], ans: 0, tip: "Vitamin C and Zinc work synergistically to support white blood cell activity and shorten colds." },
       { sku: "V-Infinity Vtrox", q: "V-Infinity Vtrox Throat Spray is most effective for which symptom?", options: ["Acute pharyngeal soreness and throat irritation", "Knee joint stiffness", "Skin eczema flare-up", "Gastric bloating"], ans: 0, tip: "Vtrox delivers targeted herbal antibacterial and anti-inflammatory relief to throat tissues." },
       { sku: "JH Nutrition Flvright", q: "What indication is JH Nutrition Flvright Vegecaps primarily formulated for?", options: ["Early cold, flu symptoms and runny nose", "Chronic joint cartilage repair", "Constipation relief", "Dry cracked heels"], ans: 0, tip: "Flvright features targeted bioflavonoids to clear upper respiratory congestion at early onset." },
-      { sku: "V-Infinity Tyreps", q: "Which House Brand lozenge is ideal for soothing a dry, scratchy throat and hoarseness?", options: ["V-Infinity Tyreps Lozenges", "VK Dermsolve", "Arthri-Flex", "Livemore Gluco-Care"], ans: 0, tip: "Tyreps lozenges lubricate the throat lining and stimulate saliva production to relieve dry coughs." },
+      { sku: "V-Infinity Tyreps", q: "Which House Brand lozenge is ideal for soothing a dry, scratchy throat and hoarseness?", options: ["V-Infinity Tyreps Lozenges", "VK Dermsolve", "Arthri-Flex", "Livemore Glycoway"], ans: 0, tip: "Tyreps lozenges lubricate the throat lining and stimulate saliva production to relieve dry coughs." },
       { sku: "Biowell Terrafast 500mg", q: "Biowell Terrafast 500mg is clinically used for:", options: ["Gentle, rapid relief of fever, headache and mild-moderate pain", "Long-term cholesterol reduction", "Eye fatigue relief", "Eczema hydration"], ans: 0, tip: "Terrafast contains premium paracetamol for fast, stomach-friendly fever and pain management." },
       { sku: "JH Nutrition Citazinc", q: "When a patron buys cough syrup and paracetamol, what is the best House Brand add-on?", options: ["JH Nutrition Citazinc Effervescent/Capsules", "VK King Kong Balm", "Taiwan Herbal Ginger Patch", "Nutribridge Maxlim"], ans: 0, tip: "Citazinc enhances cellular defense to shorten viral respiratory episode duration." },
       { sku: "V-Infinity Vtrox", q: "How should a patient administer V-Infinity Vtrox Throat Spray?", options: ["Spray 2-3 pumps directly toward the back of the throat", "Dilute in 500ml boiling water", "Rub onto chest and back", "Swallow with meals"], ans: 0, tip: "Direct spray ensures maximal local mucosal concentration for immediate soothing." },
@@ -731,13 +729,13 @@
       { sku: "VK Dermsolve Lotion", q: "VK Dermsolve Lotion is specially formulated for which skin type?", options: ["Dry, sensitive, eczema-prone, and itchy skin", "Severe fungal ringworm", "Open burn blisters", "Greasy acne-prone skin"], ans: 0, tip: "VK Dermsolve provides intensive ceramide and lipid replenishment without steroids." },
       { sku: "VK Dermsolve Lotion", q: "Why is VK Dermsolve Lotion safe for daily maintenance in children and sensitive adults?", options: ["100% steroid-free, fragrance-free, gentle hypoallergenic formula", "Contains strong corticosteroid hormones", "Contains alcohol to dry skin", "Contains bleaching agents"], ans: 0, tip: "Being steroid-free prevents skin thinning, tachyphylaxis, and rebound dermatitis." },
       { sku: "Dermacare Cream", q: "What is the ideal application timing for moisturizing dry or atopic skin?", options: ["Within 3 minutes after bathing while skin is slightly damp", "Only once a week before sleeping", "Only after scratching until bleeding", "Right before swimming"], ans: 0, tip: "Applying immediately post-bath locks in water molecules before trans-epidermal evaporation occurs." },
-      { sku: "VK Dermsolve Lotion", q: "When a customer buys an antihistamine for an itchy rash, what is the best House Brand pairing?", options: ["VK Dermsolve Lotion to soothe and hydrate the skin barrier", "Nutribridge Maxlim Coffee", "Arthri-Flex Glucosamine", "Livemore Gluco-Care"], ans: 0, tip: "Oral antihistamines reduce the itch reflex while topical Dermsolve repairs the dry skin barrier." },
+      { sku: "VK Dermsolve Lotion", q: "When a customer buys an antihistamine for an itchy rash, what is the best House Brand pairing?", options: ["VK Dermsolve Lotion to soothe and hydrate the skin barrier", "Nutribridge Maxlim Coffee", "Arthri-Flex Glucosamine", "Livemore Glycoway"], ans: 0, tip: "Oral antihistamines reduce the itch reflex while topical Dermsolve repairs the dry skin barrier." },
       { sku: "JH Nutrition Omega-3", q: "JH Nutrition Omega-3 Fish Oil 1200mg provides high EPA/DHA to support:", options: ["Healthy blood triglyceride levels, cardiovascular elasticity & brain health", "Acute nasal decongestion", "Gastric ulcer healing", "Muscle strain recovery"], ans: 0, tip: "EPA/DHA reduce triglyceride synthesis, promote endothelial function, and reduce inflammation." },
       { sku: "CoQ10 150mg", q: "Why is CoQ10 150mg highly recommended for patients taking statin cholesterol medications?", options: ["Statins deplete endogenous CoQ10, leading to muscle fatigue and cramps", "Statins increase stomach acid", "CoQ10 acts as a blood thinner", "Statins cause dry throat"], ans: 0, tip: "Statins block natural CoQ10 synthesis; replenishing CoQ10 relieves statin-induced muscle aches." },
-      { sku: "Livemore Gluco-Care", q: "Livemore Gluco-Care is formulated to assist with which health objective?", options: ["Healthy blood sugar balance & cellular glucose uptake", "Rapid fever control", "Ear canal inflammation", "Immediate hair regrowth"], ans: 0, tip: "Gluco-Care combines chromium and botanicals to optimize insulin sensitivity." },
+      { sku: "Livemore Glycoway", q: "Livemore Glycoway is formulated to assist with which health objective?", options: ["Healthy blood sugar balance & cellular glucose uptake", "Rapid fever control", "Ear canal inflammation", "Immediate hair regrowth"], ans: 0, tip: "Glycoway combines chromium and botanicals to optimize insulin sensitivity." },
       { sku: "JH Nutrition Omega-3", q: "What is the key quality attribute of pharmaceutical-grade fish oil like JH Nutrition Omega-3?", options: ["Molecularly distilled for purity from heavy metals and mercury", "Flavored with artificial sugar", "Contains high cholesterol", "Made from warm-water freshwater fish"], ans: 0, tip: "Molecular distillation removes environmental toxins, PCBs, and heavy metals." },
       { sku: "CoQ10 150mg", q: "In addition to cardiovascular cellular energy, CoQ10 acts as a potent:", options: ["Lipid-soluble antioxidant protecting cell membranes", "Fast-acting antihistamine", "Strong broad-spectrum antibiotic", "Sedative sleep inducer"], ans: 0, tip: "CoQ10 neutralizes free radicals in mitochondrial membranes, supporting heart muscle vitality." },
-      { sku: "Livemore Gluco-Care", q: "For a chronic diabetic patient picking up Metformin, what is an appropriate House Brand pair?", options: ["Livemore Gluco-Care and CoQ10 for vascular & metabolic support", "VK King Kong Balm", "V-Infinity Vtrox Spray", "Tyreps Lozenges"], ans: 0, tip: "Pairing anti-diabetic medications with metabolic nutritional support protects microvascular health." },
+      { sku: "Livemore Glycoway", q: "For a chronic diabetic patient picking up Metformin, what is an appropriate House Brand pair?", options: ["Livemore Glycoway and CoQ10 for vascular & metabolic support", "VK King Kong Balm", "V-Infinity Vtrox Spray", "Tyreps Lozenges"], ans: 0, tip: "Pairing anti-diabetic medications with metabolic nutritional support protects microvascular health." },
       { sku: "Livemore Lutein & Bilberry", q: "Livemore Lutein & Bilberry is primarily recommended for:", options: ["Filtering blue light, reducing digital eye strain & macular protection", "Relieving foot cramps", "Lowering fever", "Soothing throat hoarseness"], ans: 0, tip: "Lutein deposits in the retinal macula to filter harmful short-wavelength blue light." },
       { sku: "Ginkgo Biloba 120mg", q: "What is the primary pharmacological action of standardized Ginkgo Biloba 120mg?", options: ["Enhance cerebral & peripheral microcirculation, supporting memory and reducing tinnitus", "Suppress dry coughing", "Neutralize stomach acid", "Lubricate knee joints"], ans: 0, tip: "Ginkgo dilates microcapillaries and improves oxygenation to the brain and inner ear." },
       { sku: "Livemore Lutein & Bilberry", q: "A customer complains of tired, dry, blurry eyes after 8 hours on a computer. Recommend:", options: ["Livemore Lutein & Bilberry plus hydrating eye drops", "Taiwan Herbal Ginger Patch", "VK King Kong Balm", "Nutribridge Maxlim Coffee"], ans: 0, tip: "Bilberry anthocyanins promote rhodopsin regeneration and microcapillary blood flow in eyes." },
@@ -1092,7 +1090,7 @@
         currentPet.level++;
         currentPet.exp -= reqExp;
         const newStage = getPetStageData(currentPet.realm || 'anime', currentPet.level);
-        showPetSpeech(`🎉 EVOLUTION! Now Level ${currentPet.level}: ${newStage.name}!`);
+        showPetSpeech(`🎉 EVOLUTION! Now Level ${currentPet.level}:${newStage.name}!`);
       }
       savePetData();
       refreshPetUI();
@@ -1109,7 +1107,7 @@
       document.getElementById('petLevelText').innerText = `Level ${currentPet.level}`;
 
       const reqExp = currentPet.level * 50;
-      document.getElementById('petExpText').innerText = `EXP: ${currentPet.exp} / ${reqExp}`;
+      document.getElementById('petExpText').innerText = `EXP: ${currentPet.exp} /${reqExp}`;
       document.getElementById('petExpBar').style.width = Math.min(100, (currentPet.exp / reqExp) * 100) + "%";
 
       const avatarEl = document.getElementById('petAvatar');
@@ -1267,8 +1265,10 @@
             document.getElementById("btnDlTeammate").href = liveSheetData.teammatesGapDriveUrl;
           }
 
+          // Live Sheet Sync from HB Quiz Bank tab
           if (liveSheetData.hbQuizBank && liveSheetData.hbQuizBank.length > 0) {
             HB_QUIZ_BANK = liveSheetData.hbQuizBank;
+            console.log("Synced " + HB_QUIZ_BANK.length + " live questions from Google Sheet!");
           }
 
           renderOutletMission();
@@ -1318,12 +1318,12 @@
       const hbDiff = mtdHb - expHbPace;
 
       document.getElementById("outletTsPacingBadge").innerHTML = tsDiff >= 0 ? 
-        `<span class="status-badge badge-ontrack">🟢 ON TRACK (+RM ${Math.abs(tsDiff).toFixed(0)} ahead of Day ${day} pace)</span>` : 
-        `<span class="status-badge badge-behind">⚠️ -RM ${Math.abs(tsDiff).toFixed(0)} vs Day ${day} pace</span>`;
+        `<span class="status-badge badge-ontrack">🟢 ON TRACK (+RM ${Math.abs(tsDiff).toFixed(0)} ahead of Day${day} pace)</span>` : 
+        `<span class="status-badge badge-behind">⚠️ -RM ${Math.abs(tsDiff).toFixed(0)} vs Day${day} pace</span>`;
 
       document.getElementById("outletHbPacingBadge").innerHTML = hbDiff >= 0 ? 
-        `<span class="status-badge badge-ahead">🚀 AHEAD (+RM ${Math.abs(hbDiff).toFixed(0)} vs Day ${day} Tier 3 pace)</span>` : 
-        `<span class="status-badge badge-behind">⚡ PUSH NEEDED (-RM ${Math.abs(hbDiff).toFixed(0)} vs Day ${day} Tier 3 pace)</span>`;
+        `<span class="status-badge badge-ahead">🚀 AHEAD (+RM ${Math.abs(hbDiff).toFixed(0)} vs Day${day} Tier 3 pace)</span>` : 
+        `<span class="status-badge badge-behind">⚡ PUSH NEEDED (-RM ${Math.abs(hbDiff).toFixed(0)} vs Day${day} Tier 3 pace)</span>`;
 
       const t1Box = document.getElementById("tier1Box");
       const t2Box = document.getElementById("tier2Box");
@@ -1378,9 +1378,9 @@
       const hmRem = Math.max(0, s.hmTarget - (s.mtdHm || 0));
 
       document.getElementById("valRemainingTarget").innerHTML = `
-        • TS Target Left: <b>RM ${tsRem.toFixed(2)}</b> (Target: RM ${s.tsTarget.toLocaleString()})<br>
-        • HB Target Left: <b>RM ${hbRem.toFixed(2)}</b> (Target: RM ${s.hbTarget.toLocaleString()})<br>
-        • HM Target Left: <b>RM ${hmRem.toFixed(2)}</b> (Target: RM ${s.hmTarget.toLocaleString()})
+        • TS Target Left: <b>RM ${tsRem.toFixed(2)}</b> (Target: RM${s.tsTarget.toLocaleString()})<br>
+        • HB Target Left: <b>RM ${hbRem.toFixed(2)}</b> (Target: RM${s.hbTarget.toLocaleString()})<br>
+        • HM Target Left: <b>RM ${hmRem.toFixed(2)}</b> (Target: RM${s.hmTarget.toLocaleString()})
       `;
 
       const day = (liveSheetData.dailySummary && liveSheetData.dailySummary.dayOfMonth) || 7;
@@ -1388,11 +1388,11 @@
       const pacingDiff = (s.mtdTs || 0) - expectedPace;
 
       if (pacingDiff >= 500) {
-        document.getElementById("valPersonalPacing").innerHTML = `<span class="status-badge badge-ahead">🚀 AHEAD OF PACE (+RM ${pacingDiff.toFixed(0)} above Day ${day} target)</span>`;
+        document.getElementById("valPersonalPacing").innerHTML = `<span class="status-badge badge-ahead">🚀 AHEAD OF PACE (+RM ${pacingDiff.toFixed(0)} above Day${day} target)</span>`;
       } else if (pacingDiff >= -250) {
         document.getElementById("valPersonalPacing").innerHTML = `<span class="status-badge badge-ontrack">🟢 ON TRACK (On pace for Day ${day})</span>`;
       } else {
-        document.getElementById("valPersonalPacing").innerHTML = `<span class="status-badge badge-behind">⚡ PUSH NEEDED (-RM ${Math.abs(pacingDiff).toFixed(0)} vs Day ${day} target)</span>`;
+        document.getElementById("valPersonalPacing").innerHTML = `<span class="status-badge badge-behind">⚡ PUSH NEEDED (-RM ${Math.abs(pacingDiff).toFixed(0)} vs Day${day} target)</span>`;
       }
 
       document.getElementById("valDailyCommission").innerText = "RM " + (s.dailyCommission || 0).toFixed(2);
@@ -1483,9 +1483,12 @@
       text += `\n`;
 
       text += `🎯 Outlet Strategic Priorities & Action Plans:\n`;
+      if ( += `\n`;
+
+      text += `🎯 Outlet Strategic Priorities & Action Plans:\n`;
       if (liveSheetData.tacticalActionPlans) {
         liveSheetData.tacticalActionPlans.forEach((plan, idx) => {
-          text += `${idx + 1}. ${plan}\n`;
+          text += `${idx + 1}.${plan}\n`;
         });
       }
       text += `\n`;
@@ -1513,3 +1516,5 @@
       }
     };
   </script>
+</body>
+</html>
