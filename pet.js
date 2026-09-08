@@ -8,9 +8,9 @@ const CREATURE_ROSTER = [
     category: "Demon Slayer Anime",
     species: "Demon Slayer Tanjiro",
     stages: [
-      { minLvl: 4, name: "Tanjiro (Apprentice Swordsman)", sprite: "⚔️", subIcon: "🌊", badge: "Water Breathing" },
-      { minLvl: 8, name: "Tanjiro (Hinokami Sun Halo)", sprite: "🔥⚔️", subIcon: "☀️", badge: "Sun Breathing" },
-      { minLvl: 14, name: "Demon Slayer Pillar Legend", sprite: "👑⚔️", subIcon: "⚡", badge: "Hashira Rank" }
+      { minLvl: 4, name: "Tanjiro (Apprentice Swordsman)", sprite: "🦓", subIcon: "🌊", badge: "Water Breathing" },
+      { minLvl: 8, name: "Tanjiro (Hinokami Sun Halo)", sprite: "🐎", subIcon: "☀️", badge: "Sun Breathing" },
+      { minLvl: 14, name: "Demon Slayer Pillar Legend", sprite: "🏇", subIcon: "⚡", badge: "Hashira Rank" }
     ],
     actionDialogue: "Water Breathing: First Form - Water Surface Slash! 🌊⚔️",
     actionClass: "act-slash"
@@ -20,9 +20,9 @@ const CREATURE_ROSTER = [
     category: "Demon Slayer Anime",
     species: "Nezuko Kamado",
     stages: [
-      { minLvl: 4, name: "Chibi Nezuko (Bamboo Muzzle)", sprite: "🎋", subIcon: "🌸", badge: "Demon Girl" },
-      { minLvl: 8, name: "Awakened Nezuko (Horn Form)", sprite: "👹🎋", subIcon: "🔥", badge: "Blood Burst" },
-      { minLvl: 14, name: "Sun-Immune Sovereign Nezuko", sprite: "☀️💖", subIcon: "✨", badge: "Sun Conqueror" }
+      { minLvl: 4, name: "Chibi Nezuko (Bamboo Muzzle)", sprite: "🐶", subIcon: "🌸", badge: "Demon Girl" },
+      { minLvl: 8, name: "Awakened Nezuko (Horn Form)", sprite: "🐩", subIcon: "🔥", badge: "Blood Burst" },
+      { minLvl: 14, name: "Sun-Immune Sovereign Nezuko", sprite: "🦮", subIcon: "✨", badge: "Sun Conqueror" }
     ],
     actionDialogue: "Mmm-hmm! Blood Demon Art - Pyrokinesis! 🌸🔥",
     actionClass: "act-fire"
@@ -32,9 +32,9 @@ const CREATURE_ROSTER = [
     category: "One Piece Anime",
     species: "Monkey D. Luffy",
     stages: [
-      { minLvl: 4, name: "Straw Hat Luffy", sprite: "👒", subIcon: "🍖", badge: "Rookie Pirate" },
-      { minLvl: 8, name: "Gear 2nd Steam Luffy", sprite: "💨👒", subIcon: "👊", badge: "Gear Second" },
-      { minLvl: 14, name: "Sun God Nika (Gear 5th)", sprite: "⚡☁️", subIcon: "🥁", badge: "Warrior of Liberation" }
+      { minLvl: 4, name: "Straw Hat Luffy", sprite: "🐛", subIcon: "🍖", badge: "Rookie Pirate" },
+      { minLvl: 8, name: "Gear 2nd Steam Luffy", sprite: "🦋", subIcon: "👊", badge: "Gear Second" },
+      { minLvl: 14, name: "Sun God Nika (Gear 5th)", sprite: "🦅", subIcon: "🥁", badge: "Warrior of Liberation" }
     ],
     actionDialogue: "Gomu Gomu no Pistol! 👊💥 I'm gonna be King of the Pirates!",
     actionClass: "act-punch"
