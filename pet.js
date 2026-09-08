@@ -19,9 +19,9 @@ const CREATURE_ROSTER = [
     category: "Demon Slayer Anime",
     species: "Nezuko Kamado",
     stages: [
-      { minLvl: 4, name: "Chibi Nezuko (Blood Demon Art)", sprite: "🎋", imageSrc: "./nezuko.png", subIcon: "🌸", badge: "Demon Girl" },
-      { minLvl: 8, name: "Awakened Nezuko (Blood Burst)", sprite: "👹🎋", imageSrc: "./nezuko.png", subIcon: "🔥", badge: "Blood Burst" },
-      { minLvl: 14, name: "Sun-Immune Sovereign Nezuko", sprite: "☀️💖", imageSrc: "./nezuko.png", subIcon: "✨", badge: "Sun Conqueror" }
+      { minLvl: 4, name: "Chibi Nezuko (Blood Demon Art)", sprite: "🎋", imageSrc: "nezuko.png", subIcon: "🌸", badge: "Demon Girl" },
+      { minLvl: 8, name: "Awakened Nezuko (Blood Burst)", sprite: "👹🎋", imageSrc: "nezuko.png", subIcon: "🔥", badge: "Blood Burst" },
+      { minLvl: 14, name: "Sun-Immune Sovereign Nezuko", sprite: "☀️💖", imageSrc: "nezuko.png", subIcon: "✨", badge: "Sun Conqueror" }
     ],
     actionDialogue: "Mmm-hmm! Blood Demon Art - Pyrokinesis! 🌸🔥",
     actionClass: "act-fire"
