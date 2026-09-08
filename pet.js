@@ -119,7 +119,7 @@ const CREATURE_ROSTER = [
     category: "Mythical Beast",
     species: "Celestial Unicorn",
     stages: [
-      { minLvl: 4, name: "Starlight Foal", sprite: "🦄", subIcon: "⭐", badge: "Pure Light" },
+      { minLvl: 4, name: "Celestial Unicorn", sprite: "🦄", subIcon: "⭐", badge: "Pure Light" },
       { minLvl: 8, name: "Pegasus Storm Horn", sprite: "🪽🦄", subIcon: "🌈", badge: "Sky Gallop" },
       { minLvl: 14, name: "Solaris Astral Alicorn", sprite: "👑🦄", subIcon: "✨", badge: "Cosmic Guardian" }
     ],
@@ -194,8 +194,16 @@ function loadPetData() {
 
     if (!currentPet) {
       currentPet = createNewPetEgg();
+    } else if (!currentPet.creatureId) {
+      // Backward compatibility: map previous session realm to species
+      if (currentPet.realm === "mythic") currentPet.creatureId = "unicorn";
+      else if (currentPet.realm === "anime") currentPet.creatureId = "tanjiro";
+      else if (currentPet.realm === "dino") currentPet.creatureId = "trex";
+      else if (currentPet.realm === "movie") currentPet.creatureId = "panda";
+      else currentPet.creatureId = "unicorn";
     }
 
+    // Decay over time
     const elapsedHours = (now - (currentPet.lastUpdated || now)) / (1000 * 60 * 60);
     if (elapsedHours > 0.5) {
       const decaySteps = Math.floor(elapsedHours / 2);
@@ -254,6 +262,7 @@ function getActiveCreatureData(creatureId, level) {
   };
 }
 
+// Autonomous Roaming: Walking smoothly back and forth across the habitat
 function startPetRoaming() {
   if (petRoamInterval) clearInterval(petRoamInterval);
 
@@ -261,12 +270,14 @@ function startPetRoaming() {
     if (!currentPet || currentPet.isSleeping) return;
 
     const actor = document.getElementById("petActor");
-    const figure = document.getElementById("petFigure");
+    const figure = document.getElementById("petAvatar") || document.getElementById("petFigure");
     if (!actor || !figure) return;
 
+    // Move to random spot between 12% and 82%
     const targetX = Math.floor(Math.random() * 70) + 12;
     const isMovingRight = targetX >= petCurrentPosX;
 
+    // Flip horizontally to face walking direction
     actor.style.transform = isMovingRight ? "scaleX(1)" : "scaleX(-1)";
     figure.classList.add("walking-bob");
 
@@ -280,10 +291,11 @@ function startPetRoaming() {
   }, 4500);
 }
 
+// Signature Action Trigger
 function triggerSignatureAction() {
   if (!currentPet) return;
   const actor = document.getElementById("petActor");
-  const figure = document.getElementById("petFigure");
+  const figure = document.getElementById("petAvatar") || document.getElementById("petFigure");
   const effectBadge = document.getElementById("petActionEffect");
   if (!actor || !figure) return;
 
@@ -305,6 +317,27 @@ function triggerSignatureAction() {
       effectBadge.classList.remove("effect-pop");
     }
   }, 1400);
+}
+
+// TAPPING DIRECTLY ON PET = PLAY WITH IT!
+function handlePetDirectTap() {
+  if (!currentPet) return;
+  if (currentPet.isSleeping) {
+    showPetSpeech("Shh... I'm sleeping! Tap Wake Up first! 💤");
+    return;
+  }
+  
+  // If Level 1-3 Egg, tap to pet and wobble
+  if (currentPet.level < 4) {
+    triggerSignatureAction();
+    showPetSpeech("🥚 Wiggle! The egg is warm and happy! Feed & care to hatch!");
+    currentPet.happiness = Math.min(100, currentPet.happiness + 8);
+    savePetData();
+    refreshPetUI();
+  } else {
+    // Hatched buddy: tapping directly opens Play & Quiz!
+    triggerPetCare('play');
+  }
 }
 
 function addPetExp(pts) {
@@ -343,7 +376,7 @@ function refreshPetUI() {
   const expBar = document.getElementById('petExpBar');
   if (expBar) expBar.style.width = Math.min(100, (currentPet.exp / reqExp) * 100) + "%";
 
-  const figureEl = document.getElementById('petFigure');
+  const figureEl = document.getElementById('petAvatar') || document.getElementById('petFigure');
   const sleepBtn = document.getElementById('btnSleep');
   if (figureEl) {
     figureEl.innerText = currentPet.isSleeping ? "💤" : data.sprite;
