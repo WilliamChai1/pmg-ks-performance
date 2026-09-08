@@ -496,6 +496,16 @@
     let currentUser = null;
     let liveSheetData = null;
 
+    // SAFE DOM HELPERS
+    function setSafeText(id, text) {
+      const el = document.getElementById(id);
+      if (el) el.innerText = text;
+    }
+    function setSafeHtml(id, html) {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = html;
+    }
+
     // --- EVOLUTION REALMS ---
     const PET_REALMS = {
       anime: {
@@ -540,7 +550,6 @@
       }
     };
 
-    // --- WARDROBE & DECOR CATALOGS ---
     const PET_ACCESSORIES = [
       { id: "ds_haori", name: "Tanjiro Haori", icon: "👘", price: 250, desc: "Demon Slayer robe" },
       { id: "ds_sword", name: "Nichirin Blade", icon: "⚔️", price: 300, desc: "Water breathing sword" },
@@ -567,14 +576,14 @@
       const tabs = { perf: document.getElementById('tabNavPerf'), pet: document.getElementById('tabNavPet'), farm: document.getElementById('tabNavFarm') };
 
       for (let k in views) {
-        views[k].style.display = (k === tab) ? 'block' : 'none';
-        tabs[k].className = (k === tab) ? 'nav-tab active' : 'nav-tab';
+        if (views[k]) views[k].style.display = (k === tab) ? 'block' : 'none';
+        if (tabs[k]) tabs[k].className = (k === tab) ? 'nav-tab active' : 'nav-tab';
       }
       if (tab === 'pet') refreshPetUI();
       if (tab === 'farm') refreshFarmUI();
     }
 
-    // --- COIN SYSTEM (LINKED TO HB COMMISSION) ---
+    // --- COIN SYSTEM ---
     function getAvailableHbCoins() {
       if (!currentUser || !liveSheetData || !liveSheetData.teammates) return 0;
       const s = liveSheetData.teammates[currentUser.name] || {};
@@ -595,18 +604,19 @@
 
     function refreshAllCoinDisplays() {
       const coins = getAvailableHbCoins();
-      document.getElementById('globalHbCoinsText').innerText = coins.toLocaleString();
-      document.getElementById('farmGoldText').innerText = coins.toLocaleString();
+      setSafeText('globalHbCoinsText', coins.toLocaleString());
+      setSafeText('farmGoldText', coins.toLocaleString());
     }
 
-    // --- PET WARDROBE SYSTEM ---
+    // --- WARDROBE MODAL ---
     function openPetWardrobeModal() {
       const grid = document.getElementById('wardrobeShopGrid');
+      if (!grid) return;
       grid.innerHTML = "";
 
       PET_ACCESSORIES.forEach(item => {
-        const isOwned = currentPet.ownedAccessories && currentPet.ownedAccessories.includes(item.id);
-        const isEquipped = currentPet.equippedAccessory === item.id;
+        const isOwned = currentPet && currentPet.ownedAccessories && currentPet.ownedAccessories.includes(item.id);
+        const isEquipped = currentPet && currentPet.equippedAccessory === item.id;
 
         const card = document.createElement('div');
         card.className = "shop-item-card";
@@ -622,10 +632,12 @@
         grid.appendChild(card);
       });
 
-      document.getElementById('wardrobeModal').style.display = "flex";
+      const modal = document.getElementById('wardrobeModal');
+      if (modal) modal.style.display = "flex";
     }
 
     function handleWardrobeClick(itemId, price) {
+      if (!currentPet) return;
       if (!currentPet.ownedAccessories) currentPet.ownedAccessories = [];
       const isOwned = currentPet.ownedAccessories.includes(itemId);
 
@@ -641,20 +653,21 @@
           savePetData();
           refreshPetUI();
           openPetWardrobeModal();
-          alert("🎉 Purchased & Equipped! Looking stylish!");
+          alert("🎉 Purchased & Equipped!");
         } else {
-          alert("❌ Not enough HB Coins! Sell more House Brand products to earn commission coins!");
+          alert("❌ Not enough HB Coins! Sell more House Brand items to earn commission coins!");
         }
       }
     }
 
-    // --- FARM DECOR SYSTEM ---
+    // --- FARM DECOR MODAL ---
     function openFarmDecorModal() {
       const grid = document.getElementById('decorShopGrid');
+      if (!grid) return;
       grid.innerHTML = "";
 
       FARM_DECORATIONS.forEach(item => {
-        const isOwned = currentFarm.ownedDecor && currentFarm.ownedDecor.includes(item.id);
+        const isOwned = currentFarm && currentFarm.ownedDecor && currentFarm.ownedDecor.includes(item.id);
 
         const card = document.createElement('div');
         card.className = "shop-item-card";
@@ -670,10 +683,12 @@
         grid.appendChild(card);
       });
 
-      document.getElementById('decorModal').style.display = "flex";
+      const modal = document.getElementById('decorModal');
+      if (modal) modal.style.display = "flex";
     }
 
     function handleDecorBuy(itemId, price) {
+      if (!currentFarm) return;
       if (!currentFarm.ownedDecor) currentFarm.ownedDecor = [];
       if (deductHbCoins(price)) {
         currentFarm.ownedDecor.push(itemId);
@@ -682,12 +697,13 @@
         openFarmDecorModal();
         alert("🎉 Farm decoration installed!");
       } else {
-        alert("❌ Not enough HB Coins! Push House Brand items at the counter to earn more coins!");
+        alert("❌ Not enough HB Coins! Push House Brand items to earn more coins!");
       }
     }
 
     function openRealmSelectModal() {
-      document.getElementById('realmModal').style.display = "flex";
+      const modal = document.getElementById('realmModal');
+      if (modal) modal.style.display = "flex";
     }
 
     function setPetRealm(realmId) {
@@ -700,9 +716,9 @@
     }
 
     function closeShopModals() {
-      document.getElementById('wardrobeModal').style.display = "none";
-      document.getElementById('decorModal').style.display = "none";
-      document.getElementById('realmModal').style.display = "none";
+      const m1 = document.getElementById('wardrobeModal'); if (m1) m1.style.display = "none";
+      const m2 = document.getElementById('decorModal'); if (m2) m2.style.display = "none";
+      const m3 = document.getElementById('realmModal'); if (m3) m3.style.display = "none";
     }
 
     // --- 50-QUESTION MASTER CLINICAL QUIZ BANK (WITH GLYCOWAY) ---
@@ -769,61 +785,72 @@
       const shuffled = [...qObj.options].sort(() => Math.random() - 0.5);
       const correctIdx = shuffled.indexOf(correctText);
 
-      document.getElementById('quizSkuBadge').innerText = (qObj.sku || "House Brand") + " Challenge";
-      document.getElementById('quizQuestionText').innerText = qObj.q;
+      setSafeText('quizSkuBadge', (qObj.sku || "House Brand") + " Challenge");
+      setSafeText('quizQuestionText', qObj.q);
 
       const optsCont = document.getElementById('quizOptionsContainer');
-      optsCont.innerHTML = "";
+      if (optsCont) {
+        optsCont.innerHTML = "";
+        shuffled.forEach((optText, idx) => {
+          const btn = document.createElement('button');
+          btn.className = "quiz-opt-btn";
+          btn.innerText = optText;
+          btn.onclick = () => handleQuizAnswer(idx, correctIdx, qObj.tip);
+          optsCont.appendChild(btn);
+        });
+      }
 
       const feedback = document.getElementById('quizFeedbackBox');
-      feedback.style.display = "none";
-      document.getElementById('quizActionBtn').style.display = "none";
+      if (feedback) feedback.style.display = "none";
+      const actionBtn = document.getElementById('quizActionBtn');
+      if (actionBtn) actionBtn.style.display = "none";
 
-      shuffled.forEach((optText, idx) => {
-        const btn = document.createElement('button');
-        btn.className = "quiz-opt-btn";
-        btn.innerText = optText;
-        btn.onclick = () => handleQuizAnswer(idx, correctIdx, qObj.tip);
-        optsCont.appendChild(btn);
-      });
-
-      document.getElementById('quizModal').style.display = "flex";
+      const modal = document.getElementById('quizModal');
+      if (modal) modal.style.display = "flex";
     }
 
     function handleQuizAnswer(chosenIdx, correctIdx, tip) {
       const feedback = document.getElementById('quizFeedbackBox');
       const actionBtn = document.getElementById('quizActionBtn');
-      const btns = document.getElementById('quizOptionsContainer').querySelectorAll('button');
+      const optsCont = document.getElementById('quizOptionsContainer');
+      if (optsCont) {
+        const btns = optsCont.querySelectorAll('button');
+        btns.forEach((b, i) => {
+          b.disabled = true;
+          if (i === correctIdx) b.style.borderColor = "#2e7d32";
+          if (i === chosenIdx && i !== correctIdx) b.style.borderColor = "#c62828";
+        });
+      }
 
-      btns.forEach((b, i) => {
-        b.disabled = true;
-        if (i === correctIdx) b.style.borderColor = "#2e7d32";
-        if (i === chosenIdx && i !== correctIdx) b.style.borderColor = "#c62828";
-      });
+      if (feedback) {
+        feedback.style.display = "block";
+        if (chosenIdx === correctIdx) {
+          feedback.className = "quiz-feedback feedback-correct";
+          feedback.innerHTML = `✅ <b>CORRECT!</b><br>${tip}`;
+        } else {
+          feedback.className = "quiz-feedback feedback-wrong";
+          feedback.innerHTML = `❌ <b>CLINICAL NOTE:</b><br>${tip}`;
+        }
+      }
 
-      feedback.style.display = "block";
-      actionBtn.style.display = "block";
-
-      if (chosenIdx === correctIdx) {
-        feedback.className = "quiz-feedback feedback-correct";
-        feedback.innerHTML = `✅ <b>CORRECT!</b><br>${tip}`;
-        actionBtn.innerText = "Claim Reward ⭐";
-        actionBtn.onclick = () => {
-          document.getElementById('quizModal').style.display = "none";
-          if (pendingQuizCallback) pendingQuizCallback(true);
-        };
-      } else {
-        feedback.className = "quiz-feedback feedback-wrong";
-        feedback.innerHTML = `❌ <b>CLINICAL NOTE:</b><br>${tip}`;
-        actionBtn.innerText = "Try Again 🔄";
-        actionBtn.onclick = () => {
-          document.getElementById('quizModal').style.display = "none";
-        };
+      if (actionBtn) {
+        actionBtn.style.display = "block";
+        if (chosenIdx === correctIdx) {
+          actionBtn.innerText = "Claim Reward ⭐";
+          actionBtn.onclick = () => {
+            closeQuizModal();
+            if (pendingQuizCallback) pendingQuizCallback(true);
+          };
+        } else {
+          actionBtn.innerText = "Try Again 🔄";
+          actionBtn.onclick = closeQuizModal;
+        }
       }
     }
 
     function closeQuizModal() {
-      document.getElementById('quizModal').style.display = "none";
+      const modal = document.getElementById('quizModal');
+      if (modal) modal.style.display = "none";
     }
 
     // --- KS HERBAL FARM ENGINE ---
@@ -844,44 +871,49 @@
     }
 
     function loadFarmData() {
-      const key = getFarmStorageKey();
-      const saved = localStorage.getItem(key);
+      try {
+        const key = getFarmStorageKey();
+        const saved = localStorage.getItem(key);
 
-      if (saved) {
-        try { currentFarm = JSON.parse(saved); } catch(e) { currentFarm = null; }
+        if (saved) {
+          try { currentFarm = JSON.parse(saved); } catch(e) { currentFarm = null; }
+        }
+
+        if (!currentFarm) {
+          currentFarm = {
+            bonusCoins: 0,
+            level: 1,
+            exp: 0,
+            harvestCount: 0,
+            ownedDecor: [],
+            plots: [
+              { cropId: null, plantedAt: 0 },
+              { cropId: null, plantedAt: 0 },
+              { cropId: null, plantedAt: 0 },
+              { cropId: null, plantedAt: 0 }
+            ]
+          };
+        }
+        saveFarmData();
+        refreshFarmUI();
+
+        if (farmTimerInterval) clearInterval(farmTimerInterval);
+        farmTimerInterval = setInterval(refreshFarmUI, 3000);
+      } catch (err) {
+        console.warn("loadFarmData shielded:", err);
       }
-
-      if (!currentFarm) {
-        currentFarm = {
-          bonusCoins: 0,
-          level: 1,
-          exp: 0,
-          harvestCount: 0,
-          ownedDecor: [],
-          plots: [
-            { cropId: null, plantedAt: 0 },
-            { cropId: null, plantedAt: 0 },
-            { cropId: null, plantedAt: 0 },
-            { cropId: null, plantedAt: 0 }
-          ]
-        };
-      }
-      saveFarmData();
-      refreshFarmUI();
-
-      if (farmTimerInterval) clearInterval(farmTimerInterval);
-      farmTimerInterval = setInterval(refreshFarmUI, 2000);
     }
 
     function saveFarmData() {
       if (!currentFarm) return;
-      localStorage.setItem(getFarmStorageKey(), JSON.stringify(currentFarm));
+      try { localStorage.setItem(getFarmStorageKey(), JSON.stringify(currentFarm)); } catch(e) {}
     }
 
     function selectCropSeed(seedId) {
       selectedCropSeed = seedId;
       document.querySelectorAll('.seed-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('seed_' + seedId).classList.add('active');
+      const activeEl = document.getElementById('seed_' + seedId);
+      if (activeEl) activeEl.classList.add('active');
     }
 
     function handlePlotClick(plotIdx) {
@@ -924,23 +956,25 @@
     function refreshFarmUI() {
       if (!currentFarm) return;
       refreshAllCoinDisplays();
-      document.getElementById('farmHarvestCount').innerText = currentFarm.harvestCount;
+      setSafeText('farmHarvestCount', currentFarm.harvestCount);
 
       const terrace = document.getElementById('farmDecorTerrace');
-      terrace.innerHTML = "";
-      if (currentFarm.ownedDecor && currentFarm.ownedDecor.length > 0) {
-        currentFarm.ownedDecor.forEach(dId => {
-          const dObj = FARM_DECORATIONS.find(item => item.id === dId);
-          if (dObj) {
-            const span = document.createElement('span');
-            span.className = "decor-badge";
-            span.innerText = dObj.icon;
-            span.title = dObj.name;
-            terrace.appendChild(span);
-          }
-        });
-      } else {
-        terrace.innerHTML = "<span style='font-size:0.68rem; color:#888;'>No decorations yet. Tap 'Decor Shop' above!</span>";
+      if (terrace) {
+        terrace.innerHTML = "";
+        if (currentFarm.ownedDecor && currentFarm.ownedDecor.length > 0) {
+          currentFarm.ownedDecor.forEach(dId => {
+            const dObj = FARM_DECORATIONS.find(item => item.id === dId);
+            if (dObj) {
+              const span = document.createElement('span');
+              span.className = "decor-badge";
+              span.innerText = dObj.icon;
+              span.title = dObj.name;
+              terrace.appendChild(span);
+            }
+          });
+        } else {
+          terrace.innerHTML = "<span style='font-size:0.68rem; color:#888;'>No decorations yet. Tap 'Decor Shop' above!</span>";
+        }
       }
 
       const now = Date.now();
@@ -949,33 +983,34 @@
         const icon = document.getElementById('plotIcon_' + idx);
         const name = document.getElementById('plotName_' + idx);
         const time = document.getElementById('plotTime_' + idx);
+        if (!card) return;
 
         if (!p.cropId) {
           card.className = "plot-card";
-          icon.innerText = "🕳️";
-          name.innerText = "Empty Plot";
-          time.innerText = "Tap to Plant";
+          if (icon) icon.innerText = "🕳️";
+          if (name) name.innerText = "Empty Plot";
+          if (time) time.innerText = "Tap to Plant";
         } else {
           const def = FARM_CROPS[p.cropId];
           const elapsed = (now - p.plantedAt) / 1000;
 
           if (elapsed >= def.growTimeSec) {
             card.className = "plot-card ready";
-            icon.innerText = def.icon;
-            name.innerText = def.name;
-            time.innerHTML = "<b style='color:#2e7d32;'>Ready! Tap to Quiz & Harvest</b>";
+            if (icon) icon.innerText = def.icon;
+            if (name) name.innerText = def.name;
+            if (time) time.innerHTML = "<b style='color:#2e7d32;'>Ready! Tap to Quiz & Harvest</b>";
           } else {
             card.className = "plot-card growing";
-            icon.innerText = "🌱";
-            name.innerText = def.name;
+            if (icon) icon.innerText = "🌱";
+            if (name) name.innerText = def.name;
             const left = Math.round(def.growTimeSec - elapsed);
-            time.innerText = `Growing: ${left}s left`;
+            if (time) time.innerText = `Growing: ${left}s left`;
           }
         }
       });
     }
 
-    // --- TAMAGOTCHI PET CARE ACTIONS (QUIZ PROTECTED) ---
+    // --- PET CARE ACTIONS ---
     function triggerPetCare(actionType) {
       if (!currentPet) return;
 
@@ -988,8 +1023,10 @@
           currentPet.hunger = Math.min(100, currentPet.hunger + 25);
           showPetSpeech("Yum! That vitamin snack was delicious! 🍎 (+15 EXP)");
           const av = document.getElementById('petAvatar');
-          av.className = "pet-avatar pet-eating";
-          setTimeout(() => av.className = "pet-avatar pet-bounce", 1200);
+          if (av) {
+            av.className = "pet-avatar pet-eating";
+            setTimeout(() => av.className = "pet-avatar pet-bounce", 1200);
+          }
           addPetExp(15);
         });
       } else if (actionType === 'play') {
@@ -1026,55 +1063,59 @@
     }
 
     function loadPetData() {
-      const key = getPetStorageKey();
-      const saved = localStorage.getItem(key);
-      const now = Date.now();
+      try {
+        const key = getPetStorageKey();
+        const saved = localStorage.getItem(key);
+        const now = Date.now();
 
-      if (saved) {
-        try { currentPet = JSON.parse(saved); } catch(e) { currentPet = null; }
-      }
-
-      if (!currentPet) {
-        currentPet = {
-          name: (currentUser ? currentUser.name.split(" ")[0] : "My") + "'s Buddy",
-          realm: "anime",
-          level: 1,
-          exp: 0,
-          hunger: 80,
-          happiness: 80,
-          cleanliness: 100,
-          hasPoop: false,
-          isSleeping: false,
-          spentCoins: 0,
-          ownedAccessories: [],
-          equippedAccessory: null,
-          lastUpdated: now,
-          lastFeastDate: ""
-        };
-      }
-
-      const elapsedHours = (now - (currentPet.lastUpdated || now)) / (1000 * 60 * 60);
-      if (elapsedHours > 0.5) {
-        const decaySteps = Math.floor(elapsedHours / 2);
-        if (decaySteps > 0) {
-          currentPet.hunger = Math.max(10, currentPet.hunger - decaySteps * 12);
-          currentPet.happiness = Math.max(10, currentPet.happiness - decaySteps * 10);
-          if (decaySteps >= 2) currentPet.hasPoop = true;
-          currentPet.lastUpdated = now;
+        if (saved) {
+          try { currentPet = JSON.parse(saved); } catch(e) { currentPet = null; }
         }
+
+        if (!currentPet) {
+          currentPet = {
+            name: (currentUser ? currentUser.name.split(" ")[0] : "My") + "'s Buddy",
+            realm: "anime",
+            level: 1,
+            exp: 0,
+            hunger: 80,
+            happiness: 80,
+            cleanliness: 100,
+            hasPoop: false,
+            isSleeping: false,
+            spentCoins: 0,
+            ownedAccessories: [],
+            equippedAccessory: null,
+            lastUpdated: now,
+            lastFeastDate: ""
+          };
+        }
+
+        const elapsedHours = (now - (currentPet.lastUpdated || now)) / (1000 * 60 * 60);
+        if (elapsedHours > 0.5) {
+          const decaySteps = Math.floor(elapsedHours / 2);
+          if (decaySteps > 0) {
+            currentPet.hunger = Math.max(10, currentPet.hunger - decaySteps * 12);
+            currentPet.happiness = Math.max(10, currentPet.happiness - decaySteps * 10);
+            if (decaySteps >= 2) currentPet.hasPoop = true;
+            currentPet.lastUpdated = now;
+          }
+        }
+        savePetData();
+        refreshPetUI();
+      } catch (err) {
+        console.warn("loadPetData shielded:", err);
       }
-      savePetData();
-      refreshPetUI();
     }
 
     function savePetData() {
       if (!currentPet) return;
-      currentPet.lastUpdated = Date.now();
-      localStorage.setItem(getPetStorageKey(), JSON.stringify(currentPet));
+      try { localStorage.setItem(getPetStorageKey(), JSON.stringify(currentPet)); } catch(e) {}
     }
 
     function getPetStageData(realmId, level) {
-      const realm = PET_REALMS[realmId] || PET_REALMS['anime'];
+      const rKey = (realmId && PET_REALMS[realmId]) ? realmId : 'anime';
+      const realm = PET_REALMS[rKey];
       let stage = realm.stages[0];
       for (let s of realm.stages) {
         if (level >= s.minLvl) stage = s;
@@ -1102,46 +1143,51 @@
 
       const stage = getPetStageData(currentPet.realm || 'anime', currentPet.level);
 
-      document.getElementById('petNameTitle').innerText = currentPet.name;
-      document.getElementById('petStageBadge').innerText = stage.name;
-      document.getElementById('petLevelText').innerText = `Level ${currentPet.level}`;
+      setSafeText('petNameTitle', currentPet.name);
+      setSafeText('petStageBadge', stage.name);
+      setSafeText('petLevelText', `Level ${currentPet.level}`);
 
       const reqExp = currentPet.level * 50;
-      document.getElementById('petExpText').innerText = `EXP: ${currentPet.exp} /${reqExp}`;
-      document.getElementById('petExpBar').style.width = Math.min(100, (currentPet.exp / reqExp) * 100) + "%";
+      setSafeText('petExpText', `EXP: ${currentPet.exp} /${reqExp}`);
+      const expBar = document.getElementById('petExpBar');
+      if (expBar) expBar.style.width = Math.min(100, (currentPet.exp / reqExp) * 100) + "%";
 
       const avatarEl = document.getElementById('petAvatar');
-      if (currentPet.isSleeping) {
-        avatarEl.innerText = "💤";
-        document.getElementById('btnSleep').innerHTML = "☀️<br>Wake Up<br><span style='font-size:0.6rem; color:#888;'>Active</span>";
-      } else {
-        avatarEl.innerText = stage.avatar;
-        document.getElementById('btnSleep').innerHTML = "💤<br>Sleep / Rest<br><span style='font-size:0.6rem; color:#888;'>Energy</span>";
+      const sleepBtn = document.getElementById('btnSleep');
+      if (avatarEl) {
+        avatarEl.innerText = currentPet.isSleeping ? "💤" : stage.avatar;
+      }
+      if (sleepBtn) {
+        sleepBtn.innerHTML = currentPet.isSleeping ? "☀️<br>Wake Up<br><span style='font-size:0.6rem; color:#888;'>Active</span>" : "💤<br>Sleep / Rest<br><span style='font-size:0.6rem; color:#888;'>Energy</span>";
       }
 
       const accBadge = document.getElementById('petEquippedAccessory');
-      if (currentPet.equippedAccessory) {
-        const itemObj = PET_ACCESSORIES.find(i => i.id === currentPet.equippedAccessory);
-        accBadge.innerText = itemObj ? itemObj.icon : "";
-        accBadge.style.display = "block";
-      } else {
-        accBadge.style.display = "none";
+      if (accBadge) {
+        if (currentPet.equippedAccessory) {
+          const itemObj = PET_ACCESSORIES.find(i => i.id === currentPet.equippedAccessory);
+          accBadge.innerText = itemObj ? itemObj.icon : "";
+          accBadge.style.display = "block";
+        } else {
+          accBadge.style.display = "none";
+        }
       }
 
-      document.getElementById('poopElement').style.display = currentPet.hasPoop ? "block" : "none";
+      const poopEl = document.getElementById('poopElement');
+      if (poopEl) poopEl.style.display = currentPet.hasPoop ? "block" : "none";
 
-      document.getElementById('meterHunger').style.width = currentPet.hunger + "%";
-      document.getElementById('textHunger').innerText = Math.round(currentPet.hunger) + "%";
-      document.getElementById('meterHappy').style.width = currentPet.happiness + "%";
-      document.getElementById('textHappy').innerText = Math.round(currentPet.happiness) + "%";
-      document.getElementById('meterClean').style.width = (currentPet.hasPoop ? 30 : 100) + "%";
-      document.getElementById('textClean').innerText = (currentPet.hasPoop ? "30%" : "100%");
+      const mH = document.getElementById('meterHunger'); if (mH) mH.style.width = currentPet.hunger + "%";
+      setSafeText('textHunger', Math.round(currentPet.hunger) + "%");
+      const mHa = document.getElementById('meterHappy'); if (mHa) mHa.style.width = currentPet.happiness + "%";
+      setSafeText('textHappy', Math.round(currentPet.happiness) + "%");
+      const mC = document.getElementById('meterClean'); if (mC) mC.style.width = (currentPet.hasPoop ? 30 : 100) + "%";
+      setSafeText('textClean', currentPet.hasPoop ? "30%" : "100%");
 
       checkDailyTargetFeast();
     }
 
     function showPetSpeech(msg) {
       const el = document.getElementById('petSpeechBubble');
+      if (!el) return;
       el.innerText = msg;
       el.style.transform = "scale(1.1)";
       setTimeout(() => el.style.transform = "scale(1)", 200);
@@ -1150,8 +1196,7 @@
     function sleepPet() {
       if (!currentPet) return;
       currentPet.isSleeping = !currentPet.isSleeping;
-      if (currentPet.isSleeping) showPetSpeech("Good night! Sweet dreams... 💤");
-      else showPetSpeech("Good morning! Ready for a great day! ☀️");
+      showPetSpeech(currentPet.isSleeping ? "Good night! Sweet dreams... 💤" : "Good morning! Ready for a great day! ☀️");
       savePetData();
       refreshPetUI();
     }
@@ -1161,22 +1206,16 @@
       const todayDate = (liveSheetData.dailySummary && liveSheetData.dailySummary.date) || "Today";
       const s = liveSheetData.teammates[currentUser.name];
       const btn = document.getElementById('btnClaimFeast');
-
       if (!s || !btn) return;
+
       const hitAny = (s.dailyTs >= s.dailyTsTarget) || (s.dailyHb >= s.dailyHbTarget) || (s.dailyHm >= s.dailyHmTarget);
 
       if (currentPet.lastFeastDate === todayDate) {
-        btn.innerText = "Claimed ✅";
-        btn.disabled = true;
-        btn.style.background = "#757575";
+        btn.innerText = "Claimed ✅"; btn.disabled = true; btn.style.background = "#757575";
       } else if (hitAny) {
-        btn.innerText = "Claim 🎁";
-        btn.disabled = false;
-        btn.style.background = "#2e7d32";
+        btn.innerText = "Claim 🎁"; btn.disabled = false; btn.style.background = "#2e7d32";
       } else {
-        btn.innerText = "Locked 🔒";
-        btn.disabled = true;
-        btn.style.background = "#9e9e9e";
+        btn.innerText = "Locked 🔒"; btn.disabled = true; btn.style.background = "#9e9e9e";
       }
     }
 
@@ -1218,21 +1257,25 @@
       btn.innerHTML = (audio && !audio.paused) ? '🎵 BGM: ON' : '🔇 BGM: OFF';
     }
 
-    // --- PIN UNLOCK ---
+    // --- NON-BLOCKING PIN UNLOCK ---
     function verifyPin() {
       const pinInput = document.getElementById("pinCode");
       const pin = pinInput ? pinInput.value.trim() : "";
 
       if (USER_CONFIGS[pin]) {
         currentUser = USER_CONFIGS[pin];
-        localStorage.setItem("pmg_auth_pin", pin);
+        try { localStorage.setItem("pmg_auth_pin", pin); } catch(e) {}
         
+        // 1. Immediately hide lock screen
         const overlay = document.getElementById("pinOverlay");
         if (overlay) overlay.style.display = "none";
         
+        // 2. Safe, isolated background initializations
+        try { loadPetData(); } catch(e) { console.warn("Pet init issue:", e); }
+        try { loadFarmData(); } catch(e) { console.warn("Farm init issue:", e); }
         try { startBgm(); } catch(e) {}
-        loadPetData();
-        loadFarmData();
+        
+        // 3. Fetch live spreadsheet metrics
         loadData();
       } else {
         const err = document.getElementById("pinError");
@@ -1242,33 +1285,30 @@
 
     function logout() {
       stopMusic();
-      localStorage.removeItem("pmg_auth_pin");
+      try { localStorage.removeItem("pmg_auth_pin"); } catch(e) {}
       currentUser = null;
-      document.getElementById("pinCode").value = "";
-      document.getElementById("pinOverlay").style.display = "flex";
-      document.getElementById("managerPanel").style.display = "none";
+      const pIn = document.getElementById("pinCode"); if (pIn) pIn.value = "";
+      const pOv = document.getElementById("pinOverlay"); if (pOv) pOv.style.display = "flex";
+      const mP = document.getElementById("managerPanel"); if (mP) mP.style.display = "none";
     }
 
     async function loadData() {
-      document.getElementById("lastUpdated").innerText = "Connecting to Google Sheet...";
+      setSafeText("lastUpdated", "Connecting to Google Sheet...");
       try {
         const res = await fetch(API_URL, { redirect: "follow" });
         liveSheetData = await res.json();
         
         if (liveSheetData && liveSheetData.teammates) {
-          document.getElementById("lastUpdated").innerText = `Live Sheet Data • Updated: ${liveSheetData.updatedAt || 'Today'}`;
+          setSafeText("lastUpdated", `Live Sheet Data • Updated: ${liveSheetData.updatedAt || 'Today'}`);
           
-          if (liveSheetData.directorsReportDriveUrl) {
-            document.getElementById("btnDlDirector").href = liveSheetData.directorsReportDriveUrl;
-          }
-          if (liveSheetData.teammatesGapDriveUrl) {
-            document.getElementById("btnDlTeammate").href = liveSheetData.teammatesGapDriveUrl;
-          }
+          const bDir = document.getElementById("btnDlDirector");
+          if (bDir && liveSheetData.directorsReportDriveUrl) bDir.href = liveSheetData.directorsReportDriveUrl;
+          const bTm = document.getElementById("btnDlTeammate");
+          if (bTm && liveSheetData.teammatesGapDriveUrl) bTm.href = liveSheetData.teammatesGapDriveUrl;
 
-          // Live Sheet Sync from HB Quiz Bank tab
+          // Merge live questions from Google Sheet
           if (liveSheetData.hbQuizBank && liveSheetData.hbQuizBank.length > 0) {
             HB_QUIZ_BANK = liveSheetData.hbQuizBank;
-            console.log("Synced " + HB_QUIZ_BANK.length + " live questions from Google Sheet!");
           }
 
           renderOutletMission();
@@ -1277,9 +1317,11 @@
           renderCongratsPreview();
           checkDailyTargetFeast();
           refreshAllCoinDisplays();
+        } else if (liveSheetData && liveSheetData.error) {
+          setSafeText("lastUpdated", "Sheet sync notice: " + liveSheetData.error);
         }
       } catch (e) {
-        document.getElementById("lastUpdated").innerText = "Sync issue. Tap Lock 🔒 to retry.";
+        setSafeText("lastUpdated", "Sync issue. Tap Lock 🔒 to retry.");
       }
     }
 
@@ -1305,11 +1347,11 @@
       const tsPct = Math.min(100, (mtdTs / tsTarget) * 100);
       const hbPct = Math.min(100, (mtdHb / hbTier3) * 100);
 
-      document.getElementById("outletTsProgressText").innerText = `RM ${mtdTs.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} / RM ${tsTarget.toLocaleString()} (${tsPct.toFixed(1)}%)`;
-      document.getElementById("outletTsBar").style.width = tsPct + "%";
+      setSafeText("outletTsProgressText", `RM ${mtdTs.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} / RM ${tsTarget.toLocaleString()} (${tsPct.toFixed(1)}%)`);
+      const bTs = document.getElementById("outletTsBar"); if (bTs) bTs.style.width = tsPct + "%";
 
-      document.getElementById("outletHbProgressText").innerText = `RM ${mtdHb.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} / RM ${hbTier3.toLocaleString()} (${hbPct.toFixed(1)}%)`;
-      document.getElementById("outletHbBar").style.width = hbPct + "%";
+      setSafeText("outletHbProgressText", `RM ${mtdHb.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} / RM ${hbTier3.toLocaleString()} (${hbPct.toFixed(1)}%)`);
+      const bHb = document.getElementById("outletHbBar"); if (bHb) bHb.style.width = hbPct + "%";
 
       const day = s.dayOfMonth || 7;
       const expTsPace = (tsTarget / 30) * day;
@@ -1317,89 +1359,78 @@
       const tsDiff = mtdTs - expTsPace;
       const hbDiff = mtdHb - expHbPace;
 
-      document.getElementById("outletTsPacingBadge").innerHTML = tsDiff >= 0 ? 
-        `<span class="status-badge badge-ontrack">🟢 ON TRACK (+RM ${Math.abs(tsDiff).toFixed(0)} ahead of Day${day} pace)</span>` : 
-        `<span class="status-badge badge-behind">⚠️ -RM ${Math.abs(tsDiff).toFixed(0)} vs Day${day} pace</span>`;
+      const pBadge = document.getElementById("outletTsPacingBadge");
+      if (pBadge) {
+        pBadge.innerHTML = tsDiff >= 0 ? 
+          `<span class="status-badge badge-ontrack">🟢 ON TRACK (+RM ${Math.abs(tsDiff).toFixed(0)} ahead of Day${day} pace)</span>` : 
+          `<span class="status-badge badge-behind">⚠️ -RM ${Math.abs(tsDiff).toFixed(0)} vs Day${day} pace</span>`;
+      }
 
-      document.getElementById("outletHbPacingBadge").innerHTML = hbDiff >= 0 ? 
-        `<span class="status-badge badge-ahead">🚀 AHEAD (+RM ${Math.abs(hbDiff).toFixed(0)} vs Day${day} Tier 3 pace)</span>` : 
-        `<span class="status-badge badge-behind">⚡ PUSH NEEDED (-RM ${Math.abs(hbDiff).toFixed(0)} vs Day${day} Tier 3 pace)</span>`;
+      const hbBadge = document.getElementById("outletHbPacingBadge");
+      if (hbBadge) {
+        hbBadge.innerHTML = hbDiff >= 0 ? 
+          `<span class="status-badge badge-ahead">🚀 AHEAD (+RM ${Math.abs(hbDiff).toFixed(0)} vs Day${day} Tier 3 pace)</span>` : 
+          `<span class="status-badge badge-behind">⚡ PUSH NEEDED (-RM ${Math.abs(hbDiff).toFixed(0)} vs Day${day} Tier 3 pace)</span>`;
+      }
 
-      const t1Box = document.getElementById("tier1Box");
-      const t2Box = document.getElementById("tier2Box");
-      const t3Box = document.getElementById("tier3Box");
-      const t1Badge = document.getElementById("tier1Badge");
-      const t2Badge = document.getElementById("tier2Badge");
-      const t3Badge = document.getElementById("tier3Badge");
       const statusBanner = document.getElementById("rewardStatusBanner");
-
-      if (mtdHb >= hbTier3) {
-        t1Box.className = "tier-box unlocked"; t1Badge.className = "tier-badge badge-unlocked"; t1Badge.innerText = "UNLOCKED";
-        t2Box.className = "tier-box unlocked"; t2Badge.className = "tier-badge badge-unlocked"; t2Badge.innerText = "UNLOCKED";
-        t3Box.className = "tier-box unlocked"; t3Badge.className = "tier-badge badge-unlocked"; t3Badge.innerText = "UNLOCKED 🏆";
-        statusBanner.innerHTML = "🏆 <b>TIER 3 MAX REWARD UNLOCKED!</b> Full RM 500.00 cash bonus achieved for each teammate!";
-      } else if (mtdHb >= hbTier2) {
-        t1Box.className = "tier-box unlocked"; t1Badge.className = "tier-badge badge-unlocked"; t1Badge.innerText = "UNLOCKED";
-        t2Box.className = "tier-box unlocked"; t2Badge.className = "tier-badge badge-unlocked"; t2Badge.innerText = "UNLOCKED";
-        t3Box.className = "tier-box active"; t3Badge.className = "tier-badge badge-locked"; t3Badge.innerText = "NEXT GOAL";
-        const rem = hbTier3 - mtdHb;
-        statusBanner.innerHTML = `🎉 <b>TIER 2 UNLOCKED (+RM 375 reward)!</b> RM ${rem.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} more to unlock <b>TIER 3 (+RM 500 reward)</b>!`;
-      } else if (mtdHb >= hbTier1) {
-        t1Box.className = "tier-box unlocked"; t1Badge.className = "tier-badge badge-unlocked"; t1Badge.innerText = "UNLOCKED";
-        t2Box.className = "tier-box active"; t2Badge.className = "tier-badge badge-locked"; t2Badge.innerText = "NEXT GOAL";
-        t3Box.className = "tier-box"; t3Badge.className = "tier-badge badge-locked"; t3Badge.innerText = "LOCKED";
-        const rem = hbTier2 - mtdHb;
-        statusBanner.innerHTML = `🎉 <b>TIER 1 UNLOCKED (+RM 250 reward)!</b> RM ${rem.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} more to unlock <b>TIER 2 (+RM 375 reward)</b>!`;
-      } else {
-        t1Box.className = "tier-box active"; t1Badge.className = "tier-badge badge-locked"; t1Badge.innerText = "IN PROGRESS";
-        t2Box.className = "tier-box"; t2Badge.className = "tier-badge badge-locked"; t2Badge.innerText = "LOCKED";
-        t3Box.className = "tier-box"; t3Badge.className = "tier-badge badge-locked"; t3Badge.innerText = "LOCKED";
-        const rem = hbTier1 - mtdHb;
-        statusBanner.innerHTML = `🎯 <b>RM ${rem.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} more in HB</b> to unlock <b>TIER 1 (RM 250 reward per person)</b>!`;
+      if (statusBanner) {
+        if (mtdHb >= hbTier3) {
+          statusBanner.innerHTML = "🏆 <b>TIER 3 MAX REWARD UNLOCKED!</b> Full RM 500.00 cash bonus achieved for each teammate!";
+        } else if (mtdHb >= hbTier2) {
+          const rem = hbTier3 - mtdHb;
+          statusBanner.innerHTML = `🎉 <b>TIER 2 UNLOCKED (+RM 375 reward)!</b> RM ${rem.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} more to unlock <b>TIER 3 (+RM 500 reward)</b>!`;
+        } else if (mtdHb >= hbTier1) {
+          const rem = hbTier2 - mtdHb;
+          statusBanner.innerHTML = `🎉 <b>TIER 1 UNLOCKED (+RM 250 reward)!</b> RM ${rem.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} more to unlock <b>TIER 2 (+RM 375 reward)</b>!`;
+        } else {
+          const rem = hbTier1 - mtdHb;
+          statusBanner.innerHTML = `🎯 <b>RM ${rem.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} more in HB</b> to unlock <b>TIER 1 (RM 250 reward per person)</b>!`;
+        }
       }
     }
 
     function renderUserDashboard() {
       if (!currentUser || !liveSheetData || !liveSheetData.teammates) return;
       const userName = currentUser.name;
-      document.getElementById("userNameHeader").innerText = `👤 ${userName}`;
+      setSafeText("userNameHeader", `👤 ${userName}`);
 
-      document.getElementById("managerPanel").style.display = currentUser.role === "manager" ? "block" : "none";
+      const mP = document.getElementById("managerPanel");
+      if (mP) mP.style.display = (currentUser.role === "manager") ? "block" : "none";
 
       const s = liveSheetData.teammates[userName] || { dailyTs: 0, dailyHb: 0, dailyHm: 0, dailyCust: 0, dailyCommission: 0, mtdTs: 0, mtdHb: 0, mtdHm: 0, mtdCust: 0, mtdCommission: 0, tsTarget: 43030, hbTarget: 22334, hmTarget: 4303 };
 
-      document.getElementById("valTS").innerText = "RM " + (s.dailyTs || 0).toFixed(2);
-      document.getElementById("valHB").innerText = "RM " + (s.dailyHb || 0).toFixed(2);
-      document.getElementById("valHM").innerText = "RM " + (s.dailyHm || 0).toFixed(2);
-      document.getElementById("valCust").innerText = s.dailyCust || 0;
+      setSafeText("valTS", "RM " + (s.dailyTs || 0).toFixed(2));
+      setSafeText("valHB", "RM " + (s.dailyHb || 0).toFixed(2));
+      setSafeText("valHM", "RM " + (s.dailyHm || 0).toFixed(2));
+      setSafeText("valCust", s.dailyCust || 0);
 
       const tsRem = Math.max(0, s.tsTarget - (s.mtdTs || 0));
       const hbRem = Math.max(0, s.hbTarget - (s.mtdHb || 0));
       const hmRem = Math.max(0, s.hmTarget - (s.mtdHm || 0));
 
-      document.getElementById("valRemainingTarget").innerHTML = `
+      setSafeHtml("valRemainingTarget", `
         • TS Target Left: <b>RM ${tsRem.toFixed(2)}</b> (Target: RM${s.tsTarget.toLocaleString()})<br>
         • HB Target Left: <b>RM ${hbRem.toFixed(2)}</b> (Target: RM${s.hbTarget.toLocaleString()})<br>
         • HM Target Left: <b>RM ${hmRem.toFixed(2)}</b> (Target: RM${s.hmTarget.toLocaleString()})
-      `;
+      `);
 
       const day = (liveSheetData.dailySummary && liveSheetData.dailySummary.dayOfMonth) || 7;
       const expectedPace = (s.tsTarget / 30) * day;
       const pacingDiff = (s.mtdTs || 0) - expectedPace;
 
-      if (pacingDiff >= 500) {
-        document.getElementById("valPersonalPacing").innerHTML = `<span class="status-badge badge-ahead">🚀 AHEAD OF PACE (+RM ${pacingDiff.toFixed(0)} above Day${day} target)</span>`;
-      } else if (pacingDiff >= -250) {
-        document.getElementById("valPersonalPacing").innerHTML = `<span class="status-badge badge-ontrack">🟢 ON TRACK (On pace for Day ${day})</span>`;
-      } else {
-        document.getElementById("valPersonalPacing").innerHTML = `<span class="status-badge badge-behind">⚡ PUSH NEEDED (-RM ${Math.abs(pacingDiff).toFixed(0)} vs Day${day} target)</span>`;
+      const pEl = document.getElementById("valPersonalPacing");
+      if (pEl) {
+        if (pacingDiff >= 500) pEl.innerHTML = `<span class="status-badge badge-ahead">🚀 AHEAD OF PACE (+RM ${pacingDiff.toFixed(0)} above Day${day} target)</span>`;
+        else if (pacingDiff >= -250) pEl.innerHTML = `<span class="status-badge badge-ontrack">🟢 ON TRACK (On pace for Day ${day})</span>`;
+        else pEl.innerHTML = `<span class="status-badge badge-behind">⚡ PUSH NEEDED (-RM ${Math.abs(pacingDiff).toFixed(0)} vs Day${day} target)</span>`;
       }
 
-      document.getElementById("valDailyCommission").innerText = "RM " + (s.dailyCommission || 0).toFixed(2);
-      document.getElementById("valMtdCommission").innerText = "RM " + (s.mtdCommission || 0).toFixed(2);
+      setSafeText("valDailyCommission", "RM " + (s.dailyCommission || 0).toFixed(2));
+      setSafeText("valMtdCommission", "RM " + (s.mtdCommission || 0).toFixed(2));
 
       const rec = (liveSheetData.recommendations && liveSheetData.recommendations[userName]) || "Focus on pairing routine OTC transactions with House Brand supplements.";
-      document.getElementById("valPersonalRec").innerText = rec;
+      setSafeText("valPersonalRec", rec);
     }
 
     function renderCongratsPreview() {
@@ -1414,12 +1445,13 @@
           html += `• <b>${name.split(" ")[0]}</b> - Hit target for: ${hits.join(", ")}<br>`;
         }
       }
-      document.getElementById("congratsPreview").innerHTML = html || "No target hits recorded today.";
+      setSafeHtml("congratsPreview", html || "No target hits recorded today.");
     }
 
     function renderTeammatesTable() {
       if (!liveSheetData || !liveSheetData.teammates) return;
       const tbody = document.querySelector("#teammatesTable tbody");
+      if (!tbody) return;
       tbody.innerHTML = "";
       for (const [name, val] of Object.entries(liveSheetData.teammates)) {
         const mtdTs = val.mtdTs || 0;
@@ -1457,7 +1489,7 @@
       const hbPct = ((mtdHb / 171800) * 100).toFixed(1);
       const hmPct = ((mtdHm / 33100) * 100).toFixed(1);
 
-      let text = `Date of briefing: ${s.date || '07-Sep-2026'}\n\n`;
+      let text = `Date of briefing: ${s.date || 'Today'}\n\n`;
       text += `Target achievement:\n`;
       text += `TS: RM ${mtdTs.toFixed(2)} / RM 331,000 (${tsPct}%) - ON TRACK 🟢\n`;
       text += `HB: RM ${mtdHb.toFixed(2)} / RM 171,800 (${hbPct}%) - ON TRACK 🟢\n`;
@@ -1483,9 +1515,6 @@
       text += `\n`;
 
       text += `🎯 Outlet Strategic Priorities & Action Plans:\n`;
-      if ( += `\n`;
-
-      text += `🎯 Outlet Strategic Priorities & Action Plans:\n`;
       if (liveSheetData.tacticalActionPlans) {
         liveSheetData.tacticalActionPlans.forEach((plan, idx) => {
           text += `${idx + 1}.${plan}\n`;
@@ -1494,25 +1523,31 @@
       text += `\n`;
 
       text += `👤 Individual Teammate Priorities:\n\n`;
-      for (const [name, tip] of Object.entries(liveSheetData.recommendations)) {
+      for (const [name, tip] of Object.entries(liveSheetData.recommendations || {})) {
         text += `• *${name.split(" ")[0]}:* ${tip}\n\n`;
       }
-
-      text += `Let's have a great and productive week ahead!`;
 
       navigator.clipboard.writeText(text);
       alert("WhatsApp Daily Briefing copied to clipboard!");
     }
 
     window.onload = () => {
-      const savedPin = localStorage.getItem("pmg_auth_pin");
-      if (savedPin && USER_CONFIGS[savedPin]) {
-        currentUser = USER_CONFIGS[savedPin];
-        document.getElementById("pinOverlay").style.display = "none";
-        try { startBgm(); } catch(e) {}
-        loadPetData();
-        loadFarmData();
-        loadData();
+      try {
+        const savedPin = localStorage.getItem("pmg_auth_pin");
+        if (savedPin && USER_CONFIGS[savedPin]) {
+          currentUser = USER_CONFIGS[savedPin];
+          const overlay = document.getElementById("pinOverlay");
+          if (overlay) overlay.style.display = "none";
+          try { startBgm(); } catch(e) {}
+          try { loadPetData(); } catch(e) {}
+          try { loadFarmData(); } catch(e) {}
+          loadData();
+        }
+      } catch ( { loadFarmData(); } catch(e) {}
+          loadData();
+        }
+      } catch (err) {
+        console.warn("window.onload shielded:", err);
       }
     };
   </script>
