@@ -12,7 +12,7 @@ const USER_CONFIGS = {
   "1001": { name: "Jong Pei Choo", role: "staff" }
 };
 
-// Global State Variables
+// Global State Variables (Safe Cross-Script Declarations)
 var currentUser = null;
 var liveSheetData = null;
 var currentPet = null;
@@ -175,11 +175,11 @@ function executeLogin(pin) {
     currentUser = USER_CONFIGS[pin];
     try { localStorage.setItem("pmg_auth_pin", pin); } catch(e) {}
     
-    // Hide lock screen
+    // Dismiss lock screen immediately
     const overlay = document.getElementById("pinOverlay");
     if (overlay) overlay.style.display = "none";
     
-    // Populate dashboard immediately using baseline
+    // Render baseline data without delay
     renderOutletMission();
     renderUserDashboard();
     renderTeammatesTable();
