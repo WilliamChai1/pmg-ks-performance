@@ -12,7 +12,23 @@ const USER_CONFIGS = {
   "1001": { name: "Jong Pei Choo", role: "staff" }
 };
 
-// Instant Verified Baseline Data (Zero Loading Lag)
+// Global State Variables
+var currentUser = null;
+var liveSheetData = null;
+var currentPet = null;
+var currentFarm = null;
+
+// Safe DOM Setters
+function setSafeText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.innerText = text;
+}
+function setSafeHtml(id, html) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = html;
+}
+
+// Instant Verified Baseline Data (Zero Loading Delay)
 const BASELINE_FEED = {
   updatedAt: "07-Sep-2026 (Verified Actuals)",
   outlet: "PMG Pharmacy Kota Sentosa",
@@ -102,17 +118,27 @@ const BASELINE_FEED = {
   }
 };
 
-let currentUser = null;
-let liveSheetData = BASELINE_FEED;
+liveSheetData = BASELINE_FEED;
 
-// Safe DOM Setters
-function setSafeText(id, text) {
-  const el = document.getElementById(id);
-  if (el) el.innerText = text;
-}
-function setSafeHtml(id, html) {
-  const el = document.getElementById(id);
-  if (el) el.innerHTML = html;
+// --- TAB SWITCHER ENGINE ---
+function switchAppTab(tab) {
+  const views = { 
+    perf: document.getElementById('performanceView'), 
+    pet: document.getElementById('petView'), 
+    farm: document.getElementById('farmView') 
+  };
+  const tabs = { 
+    perf: document.getElementById('tabNavPerf'), 
+    pet: document.getElementById('tabNavPet'), 
+    farm: document.getElementById('tabNavFarm') 
+  };
+
+  for (let k in views) {
+    if (views[k]) views[k].style.display = (k === tab) ? 'block' : 'none';
+    if (tabs[k]) tabs[k].className = (k === tab) ? 'nav-tab active' : 'nav-tab';
+  }
+  if (tab === 'pet' && typeof refreshPetUI === 'function') refreshPetUI();
+  if (tab === 'farm' && typeof refreshFarmUI === 'function') refreshFarmUI();
 }
 
 // --- COIN SYSTEM ---
@@ -120,16 +146,19 @@ function getAvailableHbCoins() {
   if (!currentUser || !liveSheetData || !liveSheetData.teammates) return 0;
   const s = liveSheetData.teammates[currentUser.name] || {};
   const commissionCoins = Math.floor((s.mtdCommission || 0) * 10);
-  const bonusCoins = (currentFarm ? currentFarm.bonusCoins || 0 : 0);
-  const spent = (currentPet ? currentPet.spentCoins || 0 : 0);
+  const farmObj = (typeof currentFarm !== 'undefined' && currentFarm) ? currentFarm : null;
+  const petObj = (typeof currentPet !== 'undefined' && currentPet) ? currentPet : null;
+  const bonusCoins = farmObj ? (farmObj.bonusCoins || 0) : 0;
+  const spent = petObj ? (petObj.spentCoins || 0) : 0;
   return Math.max(0, commissionCoins + bonusCoins - spent);
 }
 
 function deductHbCoins(amount) {
   if (getAvailableHbCoins() < amount) return false;
+  if (!currentPet) return false;
   if (!currentPet.spentCoins) currentPet.spentCoins = 0;
   currentPet.spentCoins += amount;
-  savePetData();
+  if (typeof savePetData === 'function') savePetData();
   refreshAllCoinDisplays();
   return true;
 }
@@ -157,8 +186,8 @@ function executeLogin(pin) {
     renderCongratsPreview();
     
     // Initialize games
-    try { loadPetData(); } catch(e) {}
-    try { loadFarmData(); } catch(e) {}
+    try { if (typeof loadPetData === 'function') loadPetData(); } catch(e) {}
+    try { if (typeof loadFarmData === 'function') loadFarmData(); } catch(e) {}
     try { startBgm(); } catch(e) {}
     
     // Background query for latest spreadsheet updates
@@ -216,7 +245,7 @@ async function loadData() {
       const bTm = document.getElementById("btnDlTeammate");
       if (bTm && liveSheetData.teammatesGapDriveUrl) bTm.href = liveSheetData.teammatesGapDriveUrl;
 
-      if (liveSheetData.hbQuizBank && liveSheetData.hbQuizBank.length > 0) {
+      if (liveSheetData.hbQuizBank && liveSheetData.hbQuizBank.length > 0 && typeof sanitizeQuizItem === 'function') {
         HB_QUIZ_BANK = liveSheetData.hbQuizBank.map(sanitizeQuizItem);
       }
 
@@ -224,7 +253,7 @@ async function loadData() {
       renderUserDashboard();
       renderTeammatesTable();
       renderCongratsPreview();
-      checkDailyTargetFeast();
+      if (typeof checkDailyTargetFeast === 'function') checkDailyTargetFeast();
       refreshAllCoinDisplays();
     }
   } catch (e) {
@@ -430,6 +459,7 @@ function copyWhatsAppBriefing() {
   alert("WhatsApp Daily Briefing copied to clipboard!");
 }
 
+// --- BGM CONTROLLER ---
 function startBgm() {
   const audio = document.getElementById('bgmAudio');
   if (!audio) return;
