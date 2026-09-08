@@ -59,7 +59,7 @@
     .badge-ontrack { background: #e8f5e9; color: #2e7d32; border: 1px solid #b9f6ca; }
     .badge-behind { background: #fce4ec; color: #c2185b; border: 1px solid #ff80ab; }
 
-    .reward-ladder { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin: 10px 0; }
+    .reward-ladder { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 10px; }
     .tier-box { background: #fafafa; border: 2px solid #e0e0e0; border-radius: 10px; padding: 8px 4px; text-align: center; }
     .tier-box.active { border-color: #ffd700; background: #fffde7; box-shadow: 0 2px 8px rgba(255,193,7,0.3); }
     .tier-box.unlocked { border-color: #00897b; background: #e0f2f1; }
@@ -79,7 +79,6 @@
     th, td { padding: 6px 4px; text-align: right; border-bottom: 1px solid #f3e5f5; }
     th:first-child, td:first-child { text-align: left; }
 
-    /* Currency Pill */
     .coin-pill { background: #fff9c4; border: 1.5px solid #fbc02d; color: #f57f17; border-radius: 20px; padding: 4px 10px; font-size: 0.78rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; }
 
     /* --- VIRTUAL PET STYLES --- */
@@ -139,4 +138,1378 @@
     .quiz-question { font-size: 0.90rem; font-weight: 800; color: var(--text); margin-bottom: 14px; line-height: 1.4; text-align: left; }
     .quiz-options { display: flex; flex-direction: column; gap: 8px; }
     .quiz-opt-btn { background: #fbf9fd; border: 1.5px solid #e1bee7; border-radius: 10px; padding: 10px; font-size: 0.80rem; font-weight: 700; color: var(--text); cursor: pointer; text-align: left; transition: all 0.15s ease; line-height: 1.3; }
-    .quiz-opt-btn:active { background: #f3e5f5; border-color
+    .quiz-opt-btn:active { background: #f3e5f5; border-color: var(--primary); }
+    .quiz-feedback { margin-top: 10px; font-size: 0.78rem; font-weight: 700; display: none; padding: 8px; border-radius: 8px; line-height: 1.4; text-align: left; }
+    .feedback-correct { background: #e8f5e9; color: #1b5e20; border: 1px solid #a5d6a7; }
+    .feedback-wrong { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
+
+    /* --- BOTTOM NAVIGATION BAR --- */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border-top: 1.5px solid #e1bee7;
+      display: flex;
+      justify-content: space-around;
+      padding: 6px 0;
+      z-index: 900;
+      box-shadow: 0 -4px 14px rgba(123,31,162,0.08);
+    }
+    .nav-tab {
+      background: none;
+      border: none;
+      color: #757575;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      cursor: pointer;
+      width: 30%;
+      padding: 4px 0;
+      border-radius: 10px;
+    }
+    .nav-tab.active { color: var(--primary); background: #f3e5f5; }
+    .nav-tab .tab-icon { font-size: 1.25rem; }
+  </style>
+</head>
+<body>
+
+  <audio id="bgmAudio" loop preload="auto">
+    <source src="./bgm.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- PIN Shield -->
+  <div id="pinOverlay">
+    <div class="pin-box">
+      <img src="./icon-192.png" style="width:64px; height:64px; border-radius:16px; margin-bottom:8px; box-shadow: 0 4px 12px rgba(123,31,162,0.2);">
+      <h2 style="margin:0; color:var(--primary); font-size:1.2rem; font-weight:800;">KS Pulse</h2>
+      <p style="font-size:0.78rem; color:#616161; margin-top:2px;">Enter Your 4-Digit Personal PIN</p>
+      <input type="password" id="pinCode" class="pin-input" maxlength="4" placeholder="••••" autofocus onkeydown="if(event.key==='Enter') verifyPin()">
+      <button class="btn" onclick="verifyPin()">Unlock Portal ⚡</button>
+      <p id="pinError" style="color:#d32f2f; font-size:0.75rem; margin-top:8px; display:none;">Invalid PIN. Contact William.</p>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div style="text-align:center; margin:4px 0 10px;">
+    <h1 style="font-size:1.25rem; color:var(--primary); margin:0; font-weight:800;">⚡ KS Pulse Hub</h1>
+    <div style="display:flex; justify-content:center; align-items:center; gap:8px; margin-top:4px;">
+      <span class="coin-pill">🪙 <span id="globalHbCoinsText">0</span> HB Coins</span>
+      <button class="btn-logout" id="musicToggleBtn" onclick="toggleMusic()" style="background:#f3e5f5; color:var(--primary-dark); font-weight:800; border-radius:14px; border:1px solid #ab47bc;">🎵 BGM: OFF</button>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 1: PERFORMANCE DASHBOARD ==================== -->
+  <div id="performanceView">
+    <div class="card" style="border: 2px solid var(--primary); background: linear-gradient(180deg, #ffffff 0%, #faf7fc 100%);">
+      <h2 style="color: var(--primary); margin-bottom: 6px;">
+        <span>🏆 Kota Sentosa Mission & HQ Rewards</span>
+        <span style="font-size: 0.72rem; color: #7b1fa2; font-weight: 800;">Q1 FY2027</span>
+      </h2>
+
+      <div style="margin-top: 8px;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700;">
+          <span>STORE TOTAL SALES (MTD)</span>
+          <span id="outletTsProgressText">Loading...</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="outletTsBar"></div></div>
+        <div id="outletTsPacingBadge"></div>
+      </div>
+
+      <div style="margin-top: 8px;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700;">
+          <span>HOUSE BRAND (PORTION B TIER 3)</span>
+          <span id="outletHbProgressText">Loading...</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill gold" id="outletHbBar"></div></div>
+        <div id="outletHbPacingBadge"></div>
+      </div>
+
+      <div style="font-size: 0.78rem; font-weight: 800; color: var(--primary-dark); margin-top: 12px;">
+        🎁 HQ TEAM INCENTIVE REWARD TIERS:
+      </div>
+      <div class="reward-ladder">
+        <div class="tier-box" id="tier1Box">
+          <div class="tier-title">TIER 1</div>
+          <div class="tier-reward">+RM 250</div>
+          <div class="tier-target">Target: RM 152.8k</div>
+          <span class="tier-badge badge-locked" id="tier1Badge">LOCKED</span>
+        </div>
+        <div class="tier-box" id="tier2Box">
+          <div class="tier-title">TIER 2</div>
+          <div class="tier-reward">+RM 375</div>
+          <div class="tier-target">Target: RM 161.9k</div>
+          <span class="tier-badge badge-locked" id="tier2Badge">LOCKED</span>
+        </div>
+        <div class="tier-box" id="tier3Box">
+          <div class="tier-title">TIER 3 (MAX)</div>
+          <div class="tier-reward">+RM 500</div>
+          <div class="tier-target">Target: RM 171.8k</div>
+          <span class="tier-badge badge-locked" id="tier3Badge">LOCKED</span>
+        </div>
+      </div>
+
+      <div id="rewardStatusBanner" style="background: #f3e5f5; border-left: 4px solid var(--primary); padding: 8px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #4a148c;">
+        Calculating reward progress...
+      </div>
+    </div>
+
+    <!-- Teammate View -->
+    <div class="card">
+      <h2>
+        <span id="userNameHeader">👤 Loading profile...</span>
+        <button class="btn btn-logout" onclick="logout()">Lock 🔒</button>
+      </h2>
+
+      <div style="font-size:0.78rem; font-weight:800; color:var(--primary); margin-top:2px;">📅 TODAY'S PERFORMANCE (DAILY):</div>
+      <div class="metric-grid">
+        <div class="metric-box"><div class="label">TODAY TS</div><div class="val" id="valTS">Loading...</div></div>
+        <div class="metric-box"><div class="label">TODAY HB</div><div class="val" id="valHB">Loading...</div></div>
+        <div class="metric-box"><div class="label">TODAY HM</div><div class="val" id="valHM">Loading...</div></div>
+        <div class="metric-box"><div class="label">CUSTOMERS</div><div class="val" id="valCust">0</div></div>
+      </div>
+
+      <div class="gap-banner">
+        <b>🎯 Monthly Target Remaining (Sep 2026 MTD):</b>
+        <div id="valRemainingTarget" style="margin-top:4px;">Loading targets...</div>
+        <div id="valPersonalPacing" style="margin-top:6px;"></div>
+      </div>
+
+      <div class="commission-banner">
+        <div style="font-weight: 800; font-size: 0.88rem; margin-bottom: 6px; color: var(--primary-dark);">
+          💰 House Brand Commission Tracker (~3.5% Avg):
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div style="background: white; padding: 8px; border-radius: 10px; text-align: center; border: 1px solid #ce93d8;">
+            <div style="font-size: 0.65rem; color: #7b1fa2; font-weight: 800;">TODAY'S EARNINGS</div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: #00796b; margin-top: 2px;" id="valDailyCommission">RM 0.00</div>
+          </div>
+          <div style="background: white; padding: 8px; border-radius: 10px; text-align: center; border: 1px solid #ce93d8;">
+            <div style="font-size: 0.65rem; color: #7b1fa2; font-weight: 800;">MTD ACCUMULATED</div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: var(--primary); margin-top: 2px;" id="valMtdCommission">RM 0.00</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="personal-rec">
+        <b>💡 Your Personal Clinical Focus Today:</b>
+        <div id="valPersonalRec" style="margin-top:4px;">Loading recommendation...</div>
+      </div>
+    </div>
+
+    <!-- Manager Control Panel -->
+    <div id="managerPanel" class="card" style="border: 1px solid #ab47bc;">
+      <h2 style="color: #6a1b9a;">🔒 Manager Report & Screenshot Hub</h2>
+      <button class="btn btn-copy" onclick="copyWhatsAppBriefing()">📋 Copy WhatsApp Briefing</button>
+      <a id="btnDlDirector" class="btn btn-image" href="https://drive.google.com/file/d/1I9iDAmGoU_a_fIeS5jXkM9--ITeoKDdu/view?usp=drivesdk" target="_blank">📸 Download Directors 7-Day Screenshot (Ultra-HD)</a>
+      <a id="btnDlTeammate" class="btn btn-image" style="background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%);" href="https://drive.google.com/file/d/1jQQt8VL9YIkhoj680Jp_sWs8Gs2GopKf/view?usp=drivesdk" target="_blank">📸 Download Teammates Gap Screenshot (Ultra-HD)</a>
+
+      <div class="congrats-card" style="margin-top:12px;">
+        <b>🏆 Today's Congratulation Board:</b>
+        <div id="congratsPreview" style="margin-top:4px;">Loading achievers...</div>
+      </div>
+
+      <div style="overflow-x:auto; margin-top:12px;">
+        <table id="teammatesTable">
+          <thead><tr><th>Name</th><th>TS (RM)</th><th>HB (RM)</th><th>HB %</th><th>Cust</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 2: VIRTUAL PET ==================== -->
+  <div id="petView">
+    <div class="card">
+      <h2>
+        <span>🐾 <span id="petNameTitle">My KS Buddy</span></span>
+        <button class="btn-logout" style="background:#e1bee7; color:var(--primary-dark); font-weight:800;" onclick="openRealmSelectModal()">Change Realm 🔄</button>
+      </h2>
+
+      <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:800; margin-bottom:4px;">
+        <span id="petStageBadge" style="color:var(--primary);">Baby Hatchling</span>
+        <span id="petLevelText">Level 1</span>
+        <span id="petExpText">EXP: 0 / 50</span>
+      </div>
+      <div class="progress-bar-bg" style="margin-bottom:12px;">
+        <div class="progress-bar-fill" id="petExpBar" style="width:0%;"></div>
+      </div>
+
+      <!-- Habitat with Equipped Accessories -->
+      <div class="pet-habitat" id="petRoom">
+        <div class="pet-speech" id="petSpeechBubble">Answer a House Brand quiz to care for me! 🌟</div>
+        <br>
+        <div class="pet-avatar-wrapper">
+          <div class="pet-avatar pet-bounce" id="petAvatar" onclick="triggerPetCare('play')">🐣</div>
+          <div class="equipped-badge" id="petEquippedAccessory"></div>
+        </div>
+        <div class="poop-item" id="poopElement" style="display:none;" onclick="triggerPetCare('clean')" title="Tap to clean poop!">💩</div>
+      </div>
+
+      <button class="btn" style="background:linear-gradient(135deg, #ab47bc 0%, #ce93d8 100%); margin-bottom:10px;" onclick="openPetWardrobeModal()">🛍️ Anime & Movie Wardrobe</button>
+
+      <div class="pet-meters">
+        <div class="meter-card">
+          <div class="meter-label">HUNGER ❤️</div>
+          <div class="meter-bar-bg"><div class="meter-bar-fill fill-hunger" id="meterHunger" style="width:80%;"></div></div>
+          <div style="font-size:0.65rem; color:#555; margin-top:2px;" id="textHunger">80%</div>
+        </div>
+        <div class="meter-card">
+          <div class="meter-label">HAPPY ⭐</div>
+          <div class="meter-bar-bg"><div class="meter-bar-fill fill-happy" id="meterHappy" style="width:80%;"></div></div>
+          <div style="font-size:0.65rem; color:#555; margin-top:2px;" id="textHappy">80%</div>
+        </div>
+        <div class="meter-card">
+          <div class="meter-label">CLEAN ✨</div>
+          <div class="meter-bar-bg"><div class="meter-bar-fill fill-clean" id="meterClean" style="width:100%;"></div></div>
+          <div style="font-size:0.65rem; color:#555; margin-top:2px;" id="textClean">100%</div>
+        </div>
+      </div>
+
+      <div class="pet-actions">
+        <button class="btn-pet" onclick="triggerPetCare('feed')">🍎<br>Feed Snack<br><span style="font-size:0.6rem; color:#888;">Quiz & Eat</span></button>
+        <button class="btn-pet" onclick="triggerPetCare('play')">🎾<br>Play Ball<br><span style="font-size:0.6rem; color:#888;">Quiz & Play</span></button>
+        <button class="btn-pet" onclick="triggerPetCare('clean')">🧹<br>Clean Room<br><span style="font-size:0.6rem; color:#888;">Quiz & Clean</span></button>
+        <button class="btn-pet" onclick="sleepPet()" id="btnSleep">💤<br>Sleep / Rest<br><span style="font-size:0.6rem; color:#888;">Energy</span></button>
+      </div>
+
+      <div id="petSalesFeastBox" style="background:#e8f5e9; border:1.5px solid #2e7d32; border-radius:12px; padding:10px; margin-top:14px; display:flex; align-items:center; justify-content:space-between;">
+        <div>
+          <div style="font-size:0.75rem; font-weight:800; color:#1b5e20;">🌟 DAILY TARGET PET FEAST</div>
+          <div style="font-size:0.68rem; color:#2e7d32;">Hit TS, HB, or HM today to unlock +50 Bonus EXP!</div>
+        </div>
+        <button class="btn" id="btnClaimFeast" style="width:auto; margin:0; padding:6px 10px; font-size:0.72rem; background:#2e7d32;" onclick="claimTargetFeast()">Claim 🎁</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 3: KS HERBAL FARM ==================== -->
+  <div id="farmView">
+    <div class="card" style="border: 2px solid #81c784;">
+      <h2>
+        <span>🌾 <span id="farmTitleName">Kota Sentosa Herbal Farm</span></span>
+        <button class="btn-logout" style="background:#c8e6c9; color:#1b5e20; font-weight:800;" onclick="openFarmDecorModal()">🏪 Decor Shop</button>
+      </h2>
+
+      <div class="farm-header-box">
+        <span>🪙 HB Coins: <span id="farmGoldText">0</span></span>
+        <span>🌾 Harvested: <span id="farmHarvestCount">0</span></span>
+      </div>
+
+      <div class="decor-terrace" id="farmDecorTerrace"></div>
+
+      <div style="font-size:0.75rem; font-weight:800; color:#2e7d32; margin-top:6px;">SELECT HERBAL SEED TO PLANT:</div>
+      <div class="seed-tray">
+        <div class="seed-btn active" id="seed_ginkgo" onclick="selectCropSeed('ginkgo')">🌿<br>Ginkgo<br><span style="font-size:0.6rem; color:#666;">1 min</span></div>
+        <div class="seed-btn" id="seed_ginger" onclick="selectCropSeed('ginger')">🫚<br>Ginger<br><span style="font-size:0.6rem; color:#666;">3 mins</span></div>
+        <div class="seed-btn" id="seed_bilberry" onclick="selectCropSeed('bilberry')">🫐<br>Bilberry<br><span style="font-size:0.6rem; color:#666;">5 mins</span></div>
+        <div class="seed-btn" id="seed_cordyceps" onclick="selectCropSeed('cordyceps')">🌾<br>Cordyceps<br><span style="font-size:0.6rem; color:#666;">10 mins</span></div>
+      </div>
+
+      <div class="farm-plots-grid">
+        <div class="plot-card" id="plot_0" onclick="handlePlotClick(0)"><span class="crop-icon" id="plotIcon_0">🕳️</span><div style="font-weight:800; font-size:0.75rem;" id="plotName_0">Empty Plot</div><div style="font-size:0.65rem; color:#777;" id="plotTime_0">Tap to Plant</div></div>
+        <div class="plot-card" id="plot_1" onclick="handlePlotClick(1)"><span class="crop-icon" id="plotIcon_1">🕳️</span><div style="font-weight:800; font-size:0.75rem;" id="plotName_1">Empty Plot</div><div style="font-size:0.65rem; color:#777;" id="plotTime_1">Tap to Plant</div></div>
+        <div class="plot-card" id="plot_2" onclick="handlePlotClick(2)"><span class="crop-icon" id="plotIcon_2">🕳️</span><div style="font-weight:800; font-size:0.75rem;" id="plotName_2">Empty Plot</div><div style="font-size:0.65rem; color:#777;" id="plotTime_2">Tap to Plant</div></div>
+        <div class="plot-card" id="plot_3" onclick="handlePlotClick(3)"><span class="crop-icon" id="plotIcon_3">🕳️</span><div style="font-weight:800; font-size:0.75rem;" id="plotName_3">Empty Plot</div><div style="font-size:0.65rem; color:#777;" id="plotTime_3">Tap to Plant</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PET WARDROBE SHOP MODAL -->
+  <div class="shop-modal" id="wardrobeModal">
+    <div class="shop-card">
+      <h3 style="margin-top:0; color:var(--primary); display:flex; justify-content:space-between;">
+        <span>🛍️ Anime & Movie Wardrobe</span>
+        <button style="background:none; border:none; font-size:1.2rem; cursor:pointer;" onclick="closeShopModals()">✕</button>
+      </h3>
+      <div style="font-size:0.75rem; color:#555;">Spend your earned HB Commission Coins to dress up your pet!</div>
+      <div class="shop-grid" id="wardrobeShopGrid"></div>
+    </div>
+  </div>
+
+  <!-- FARM DECOR SHOP MODAL -->
+  <div class="shop-modal" id="decorModal">
+    <div class="shop-card">
+      <h3 style="margin-top:0; color:#2e7d32; display:flex; justify-content:space-between;">
+        <span>🏪 Farm Decoration Shop</span>
+        <button style="background:none; border:none; font-size:1.2rem; cursor:pointer;" onclick="closeShopModals()">✕</button>
+      </h3>
+      <div style="font-size:0.75rem; color:#555;">Decorate your herbal farm with items bought from HB sales!</div>
+      <div class="shop-grid" id="decorShopGrid"></div>
+    </div>
+  </div>
+
+  <!-- PET REALM SELECTOR MODAL -->
+  <div class="shop-modal" id="realmModal">
+    <div class="shop-card" style="text-align:center;">
+      <h3 style="margin-top:0; color:var(--primary);">✨ Choose Your Evolution Realm</h3>
+      <div style="font-size:0.75rem; color:#555; margin-bottom:12px;">Choose which species lineage your pet evolves into!</div>
+      <button class="btn" style="background:#ab47bc; margin-bottom:8px;" onclick="setPetRealm('anime')">⚡ Anime Legends (Demon Slayer, Pikachu)</button>
+      <button class="btn" style="background:#e65100; margin-bottom:8px;" onclick="setPetRealm('dino')">🦖 Prehistoric Dinosaurs (Raptor, T-Rex)</button>
+      <button class="btn" style="background:#1565c0; margin-bottom:8px;" onclick="setPetRealm('movie')">🦸 Movie & Pop Heroes (Panda, Sorcerer)</button>
+      <button class="btn" style="background:#00897b; margin-bottom:8px;" onclick="setPetRealm('mythic')">🦄 Mythical Beasts (Unicorn, Phoenix, Dragon)</button>
+      <button class="btn-logout" style="margin-top:8px;" onclick="closeShopModals()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- HOUSE BRAND CLINICAL QUIZ MODAL -->
+  <div id="quizModal">
+    <div class="quiz-card">
+      <div class="quiz-sku-badge" id="quizSkuBadge">House Brand Quiz</div>
+      <div class="quiz-question" id="quizQuestionText">Loading Question...</div>
+      <div class="quiz-options" id="quizOptionsContainer"></div>
+      <div class="quiz-feedback" id="quizFeedbackBox"></div>
+      <button class="btn" id="quizActionBtn" style="margin-top:12px; display:none;" onclick="closeQuizModal()">Continue</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAVIGATION -->
+  <div class="bottom-nav">
+    <button class="nav-tab active" id="tabNavPerf" onclick="switchAppTab('perf')">
+      <span class="tab-icon">📊</span><span>Performance</span>
+    </button>
+    <button class="nav-tab" id="tabNavPet" onclick="switchAppTab('pet')">
+      <span class="tab-icon">🐾</span><span>My Pet</span>
+    </button>
+    <button class="nav-tab" id="tabNavFarm" onclick="switchAppTab('farm')">
+      <span class="tab-icon">🌾</span><span>KS Farm</span>
+    </button>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbyDXiyZZuYYDN4e6w16HyoTXbKbLwmPCSqoJVAkuRd4iPTYQP7KGtMJZuaQ-NyyXgSZ-w/exec";
+    
+    const USER_CONFIGS = {
+      "6688": { name: "Chai Yee Sian (William)", role: "manager" },
+      "1003": { name: "Haniesha Louna", role: "staff" },
+      "1007": { name: "Kenix Ling", role: "staff" },
+      "1004": { name: "Daniela Janet", role: "staff" },
+      "1617": { name: "Nurhafizah Pauli", role: "staff" },
+      "1006": { name: "Muhammad Nur Farizin", role: "staff" },
+      "1002": { name: "Fiona Fiena", role: "staff" },
+      "1001": { name: "Jong Pei Choo", role: "staff" }
+    };
+
+    let currentUser = null;
+    let liveSheetData = null;
+
+    // --- EVOLUTION REALMS ---
+    const PET_REALMS = {
+      anime: {
+        name: "Anime Legends",
+        stages: [
+          { minLvl: 1, name: "Chibi Mystery Egg", avatar: "🥚" },
+          { minLvl: 4, name: "Baby Thunder Spark (Pikachu)", avatar: "⚡" },
+          { minLvl: 8, name: "Demon Slayer Swordsman (Tanjiro)", avatar: "⚔️" },
+          { minLvl: 12, name: "Nine-Tails Fox (Kurama)", avatar: "🦊" },
+          { minLvl: 20, name: "Super Saiyan Dragon", avatar: "🐲" }
+        ]
+      },
+      dino: {
+        name: "Dinosaur Titans",
+        stages: [
+          { minLvl: 1, name: "Prehistoric Fossil Egg", avatar: "🥚" },
+          { minLvl: 4, name: "Swift Raptor", avatar: "🦖" },
+          { minLvl: 8, name: "Armored Triceratops", avatar: "🦏" },
+          { minLvl: 12, name: "Apex T-Rex King", avatar: "🦕" },
+          { minLvl: 20, name: "Mecha-Godzilla Titan", avatar: "🤖" }
+        ]
+      },
+      movie: {
+        name: "Movie & Heroes",
+        stages: [
+          { minLvl: 1, name: "Heroic Cosmic Pod", avatar: "🥚" },
+          { minLvl: 4, name: "Kung Fu Panda", avatar: "🐼" },
+          { minLvl: 8, name: "Hogwarts Sorcerer", avatar: "🧙‍♂️" },
+          { minLvl: 12, name: "Gotham Knight", avatar: "🦇" },
+          { minLvl: 20, name: "Galaxy Avenger", avatar: "🦸" }
+        ]
+      },
+      mythic: {
+        name: "Mythical Beasts",
+        stages: [
+          { minLvl: 1, name: "Enchanted Starlight Egg", avatar: "🥚" },
+          { minLvl: 4, name: "Celestial Unicorn", avatar: "🦄" },
+          { minLvl: 8, name: "Royal Storm Griffin", avatar: "🦅" },
+          { minLvl: 12, name: "Immortal Phoenix", avatar: "🦚" },
+          { minLvl: 20, name: "Sovereign Jade Dragon", avatar: "🐉" }
+        ]
+      }
+    };
+
+    // --- WARDROBE & DECOR CATALOGS ---
+    const PET_ACCESSORIES = [
+      { id: "ds_haori", name: "Tanjiro Haori", icon: "👘", price: 250, desc: "Demon Slayer robe" },
+      { id: "ds_sword", name: "Nichirin Blade", icon: "⚔️", price: 300, desc: "Water breathing sword" },
+      { id: "nezuko_bamboo", name: "Nezuko Bamboo", icon: "🎋", price: 200, desc: "Protective charm" },
+      { id: "luffy_hat", name: "Luffy Straw Hat", icon: "👒", price: 250, desc: "Pirate king hat" },
+      { id: "ninja_band", name: "Ninja Headband", icon: "🥷", price: 200, desc: "Leaf village metal band" },
+      { id: "gold_crown", name: "Imperial Crown", icon: "👑", price: 400, desc: "For top HB sellers" },
+      { id: "hero_cape", name: "Dark Knight Cape", icon: "🦇", price: 300, desc: "Vigilante cape" },
+      { id: "wizard_wand", name: "Magic Wand", icon: "🪄", price: 250, desc: "Pure wizardry power" }
+    ];
+
+    const FARM_DECORATIONS = [
+      { id: "torii", name: "Japanese Torii", icon: "⛩️", price: 250, desc: "Sacred garden arch" },
+      { id: "windmill", name: "Rustic Windmill", icon: "💨", price: 300, desc: "Countryside windmill" },
+      { id: "mushrooms", name: "Fairy Mushrooms", icon: "🍄", price: 200, desc: "Glowing garden lights" },
+      { id: "fountain", name: "Marble Fountain", icon: "⛲", price: 350, desc: "Hydrates crops" },
+      { id: "tractor", name: "Harvest Tractor", icon: "🚜", price: 400, desc: "Pharmacy farm lifter" },
+      { id: "sunflowers", name: "Sunflower Fence", icon: "🌻", price: 200, desc: "Bright and cheerful" }
+    ];
+
+    // --- TAB SWITCHING ---
+    function switchAppTab(tab) {
+      const views = { perf: document.getElementById('performanceView'), pet: document.getElementById('petView'), farm: document.getElementById('farmView') };
+      const tabs = { perf: document.getElementById('tabNavPerf'), pet: document.getElementById('tabNavPet'), farm: document.getElementById('tabNavFarm') };
+
+      for (let k in views) {
+        views[k].style.display = (k === tab) ? 'block' : 'none';
+        tabs[k].className = (k === tab) ? 'nav-tab active' : 'nav-tab';
+      }
+      if (tab === 'pet') refreshPetUI();
+      if (tab === 'farm') refreshFarmUI();
+    }
+
+    // --- COIN SYSTEM (LINKED TO HB COMMISSION) ---
+    function getAvailableHbCoins() {
+      if (!currentUser || !liveSheetData || !liveSheetData.teammates) return 0;
+      const s = liveSheetData.teammates[currentUser.name] || {};
+      const commissionCoins = Math.floor((s.mtdCommission || 0) * 10);
+      const bonusCoins = (currentFarm ? currentFarm.bonusCoins || 0 : 0);
+      const spent = (currentPet ? currentPet.spentCoins || 0 : 0);
+      return Math.max(0, commissionCoins + bonusCoins - spent);
+    }
+
+    function deductHbCoins(amount) {
+      if (getAvailableHbCoins() < amount) return false;
+      if (!currentPet.spentCoins) currentPet.spentCoins = 0;
+      currentPet.spentCoins += amount;
+      savePetData();
+      refreshAllCoinDisplays();
+      return true;
+    }
+
+    function refreshAllCoinDisplays() {
+      const coins = getAvailableHbCoins();
+      document.getElementById('globalHbCoinsText').innerText = coins.toLocaleString();
+      document.getElementById('farmGoldText').innerText = coins.toLocaleString();
+    }
+
+    // --- PET WARDROBE SYSTEM ---
+    function openPetWardrobeModal() {
+      const grid = document.getElementById('wardrobeShopGrid');
+      grid.innerHTML = "";
+      const coins = getAvailableHbCoins();
+
+      PET_ACCESSORIES.forEach(item => {
+        const isOwned = currentPet.ownedAccessories && currentPet.ownedAccessories.includes(item.id);
+        const isEquipped = currentPet.equippedAccessory === item.id;
+
+        const card = document.createElement('div');
+        card.className = "shop-item-card";
+        card.innerHTML = `
+          <div class="shop-item-icon">${item.icon}</div>
+          <b>${item.name}</b>
+          <div style="color:#666; font-size:0.65rem; margin:2px 0;">${item.desc}</div>
+          <div style="font-weight:800; color:#f57f17; margin:4px 0;">🪙 ${item.price} Coins</div>
+          <button class="btn" style="padding:6px; font-size:0.7rem; margin:0; background:${isEquipped ? '#c62828' : (isOwned ? '#00796b' : 'var(--primary-gradient)')}" onclick="handleWardrobeClick('${item.id}', ${item.price})">
+            ${isEquipped ? 'Unequip ✕' : (isOwned ? 'Equip 👘' : 'Buy 🪙')}
+          </button>
+        `;
+        grid.appendChild(card);
+      });
+
+      document.getElementById('wardrobeModal').style.display = "flex";
+    }
+
+    function handleWardrobeClick(itemId, price) {
+      if (!currentPet.ownedAccessories) currentPet.ownedAccessories = [];
+      const isOwned = currentPet.ownedAccessories.includes(itemId);
+
+      if (isOwned) {
+        currentPet.equippedAccessory = (currentPet.equippedAccessory === itemId) ? null : itemId;
+        savePetData();
+        refreshPetUI();
+        openPetWardrobeModal();
+      } else {
+        if (deductHbCoins(price)) {
+          currentPet.ownedAccessories.push(itemId);
+          currentPet.equippedAccessory = itemId;
+          savePetData();
+          refreshPetUI();
+          openPetWardrobeModal();
+          alert("🎉 Purchased & Equipped! Looking stylish!");
+        } else {
+          alert("❌ Not enough HB Coins! Sell more House Brand products to earn commission coins!");
+        }
+      }
+    }
+
+    // --- FARM DECOR SYSTEM ---
+    function openFarmDecorModal() {
+      const grid = document.getElementById('decorShopGrid');
+      grid.innerHTML = "";
+
+      FARM_DECORATIONS.forEach(item => {
+        const isOwned = currentFarm.ownedDecor && currentFarm.ownedDecor.includes(item.id);
+
+        const card = document.createElement('div');
+        card.className = "shop-item-card";
+        card.innerHTML = `
+          <div class="shop-item-icon">${item.icon}</div>
+          <b>${item.name}</b>
+          <div style="color:#666; font-size:0.65rem; margin:2px 0;">${item.desc}</div>
+          <div style="font-weight:800; color:#f57f17; margin:4px 0;">🪙 ${item.price} Coins</div>
+          <button class="btn" style="padding:6px; font-size:0.7rem; margin:0; background:${isOwned ? '#757575' : '#2e7d32'}" onclick="handleDecorBuy('${item.id}', ${item.price})" ${isOwned ? 'disabled' : ''}>
+            ${isOwned ? 'Installed ✅' : 'Buy 🪙'}
+          </button>
+        `;
+        grid.appendChild(card);
+      });
+
+      document.getElementById('decorModal').style.display = "flex";
+    }
+
+    function handleDecorBuy(itemId, price) {
+      if (!currentFarm.ownedDecor) currentFarm.ownedDecor = [];
+      if (deductHbCoins(price)) {
+        currentFarm.ownedDecor.push(itemId);
+        saveFarmData();
+        refreshFarmUI();
+        openFarmDecorModal();
+        alert("🎉 Farm decoration installed!");
+      } else {
+        alert("❌ Not enough HB Coins! Push House Brand items at the counter to earn more coins!");
+      }
+    }
+
+    function openRealmSelectModal() {
+      document.getElementById('realmModal').style.display = "flex";
+    }
+
+    function setPetRealm(realmId) {
+      if (!currentPet) return;
+      currentPet.realm = realmId;
+      savePetData();
+      refreshPetUI();
+      closeShopModals();
+      showPetSpeech(`✨ Switched to ${PET_REALMS[realmId].name}! Ready to evolve!`);
+    }
+
+    function closeShopModals() {
+      document.getElementById('wardrobeModal').style.display = "none";
+      document.getElementById('decorModal').style.display = "none";
+      document.getElementById('realmModal').style.display = "none";
+    }
+
+    // --- 50-QUESTION MASTER CLINICAL QUIZ BANK ---
+    let HB_QUIZ_BANK = [
+      { sku: "Nutribridge Suppflora", q: "What is the primary clinical benefit of Nutribridge Suppflora Probiotics?", options: ["Restore intestinal microflora & relieve bloating", "Suppress dry night cough", "Reduce elevated blood pressure", "Relieve acute migraine"], ans: 0, tip: "Suppflora restores gut microbiome balance, especially after antibiotics or for indigestion." },
+      { sku: "Biowell B'llox", q: "Which House Brand product is recommended for rapid acid reflux and gastric discomfort?", options: ["Biowell B'llox Gastric Relief", "VK King Kong Balm", "Livemore Lutein & Bilberry", "JH Nutrition Omega-3"], ans: 0, tip: "B'llox buffers stomach acid and provides soothing mucoprotective gastric relief." },
+      { sku: "Nutribridge Suppflora", q: "When a customer purchases oral antibiotics, what is the best House Brand cross-sell?", options: ["Nutribridge Suppflora Probiotics", "VK King Kong Balm", "Livemore Vitaglo Chewables", "Taiwan Herbal Ginger Patch"], ans: 0, tip: "Pairing antibiotics with Suppflora (2 hours apart) prevents antibiotic-associated diarrhea." },
+      { sku: "Biowell B'llox", q: "A customer experiences post-meal fullness, acid regurgitation, and stomach burning. What to recommend?", options: ["Biowell B'llox Gastric Relief", "V-Infinity Vtrox Spray", "Arthri-Flex Glucosamine", "Livemore Lutein"], ans: 0, tip: "B'llox offers fast relief for upper digestive acid irritation and dyspepsia." },
+      { sku: "Nutribridge Suppflora", q: "For irritable bowel symptoms and erratic stool consistency, how should Suppflora be taken?", options: ["1 sachet daily with room temperature water", "Boiled with hot water", "Taken only during fever", "Applied topically"], ans: 0, tip: "Never mix probiotics with hot water (>40°C) as heat destroys live cultures." },
+      { sku: "Biowell B'llox", q: "Which active mechanism allows Biowell B'llox to relieve gastric irritation quickly?", options: ["Fast acid-neutralizing and mucosal-soothing action", "Blocking histamine in airways", "Thinning bronchial phlegm", "Stimulating intestinal peristalsis"], ans: 0, tip: "B'llox neutralizes localized acidity directly upon reaching the gastric lumen." },
+      { sku: "JH Nutrition Citazinc", q: "What is the key synergistic formula in JH Nutrition Citazinc?", options: ["Vitamin C + Elemental Zinc", "Glucosamine + Chondroitin", "Calcium + Vitamin D3", "Omega-3 + CoQ10"], ans: 0, tip: "Vitamin C and Zinc work synergistically to support white blood cell activity and shorten colds." },
+      { sku: "V-Infinity Vtrox", q: "V-Infinity Vtrox Throat Spray is most effective for which symptom?", options: ["Acute pharyngeal soreness and throat irritation", "Knee joint stiffness", "Skin eczema flare-up", "Gastric bloating"], ans: 0, tip: "Vtrox delivers targeted herbal antibacterial and anti-inflammatory relief to throat tissues." },
+      { sku: "JH Nutrition Flvright", q: "What indication is JH Nutrition Flvright Vegecaps primarily formulated for?", options: ["Early cold, flu symptoms and runny nose", "Chronic joint cartilage repair", "Constipation relief", "Dry cracked heels"], ans: 0, tip: "Flvright features targeted bioflavonoids to clear upper respiratory congestion at early onset." },
+      { sku: "V-Infinity Tyreps", q: "Which House Brand lozenge is ideal for soothing a dry, scratchy throat and hoarseness?", options: ["V-Infinity Tyreps Lozenges", "VK Dermsolve", "Arthri-Flex", "Livemore Gluco-Care"], ans: 0, tip: "Tyreps lozenges lubricate the throat lining and stimulate saliva production to relieve dry coughs." },
+      { sku: "Biowell Terrafast 500mg", q: "Biowell Terrafast 500mg is clinically used for:", options: ["Gentle, rapid relief of fever, headache and mild-moderate pain", "Long-term cholesterol reduction", "Eye fatigue relief", "Eczema hydration"], ans: 0, tip: "Terrafast contains premium paracetamol for fast, stomach-friendly fever and pain management." },
+      { sku: "JH Nutrition Citazinc", q: "When a patron buys cough syrup and paracetamol, what is the best House Brand add-on?", options: ["JH Nutrition Citazinc Effervescent/Capsules", "VK King Kong Balm", "Taiwan Herbal Ginger Patch", "Nutribridge Maxlim"], ans: 0, tip: "Citazinc enhances cellular defense to shorten viral respiratory episode duration." },
+      { sku: "V-Infinity Vtrox", q: "How should a patient administer V-Infinity Vtrox Throat Spray?", options: ["Spray 2-3 pumps directly toward the back of the throat", "Dilute in 500ml boiling water", "Rub onto chest and back", "Swallow with meals"], ans: 0, tip: "Direct spray ensures maximal local mucosal concentration for immediate soothing." },
+      { sku: "Arthri-Flex", q: "What is the primary therapeutic purpose of Arthri-Flex Glucosamine?", options: ["Repair joint cartilage & restore knee mobility", "Rapid fever reduction", "Sore throat relief", "Skin brightening"], ans: 0, tip: "Arthri-Flex provides essential glycosaminoglycans to stimulate synovial fluid and rebuild cartilage." },
+      { sku: "Taiwan Herbal Ginger Patch", q: "Which House Brand product is ideal for stiff shoulders, backache, and lumbar pain?", options: ["Taiwan Herbal Ginger Patch", "Livemore Vitaglo", "JH Nutrition Citazinc", "Nutribridge Suppflora"], ans: 0, tip: "Taiwan Herbal Ginger Patches provide deep-penetrating warming therapy to relieve muscular tension." },
+      { sku: "VK King Kong Balm", q: "VK King Kong Balm is formulated for:", options: ["Rapid relief of sprains, muscle aches, insect bites and headaches", "Chronic diabetes maintenance", "Gastric acid buffer", "Facial acne treatment"], ans: 0, tip: "VK King Kong Balm combines camphor, menthol and essential oils for fast counter-irritant relief." },
+      { sku: "Arthri-Flex", q: "An elderly customer complains of clicking knees when climbing stairs. Recommend:", options: ["Arthri-Flex Glucosamine daily for at least 3 months", "Single dose paracetamol only", "Nutribridge Maxlim Coffee", "V-Infinity Vtrox Spray"], ans: 0, tip: "Cartilage regeneration requires consistent daily chondroprotective supplementation for 8-12 weeks." },
+      { sku: "Taiwan Herbal Ginger Patch", q: "What is the recommended application duration for Taiwan Herbal Ginger Patches?", options: ["Apply to clean, dry skin for 6-8 hours", "Leave on continuously for 3 days", "Apply only in the shower", "Apply over open wounds"], ans: 0, tip: "6–8 hours provides optimal therapeutic heat without causing localized skin irritation." },
+      { sku: "VK King Kong Balm", q: "When a customer buys oral pain tablets for muscle sprain, what is a great checkout pairing?", options: ["VK King Kong Balm or Taiwan Herbal Ginger Patches", "Biowell B'llox", "Livemore Lutein", "Nutribridge Suppflora"], ans: 0, tip: "Combining oral NSAIDs with topical heat patches/balms provides synergistic multi-target pain relief." },
+      { sku: "VK Dermsolve Lotion", q: "VK Dermsolve Lotion is specially formulated for which skin type?", options: ["Dry, sensitive, eczema-prone, and itchy skin", "Severe fungal ringworm", "Open burn blisters", "Greasy acne-prone skin"], ans: 0, tip: "VK Dermsolve provides intensive ceramide and lipid replenishment without steroids." },
+      { sku: "VK Dermsolve Lotion", q: "Why is VK Dermsolve Lotion safe for daily maintenance in children and sensitive adults?", options: ["100% steroid-free, fragrance-free, gentle hypoallergenic formula", "Contains strong corticosteroid hormones", "Contains alcohol to dry skin", "Contains bleaching agents"], ans: 0, tip: "Being steroid-free prevents skin thinning, tachyphylaxis, and rebound dermatitis." },
+      { sku: "Dermacare Cream", q: "What is the ideal application timing for moisturizing dry or atopic skin?", options: ["Within 3 minutes after bathing while skin is slightly damp", "Only once a week before sleeping", "Only after scratching until bleeding", "Right before swimming"], ans: 0, tip: "Applying immediately post-bath locks in water molecules before trans-epidermal evaporation occurs." },
+      { sku: "VK Dermsolve Lotion", q: "When a customer buys an antihistamine for an itchy rash, what is the best House Brand pairing?", options: ["VK Dermsolve Lotion to soothe and hydrate the skin barrier", "Nutribridge Maxlim Coffee", "Arthri-Flex Glucosamine", "Livemore Gluco-Care"], ans: 0, tip: "Oral antihistamines reduce the itch reflex while topical Dermsolve repairs the dry skin barrier." },
+      { sku: "JH Nutrition Omega-3", q: "JH Nutrition Omega-3 Fish Oil 1200mg provides high EPA/DHA to support:", options: ["Healthy blood triglyceride levels, cardiovascular elasticity & brain health", "Acute nasal decongestion", "Gastric ulcer healing", "Muscle strain recovery"], ans: 0, tip: "EPA/DHA reduce triglyceride synthesis, promote endothelial function, and reduce inflammation." },
+      { sku: "CoQ10 150mg", q: "Why is CoQ10 150mg highly recommended for patients taking statin cholesterol medications?", options: ["Statins deplete endogenous CoQ10, leading to muscle fatigue and cramps", "Statins increase stomach acid", "CoQ10 acts as a blood thinner", "Statins cause dry throat"], ans: 0, tip: "Statins block natural CoQ10 synthesis; replenishing CoQ10 relieves statin-induced muscle aches." },
+      { sku: "Livemore Gluco-Care", q: "Livemore Gluco-Care is formulated to assist with which health objective?", options: ["Healthy blood sugar balance & cellular glucose uptake", "Rapid fever control", "Ear canal inflammation", "Immediate hair regrowth"], ans: 0, tip: "Gluco-Care combines chromium and botanicals to optimize insulin sensitivity." },
+      { sku: "JH Nutrition Omega-3", q: "What is the key quality attribute of pharmaceutical-grade fish oil like JH Nutrition Omega-3?", options: ["Molecularly distilled for purity from heavy metals and mercury", "Flavored with artificial sugar", "Contains high cholesterol", "Made from warm-water freshwater fish"], ans: 0, tip: "Molecular distillation removes environmental toxins, PCBs, and heavy metals." },
+      { sku: "CoQ10 150mg", q: "In addition to cardiovascular cellular energy, CoQ10 acts as a potent:", options: ["Lipid-soluble antioxidant protecting cell membranes", "Fast-acting antihistamine", "Strong broad-spectrum antibiotic", "Sedative sleep inducer"], ans: 0, tip: "CoQ10 neutralizes free radicals in mitochondrial membranes, supporting heart muscle vitality." },
+      { sku: "Livemore Gluco-Care", q: "For a chronic diabetic patient picking up Metformin, what is an appropriate House Brand pair?", options: ["Livemore Gluco-Care and CoQ10 for vascular & metabolic support", "VK King Kong Balm", "V-Infinity Vtrox Spray", "Tyreps Lozenges"], ans: 0, tip: "Pairing anti-diabetic medications with metabolic nutritional support protects microvascular health." },
+      { sku: "Livemore Lutein & Bilberry", q: "Livemore Lutein & Bilberry is primarily recommended for:", options: ["Filtering blue light, reducing digital eye strain & macular protection", "Relieving foot cramps", "Lowering fever", "Soothing throat hoarseness"], ans: 0, tip: "Lutein deposits in the retinal macula to filter harmful short-wavelength blue light." },
+      { sku: "Ginkgo Biloba 120mg", q: "What is the primary pharmacological action of standardized Ginkgo Biloba 120mg?", options: ["Enhance cerebral & peripheral microcirculation, supporting memory and reducing tinnitus", "Suppress dry coughing", "Neutralize stomach acid", "Lubricate knee joints"], ans: 0, tip: "Ginkgo dilates microcapillaries and improves oxygenation to the brain and inner ear." },
+      { sku: "Livemore Lutein & Bilberry", q: "A customer complains of tired, dry, blurry eyes after 8 hours on a computer. Recommend:", options: ["Livemore Lutein & Bilberry plus hydrating eye drops", "Taiwan Herbal Ginger Patch", "VK King Kong Balm", "Nutribridge Maxlim Coffee"], ans: 0, tip: "Bilberry anthocyanins promote rhodopsin regeneration and microcapillary blood flow in eyes." },
+      { sku: "Ginkgo Biloba 120mg", q: "Patients experiencing cold hands/feet, numbness, and mild forgetfulness benefit most from:", options: ["Standardized Ginkgo Biloba 120mg", "Biowell B'llox", "VK Dermsolve Lotion", "Biowell Terrafast"], ans: 0, tip: "Ginkgo enhances peripheral microvascular perfusion to warm extremities and sharpen recall." },
+      { sku: "Nutribridge Maxlim Coffee", q: "What is the primary function of Nutribridge Maxlim Coffee?", options: ["Promote thermogenic metabolism, energy expenditure & appetite management", "Deep tranquilizing sleep aid", "Wound sterilization", "Relieving sore throat"], ans: 0, tip: "Maxlim incorporates natural botanical extracts that support metabolic thermogenesis." },
+      { sku: "Nutribridge Cordyceps", q: "Nutribridge Cordyceps is traditionally and clinically valued for:", options: ["Supporting lung capacity, respiratory stamina, kidney vitality & fatigue recovery", "Skin whitening", "Rapid acid indigestion relief", "Nasal decongestion"], ans: 0, tip: "Cordyceps increases cellular ATP production and improves oxygen utilization efficiency." },
+      { sku: "Nutribridge Maxlim Coffee", q: "When is the best time for a customer to enjoy Nutribridge Maxlim Coffee?", options: ["In the morning or 30 minutes before exercise", "Right before going to bed at midnight", "During acute fever", "With heavy antibiotics"], ans: 0, tip: "Morning consumption energizes daily metabolism and supports sustained stamina." },
+      { sku: "Nutribridge Cordyceps", q: "For a customer recovering from prolonged illness and feeling constantly drained, recommend:", options: ["Nutribridge Cordyceps Capsules", "VK King Kong Balm", "Dermacare Cream", "Tyreps Lozenges"], ans: 0, tip: "Cordyceps tonifies Qi, nourishes lung energetics, and speeds up physical recuperation." },
+      { sku: "Livemore Vitaglo Chewables", q: "Livemore Vitaglo Chewable Tablets are formulated for:", options: ["Comprehensive daily vitamins & minerals for growing children and picky eaters", "Relieving joint arthritis in elderly", "Neutralizing stomach acidity", "Treating fungal skin rash"], ans: 0, tip: "Vitaglo delivers essential micronutrients in delicious chewable format for growing kids." },
+      { sku: "Calcium + Vitamin D3", q: "Why is Vitamin D3 always formulated alongside Calcium in bone health supplements?", options: ["Vitamin D3 is essential for active intestinal absorption of Calcium into bones", "Vitamin D3 adds sweet taste", "Vitamin D3 acts as a painkiller", "Vitamin D3 lowers cholesterol"], ans: 0, tip: "Without Vitamin D3, less than 15% of ingested calcium can be absorbed from the gut." },
+      { sku: "Livemore Vitaglo Chewables", q: "A mother requests a children's multivitamin because her child avoids vegetables. Recommend:", options: ["Livemore Vitaglo Chewables", "Arthri-Flex", "Nutribridge Maxlim", "VK King Kong Balm"], ans: 0, tip: "Vitaglo covers dietary micronutrient gaps in pediatric development with safe, balanced daily doses." },
+      { sku: "Calcium + Vitamin D3", q: "Which population group has the greatest clinical need for daily Calcium + Vitamin D3?", options: ["Post-menopausal women and elderly at risk of osteopenia/osteoporosis", "Athletes with muscle sprain", "Patients with acute cold/cough", "Individuals with stomach ulcer"], ans: 0, tip: "Estrogen decline post-menopause accelerates bone mineral loss; Calcium + D3 preserves bone density." },
+      { sku: "Taiwan Herbal Ginger Patch", q: "A driver complains of lower back ache after long hours of driving. Best practical advice:", options: ["Taiwan Herbal Ginger Patch on lumbar area + oral muscle relaxant if needed", "Nutribridge Maxlim Coffee", "Eye drops only", "Vitamin C only"], ans: 0, tip: "Ginger patches offer continuous warming pain relief while seated without causing drowsiness." },
+      { sku: "V-Infinity Vtrox", q: "A teacher loses her voice and has throat dryness before exams. What should she carry?", options: ["V-Infinity Vtrox Throat Spray and Tyreps Lozenges", "VK Dermsolve Lotion", "Biowell B'llox", "Arthri-Flex Glucosamine"], ans: 0, tip: "Portable throat sprays provide instant voice lubrication and mucosal anti-inflammatory relief." },
+      { sku: "JH Nutrition Citazinc", q: "What is the recommended daily timing for taking JH Nutrition Citazinc?", options: ["After breakfast or lunch with plenty of water", "On an empty stomach before sleeping", "Only when fever exceeds 39°C", "Dissolved in hot tea"], ans: 0, tip: "Taking zinc and vitamin C post-meal prevents gastric irritation and optimizes absorption." },
+      { sku: "Nutribridge Suppflora", q: "A patient asks: 'Why take probiotics when buying gastric medicine?' Best clinical answer:", options: ["Probiotics restore healthy digestion and reduce bloating caused by altered stomach acid balance", "Probiotics are only for taste", "Gastric medicine causes sore throat", "Probiotics lower blood pressure"], ans: 0, tip: "Suppflora balances the lower gastrointestinal tract when antacids or PPIs alter natural gastric pH." },
+      { sku: "VK Dermsolve Lotion", q: "A mother asks for steroid cream for a toddler's mild red dry cheeks. Best safer alternative:", options: ["VK Dermsolve Lotion to repair the skin barrier without steroid side effects", "Strong hydrocortisone on face", "VK King Kong Balm", "Taiwan Herbal Ginger Patch"], ans: 0, tip: "Pediatric facial skin is thin; steroid-free barrier moisturizers like Dermsolve are the safest choice." },
+      { sku: "Arthri-Flex", q: "Why choose Arthri-Flex over standard painkillers alone for chronic osteoarthritis?", options: ["Arthri-Flex addresses root cartilage breakdown, whereas painkillers only mask symptoms", "Arthri-Flex works in 5 minutes", "Painkillers are illegal", "Arthri-Flex is an antibiotic"], ans: 0, tip: "Glucosamine promotes structural cartilage remodeling rather than merely blocking pain signals." },
+      { sku: "JH Nutrition Omega-3", q: "When a customer asks how to store fish oil capsules in humid Malaysian weather:", options: ["Store in a cool, dry place below 30°C away from direct sunlight, or in the refrigerator", "Leave on the car dashboard under direct sun", "Freeze in ice cubes", "Leave bottle cap open"], ans: 0, tip: "Heat and UV light cause oxidation and rancidity in polyunsaturated fatty acids." },
+      { sku: "Biowell Terrafast 500mg", q: "What is the maximum daily safe dose of Paracetamol (Biowell Terrafast 500mg) for an adult?", options: ["4,000mg (8 tablets of 500mg) in 24 hours", "10,000mg in 24 hours", "2 tablets once a week", "1 tablet every 30 minutes indefinitely"], ans: 0, tip: "Exceeding 4,000mg paracetamol within 24 hours poses severe risks of hepatotoxicity." },
+      { sku: "Biowell B'llox", q: "How should a patient take Biowell B'llox for optimal heartburn relief?", options: ["Chew or take 1-2 tablets after meals or at the onset of heartburn symptoms", "Dissolve in boiling tea", "Take only once a month", "Rub onto the abdomen"], ans: 0, tip: "Taking B'llox post-meal or upon symptom onset allows direct acid neutralization when gastric acid is highest." }
+    ];
+
+    let pendingQuizCallback = null;
+
+    function openQuizModal(reasonText, callbackOnSuccess) {
+      pendingQuizCallback = callbackOnSuccess;
+      const qObj = HB_QUIZ_BANK[Math.floor(Math.random() * HB_QUIZ_BANK.length)];
+      
+      const correctText = qObj.options[qObj.ans || 0];
+      const shuffled = [...qObj.options].sort(() => Math.random() - 0.5);
+      const correctIdx = shuffled.indexOf(correctText);
+
+      document.getElementById('quizSkuBadge').innerText = (qObj.sku || "House Brand") + " Challenge";
+      document.getElementById('quizQuestionText').innerText = qObj.q;
+
+      const optsCont = document.getElementById('quizOptionsContainer');
+      optsCont.innerHTML = "";
+
+      const feedback = document.getElementById('quizFeedbackBox');
+      feedback.style.display = "none";
+      document.getElementById('quizActionBtn').style.display = "none";
+
+      shuffled.forEach((optText, idx) => {
+        const btn = document.createElement('button');
+        btn.className = "quiz-opt-btn";
+        btn.innerText = optText;
+        btn.onclick = () => handleQuizAnswer(idx, correctIdx, qObj.tip);
+        optsCont.appendChild(btn);
+      });
+
+      document.getElementById('quizModal').style.display = "flex";
+    }
+
+    function handleQuizAnswer(chosenIdx, correctIdx, tip) {
+      const feedback = document.getElementById('quizFeedbackBox');
+      const actionBtn = document.getElementById('quizActionBtn');
+      const btns = document.getElementById('quizOptionsContainer').querySelectorAll('button');
+
+      btns.forEach((b, i) => {
+        b.disabled = true;
+        if (i === correctIdx) b.style.borderColor = "#2e7d32";
+        if (i === chosenIdx && i !== correctIdx) b.style.borderColor = "#c62828";
+      });
+
+      feedback.style.display = "block";
+      actionBtn.style.display = "block";
+
+      if (chosenIdx === correctIdx) {
+        feedback.className = "quiz-feedback feedback-correct";
+        feedback.innerHTML = `✅ <b>CORRECT!</b><br>${tip}`;
+        actionBtn.innerText = "Claim Reward ⭐";
+        actionBtn.onclick = () => {
+          document.getElementById('quizModal').style.display = "none";
+          if (pendingQuizCallback) pendingQuizCallback(true);
+        };
+      } else {
+        feedback.className = "quiz-feedback feedback-wrong";
+        feedback.innerHTML = `❌ <b>CLINICAL NOTE:</b><br>${tip}`;
+        actionBtn.innerText = "Try Again 🔄";
+        actionBtn.onclick = () => {
+          document.getElementById('quizModal').style.display = "none";
+        };
+      }
+    }
+
+    function closeQuizModal() {
+      document.getElementById('quizModal').style.display = "none";
+    }
+
+    // --- KS HERBAL FARM ENGINE ---
+    const FARM_CROPS = {
+      ginkgo: { name: "Ginkgo Herb", icon: "🌿", growTimeSec: 60, rewardGold: 25, rewardExp: 15 },
+      ginger: { name: "Ginger Root", icon: "🫚", growTimeSec: 180, rewardGold: 55, rewardExp: 30 },
+      bilberry: { name: "Bilberry Berry", icon: "🫐", growTimeSec: 300, rewardGold: 95, rewardExp: 50 },
+      cordyceps: { name: "Golden Cordyceps", icon: "🌾", growTimeSec: 600, rewardGold: 180, rewardExp: 90 }
+    };
+
+    let selectedCropSeed = 'ginkgo';
+    let currentFarm = null;
+    let farmTimerInterval = null;
+
+    function getFarmStorageKey() {
+      const name = currentUser ? currentUser.name : "guest";
+      return "ks_farm_" + name.replace(/[^a-zA-Z0-9]/g, "_");
+    }
+
+    function loadFarmData() {
+      const key = getFarmStorageKey();
+      const saved = localStorage.getItem(key);
+
+      if (saved) {
+        try { currentFarm = JSON.parse(saved); } catch(e) { currentFarm = null; }
+      }
+
+      if (!currentFarm) {
+        currentFarm = {
+          bonusCoins: 0,
+          level: 1,
+          exp: 0,
+          harvestCount: 0,
+          ownedDecor: [],
+          plots: [
+            { cropId: null, plantedAt: 0 },
+            { cropId: null, plantedAt: 0 },
+            { cropId: null, plantedAt: 0 },
+            { cropId: null, plantedAt: 0 }
+          ]
+        };
+      }
+      saveFarmData();
+      refreshFarmUI();
+
+      if (farmTimerInterval) clearInterval(farmTimerInterval);
+      farmTimerInterval = setInterval(refreshFarmUI, 2000);
+    }
+
+    function saveFarmData() {
+      if (!currentFarm) return;
+      localStorage.setItem(getFarmStorageKey(), JSON.stringify(currentFarm));
+    }
+
+    function selectCropSeed(seedId) {
+      selectedCropSeed = seedId;
+      document.querySelectorAll('.seed-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('seed_' + seedId).classList.add('active');
+    }
+
+    function handlePlotClick(plotIdx) {
+      if (!currentFarm) return;
+      const plot = currentFarm.plots[plotIdx];
+      const now = Date.now();
+
+      if (!plot.cropId) {
+        plot.cropId = selectedCropSeed;
+        plot.plantedAt = now;
+        saveFarmData();
+        refreshFarmUI();
+      } else {
+        const def = FARM_CROPS[plot.cropId];
+        const elapsed = (now - plot.plantedAt) / 1000;
+        
+        if (elapsed >= def.growTimeSec) {
+          openQuizModal(`Harvest ${def.name}`, () => {
+            currentFarm.bonusCoins = (currentFarm.bonusCoins || 0) + def.rewardGold;
+            currentFarm.exp += def.rewardExp;
+            currentFarm.harvestCount++;
+            plot.cropId = null;
+            plot.plantedAt = 0;
+
+            if (currentPet) {
+              currentPet.hunger = Math.min(100, currentPet.hunger + 15);
+              savePetData();
+            }
+
+            saveFarmData();
+            refreshFarmUI();
+            refreshAllCoinDisplays();
+          });
+        } else {
+          alert(`🌱 Still growing! Ready in ${Math.round(def.growTimeSec - elapsed)} seconds.`);
+        }
+      }
+    }
+
+    function refreshFarmUI() {
+      if (!currentFarm) return;
+      refreshAllCoinDisplays();
+      document.getElementById('farmHarvestCount').innerText = currentFarm.harvestCount;
+
+      const terrace = document.getElementById('farmDecorTerrace');
+      terrace.innerHTML = "";
+      if (currentFarm.ownedDecor && currentFarm.ownedDecor.length > 0) {
+        currentFarm.ownedDecor.forEach(dId => {
+          const dObj = FARM_DECORATIONS.find(item => item.id === dId);
+          if (dObj) {
+            const span = document.createElement('span');
+            span.className = "decor-badge";
+            span.innerText = dObj.icon;
+            span.title = dObj.name;
+            terrace.appendChild(span);
+          }
+        });
+      } else {
+        terrace.innerHTML = "<span style='font-size:0.68rem; color:#888;'>No decorations yet. Tap 'Decor Shop' above!</span>";
+      }
+
+      const now = Date.now();
+      currentFarm.plots.forEach((p, idx) => {
+        const card = document.getElementById('plot_' + idx);
+        const icon = document.getElementById('plotIcon_' + idx);
+        const name = document.getElementById('plotName_' + idx);
+        const time = document.getElementById('plotTime_' + idx);
+
+        if (!p.cropId) {
+          card.className = "plot-card";
+          icon.innerText = "🕳️";
+          name.innerText = "Empty Plot";
+          time.innerText = "Tap to Plant";
+        } else {
+          const def = FARM_CROPS[p.cropId];
+          const elapsed = (now - p.plantedAt) / 1000;
+
+          if (elapsed >= def.growTimeSec) {
+            card.className = "plot-card ready";
+            icon.innerText = def.icon;
+            name.innerText = def.name;
+            time.innerHTML = "<b style='color:#2e7d32;'>Ready! Tap to Quiz & Harvest</b>";
+          } else {
+            card.className = "plot-card growing";
+            icon.innerText = "🌱";
+            name.innerText = def.name;
+            const left = Math.round(def.growTimeSec - elapsed);
+            time.innerText = `Growing: ${left}s left`;
+          }
+        }
+      });
+    }
+
+    // --- TAMAGOTCHI PET CARE ACTIONS (QUIZ PROTECTED) ---
+    function triggerPetCare(actionType) {
+      if (!currentPet) return;
+
+      if (actionType === 'feed') {
+        if (currentPet.hunger >= 100) {
+          showPetSpeech("I'm completely full! Let's play instead! 🎾");
+          return;
+        }
+        openQuizModal("Feed Pet Snack", () => {
+          currentPet.hunger = Math.min(100, currentPet.hunger + 25);
+          showPetSpeech("Yum! That vitamin snack was delicious! 🍎 (+15 EXP)");
+          const av = document.getElementById('petAvatar');
+          av.className = "pet-avatar pet-eating";
+          setTimeout(() => av.className = "pet-avatar pet-bounce", 1200);
+          addPetExp(15);
+        });
+      } else if (actionType === 'play') {
+        if (currentPet.isSleeping) {
+          showPetSpeech("Shh... I'm sleeping! Wake me up first! 💤");
+          return;
+        }
+        openQuizModal("Play with Pet", () => {
+          currentPet.happiness = Math.min(100, currentPet.happiness + 20);
+          currentPet.hunger = Math.max(5, currentPet.hunger - 6);
+          showPetSpeech("Yay! Playing catch is so much fun! ⭐ (+10 EXP)");
+          addPetExp(10);
+        });
+      } else if (actionType === 'clean') {
+        if (!currentPet.hasPoop) {
+          showPetSpeech("The room is sparkling clean already! ✨");
+          return;
+        }
+        openQuizModal("Clean Up Room", () => {
+          currentPet.hasPoop = false;
+          currentPet.cleanliness = 100;
+          showPetSpeech("Thank you for cleaning! All fresh and tidy! 🧹 (+20 EXP)");
+          addPetExp(20);
+        });
+      }
+    }
+
+    // --- TAMAGOTCHI PET ENGINE ---
+    let currentPet = null;
+
+    function getPetStorageKey() {
+      const name = currentUser ? currentUser.name : "guest";
+      return "ks_pet_" + name.replace(/[^a-zA-Z0-9]/g, "_");
+    }
+
+    function loadPetData() {
+      const key = getPetStorageKey();
+      const saved = localStorage.getItem(key);
+      const now = Date.now();
+
+      if (saved) {
+        try { currentPet = JSON.parse(saved); } catch(e) { currentPet = null; }
+      }
+
+      if (!currentPet) {
+        currentPet = {
+          name: (currentUser ? currentUser.name.split(" ")[0] : "My") + "'s Buddy",
+          realm: "anime",
+          level: 1,
+          exp: 0,
+          hunger: 80,
+          happiness: 80,
+          cleanliness: 100,
+          hasPoop: false,
+          isSleeping: false,
+          spentCoins: 0,
+          ownedAccessories: [],
+          equippedAccessory: null,
+          lastUpdated: now,
+          lastFeastDate: ""
+        };
+      }
+
+      const elapsedHours = (now - (currentPet.lastUpdated || now)) / (1000 * 60 * 60);
+      if (elapsedHours > 0.5) {
+        const decaySteps = Math.floor(elapsedHours / 2);
+        if (decaySteps > 0) {
+          currentPet.hunger = Math.max(10, currentPet.hunger - decaySteps * 12);
+          currentPet.happiness = Math.max(10, currentPet.happiness - decaySteps * 10);
+          if (decaySteps >= 2) currentPet.hasPoop = true;
+          currentPet.lastUpdated = now;
+        }
+      }
+      savePetData();
+      refreshPetUI();
+    }
+
+    function savePetData() {
+      if (!currentPet) return;
+      currentPet.lastUpdated = Date.now();
+      localStorage.setItem(getPetStorageKey(), JSON.stringify(currentPet));
+    }
+
+    function getPetStageData(realmId, level) {
+      const realm = PET_REALMS[realmId] || PET_REALMS['anime'];
+      let stage = realm.stages[0];
+      for (let s of realm.stages) {
+        if (level >= s.minLvl) stage = s;
+      }
+      return stage;
+    }
+
+    function addPetExp(pts) {
+      if (!currentPet) return;
+      currentPet.exp += pts;
+      const reqExp = currentPet.level * 50;
+      if (currentPet.exp >= reqExp) {
+        currentPet.level++;
+        currentPet.exp -= reqExp;
+        const newStage = getPetStageData(currentPet.realm || 'anime', currentPet.level);
+        showPetSpeech(`🎉 EVOLUTION! Now Level ${currentPet.level}: ${newStage.name}!`);
+      }
+      savePetData();
+      refreshPetUI();
+    }
+
+    function refreshPetUI() {
+      if (!currentPet) return;
+      refreshAllCoinDisplays();
+
+      const stage = getPetStageData(currentPet.realm || 'anime', currentPet.level);
+
+      document.getElementById('petNameTitle').innerText = currentPet.name;
+      document.getElementById('petStageBadge').innerText = stage.name;
+      document.getElementById('petLevelText').innerText = `Level ${currentPet.level}`;
+
+      const reqExp = currentPet.level * 50;
+      document.getElementById('petExpText').innerText = `EXP: ${currentPet.exp} / ${reqExp}`;
+      document.getElementById('petExpBar').style.width = Math.min(100, (currentPet.exp / reqExp) * 100) + "%";
+
+      const avatarEl = document.getElementById('petAvatar');
+      if (currentPet.isSleeping) {
+        avatarEl.innerText = "💤";
+        document.getElementById('btnSleep').innerHTML = "☀️<br>Wake Up<br><span style='font-size:0.6rem; color:#888;'>Active</span>";
+      } else {
+        avatarEl.innerText = stage.avatar;
+        document.getElementById('btnSleep').innerHTML = "💤<br>Sleep / Rest<br><span style='font-size:0.6rem; color:#888;'>Energy</span>";
+      }
+
+      const accBadge = document.getElementById('petEquippedAccessory');
+      if (currentPet.equippedAccessory) {
+        const itemObj = PET_ACCESSORIES.find(i => i.id === currentPet.equippedAccessory);
+        accBadge.innerText = itemObj ? itemObj.icon : "";
+        accBadge.style.display = "block";
+      } else {
+        accBadge.style.display = "none";
+      }
+
+      document.getElementById('poopElement').style.display = currentPet.hasPoop ? "block" : "none";
+
+      document.getElementById('meterHunger').style.width = currentPet.hunger + "%";
+      document.getElementById('textHunger').innerText = Math.round(currentPet.hunger) + "%";
+      document.getElementById('meterHappy').style.width = currentPet.happiness + "%";
+      document.getElementById('textHappy').innerText = Math.round(currentPet.happiness) + "%";
+      document.getElementById('meterClean').style.width = (currentPet.hasPoop ? 30 : 100) + "%";
+      document.getElementById('textClean').innerText = (currentPet.hasPoop ? "30%" : "100%");
+
+      checkDailyTargetFeast();
+    }
+
+    function showPetSpeech(msg) {
+      const el = document.getElementById('petSpeechBubble');
+      el.innerText = msg;
+      el.style.transform = "scale(1.1)";
+      setTimeout(() => el.style.transform = "scale(1)", 200);
+    }
+
+    function sleepPet() {
+      if (!currentPet) return;
+      currentPet.isSleeping = !currentPet.isSleeping;
+      if (currentPet.isSleeping) showPetSpeech("Good night! Sweet dreams... 💤");
+      else showPetSpeech("Good morning! Ready for a great day! ☀️");
+      savePetData();
+      refreshPetUI();
+    }
+
+    function checkDailyTargetFeast() {
+      if (!currentPet || !currentUser || !liveSheetData || !liveSheetData.teammates) return;
+      const todayDate = (liveSheetData.dailySummary && liveSheetData.dailySummary.date) || "Today";
+      const s = liveSheetData.teammates[currentUser.name];
+      const btn = document.getElementById('btnClaimFeast');
+
+      if (!s || !btn) return;
+      const hitAny = (s.dailyTs >= s.dailyTsTarget) || (s.dailyHb >= s.dailyHbTarget) || (s.dailyHm >= s.dailyHmTarget);
+
+      if (currentPet.lastFeastDate === todayDate) {
+        btn.innerText = "Claimed ✅";
+        btn.disabled = true;
+        btn.style.background = "#757575";
+      } else if (hitAny) {
+        btn.innerText = "Claim 🎁";
+        btn.disabled = false;
+        btn.style.background = "#2e7d32";
+      } else {
+        btn.innerText = "Locked 🔒";
+        btn.disabled = true;
+        btn.style.background = "#9e9e9e";
+      }
+    }
+
+    function claimTargetFeast() {
+      if (!currentPet || !liveSheetData) return;
+      const todayDate = (liveSheetData.dailySummary && liveSheetData.dailySummary.date) || "Today";
+      currentPet.lastFeastDate = todayDate;
+      currentPet.hunger = 100;
+      currentPet.happiness = 100;
+      showPetSpeech("🏆 Target Feast claimed! Fully energized! (+50 Bonus EXP) 🌟");
+      addPetExp(50);
+      refreshPetUI();
+    }
+
+    // --- BGM CONTROLLER ---
+    function startBgm() {
+      const audio = document.getElementById('bgmAudio');
+      if (!audio) return;
+      audio.play().then(() => updateMusicButtonUI()).catch(e => updateMusicButtonUI());
+    }
+
+    function stopMusic() {
+      const audio = document.getElementById('bgmAudio');
+      if (audio) { audio.pause(); audio.currentTime = 0; }
+      updateMusicButtonUI();
+    }
+
+    function toggleMusic() {
+      const audio = document.getElementById('bgmAudio');
+      if (!audio) return;
+      if (audio.paused) startBgm();
+      else { audio.pause(); updateMusicButtonUI(); }
+    }
+
+    function updateMusicButtonUI() {
+      const btn = document.getElementById('musicToggleBtn');
+      const audio = document.getElementById('bgmAudio');
+      if (!btn) return;
+      btn.innerHTML = (audio && !audio.paused) ? '🎵 BGM: ON' : '🔇 BGM: OFF';
+    }
+
+    // --- PIN UNLOCK ---
+    function verifyPin() {
+      const pinInput = document.getElementById("pinCode");
+      const pin = pinInput ? pinInput.value.trim() : "";
+
+      if (USER_CONFIGS[pin]) {
+        currentUser = USER_CONFIGS[pin];
+        localStorage.setItem("pmg_auth_pin", pin);
+        
+        const overlay = document.getElementById("pinOverlay");
+        if (overlay) overlay.style.display = "none";
+        
+        try { startBgm(); } catch(e) {}
+        loadPetData();
+        loadFarmData();
+        loadData();
+      } else {
+        const err = document.getElementById("pinError");
+        if (err) err.style.display = "block";
+      }
+    }
+
+    function logout() {
+      stopMusic();
+      localStorage.removeItem("pmg_auth_pin");
+      currentUser = null;
+      document.getElementById("pinCode").value = "";
+      document.getElementById("pinOverlay").style.display = "flex";
+      document.getElementById("managerPanel").style.display = "none";
+    }
+
+    async function loadData() {
+      document.getElementById("lastUpdated").innerText = "Connecting to Google Sheet...";
+      try {
+        const res = await fetch(API_URL, { redirect: "follow" });
+        liveSheetData = await res.json();
+        
+        if (liveSheetData && liveSheetData.teammates) {
+          document.getElementById("lastUpdated").innerText = `Live Sheet Data • Updated: ${liveSheetData.updatedAt || 'Today'}`;
+          
+          if (liveSheetData.directorsReportDriveUrl) {
+            document.getElementById("btnDlDirector").href = liveSheetData.directorsReportDriveUrl;
+          }
+          if (liveSheetData.teammatesGapDriveUrl) {
+            document.getElementById("btnDlTeammate").href = liveSheetData.teammatesGapDriveUrl;
+          }
+
+          if (liveSheetData.hbQuizBank && liveSheetData.hbQuizBank.length > 0) {
+            HB_QUIZ_BANK = liveSheetData.hbQuizBank;
+          }
+
+          renderOutletMission();
+          renderUserDashboard();
+          renderTeammatesTable();
+          renderCongratsPreview();
+          checkDailyTargetFeast();
+          refreshAllCoinDisplays();
+        }
+      } catch (e) {
+        document.getElementById("lastUpdated").innerText = "Sync issue. Tap Lock 🔒 to retry.";
+      }
+    }
+
+    function renderOutletMission() {
+      if (!liveSheetData) return;
+      const s = liveSheetData.dailySummary || {};
+
+      let mtdTs = s.mtdTotalSales || 0;
+      let mtdHb = s.mtdHbSales || 0;
+
+      if (mtdTs <= 0 && liveSheetData.teammates) {
+        mtdTs = Object.values(liveSheetData.teammates).reduce((acc, tm) => acc + (tm.mtdTs || 0), 0);
+      }
+      if (mtdHb <= 0 && liveSheetData.teammates) {
+        mtdHb = Object.values(liveSheetData.teammates).reduce((acc, tm) => acc + (tm.mtdHb || 0), 0);
+      }
+
+      const tsTarget = s.tsTarget || 331000.0;
+      const hbTier3 = s.hbTier3Target || 171800.0;
+      const hbTier2 = s.hbTier2Target || 161900.0;
+      const hbTier1 = s.hbTier1Target || 152750.0;
+
+      const tsPct = Math.min(100, (mtdTs / tsTarget) * 100);
+      const hbPct = Math.min(100, (mtdHb / hbTier3) * 100);
+
+      document.getElementById("outletTsProgressText").innerText = `RM ${mtdTs.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} / RM ${tsTarget.toLocaleString()} (${tsPct.toFixed(1)}%)`;
+      document.getElementById("outletTsBar").style.width = tsPct + "%";
+
+      document.getElementById("outletHbProgressText").innerText = `RM ${mtdHb.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} / RM ${hbTier3.toLocaleString()} (${hbPct.toFixed(1)}%)`;
+      document.getElementById("outletHbBar").style.width = hbPct + "%";
+
+      const day = s.dayOfMonth || 7;
+      const expTsPace = (tsTarget / 30) * day;
+      const expHbPace = (hbTier3 / 30) * day;
+      const tsDiff = mtdTs - expTsPace;
+      const hbDiff = mtdHb - expHbPace;
+
+      document.getElementById("outletTsPacingBadge").innerHTML = tsDiff >= 0 ? 
+        `<span class="status-badge badge-ontrack">🟢 ON TRACK (+RM ${Math.abs(tsDiff).toFixed(0)} ahead of Day ${day} pace)</span>` : 
+        `<span class="status-badge badge-behind">⚠️ -RM ${Math.abs(tsDiff).toFixed(0)} vs Day ${day} pace</span>`;
+
+      document.getElementById("outletHbPacingBadge").innerHTML = hbDiff >= 0 ? 
+        `<span class="status-badge badge-ahead">🚀 AHEAD (+RM ${Math.abs(hbDiff).toFixed(0)} vs Day ${day} Tier 3 pace)</span>` : 
+        `<span class="status-badge badge-behind">⚡ PUSH NEEDED (-RM ${Math.abs(hbDiff).toFixed(0)} vs Day ${day} Tier 3 pace)</span>`;
+
+      const t1Box = document.getElementById("tier1Box");
+      const t2Box = document.getElementById("tier2Box");
+      const t3Box = document.getElementById("tier3Box");
+      const t1Badge = document.getElementById("tier1Badge");
+      const t2Badge = document.getElementById("tier2Badge");
+      const t3Badge = document.getElementById("tier3Badge");
+      const statusBanner = document.getElementById("rewardStatusBanner");
+
+      if (mtdHb >= hbTier3) {
+        t1Box.className = "tier-box unlocked"; t1Badge.className = "tier-badge badge-unlocked"; t1Badge.innerText = "UNLOCKED";
+        t2Box.className = "tier-box unlocked"; t2Badge.className = "tier-badge badge-unlocked"; t2Badge.innerText = "UNLOCKED";
+        t3Box.className = "tier-box unlocked"; t3Badge.className = "tier-badge badge-unlocked"; t3Badge.innerText = "UNLOCKED 🏆";
+        statusBanner.innerHTML = "🏆 <b>TIER 3 MAX REWARD UNLOCKED!</b> Full RM 500.00 cash bonus achieved for each teammate!";
+      } else if (mtdHb >= hbTier2) {
+        t1Box.className = "tier-box unlocked"; t1Badge.className = "tier-badge badge-unlocked"; t1Badge.innerText = "UNLOCKED";
+        t2Box.className = "tier-box unlocked"; t2Badge.className = "tier-badge badge-unlocked"; t2Badge.innerText = "UNLOCKED";
+        t3Box.className = "tier-box active"; t3Badge.className = "tier-badge badge-locked"; t3Badge.innerText = "NEXT GOAL";
+        const rem = hbTier3 - mtdHb;
+        statusBanner.innerHTML = `🎉 <b>TIER 2 UNLOCKED (+RM 375 reward)!</b> RM ${rem.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} more to unlock <b>TIER 3 (+RM 500 reward)</b>!`;
+      } else if (mtdHb >= hbTier1) {
+        t1Box.className = "tier-box unlocked"; t1Badge.className = "tier-badge badge-unlocked"; t1Badge.innerText = "UNLOCKED";
+        t2Box.className = "tier-box active"; t2Badge.className = "tier-badge badge-locked"; t2Badge.innerText = "NEXT GOAL";
+        t3Box.className = "tier-box"; t3Badge.className = "tier-badge badge-locked"; t3Badge.innerText = "LOCKED";
+        const rem = hbTier2 - mtdHb;
+        statusBanner.innerHTML = `🎉 <b>TIER 1 UNLOCKED (+RM 250 reward)!</b> RM ${rem.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} more to unlock <b>TIER 2 (+RM 375 reward)</b>!`;
+      } else {
+        t1Box.className = "tier-box active"; t1Badge.className = "tier-badge badge-locked"; t1Badge.innerText = "IN PROGRESS";
+        t2Box.className = "tier-box"; t2Badge.className = "tier-badge badge-locked"; t2Badge.innerText = "LOCKED";
+        t3Box.className = "tier-box"; t3Badge.className = "tier-badge badge-locked"; t3Badge.innerText = "LOCKED";
+        const rem = hbTier1 - mtdHb;
+        statusBanner.innerHTML = `🎯 <b>RM ${rem.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})} more in HB</b> to unlock <b>TIER 1 (RM 250 reward per person)</b>!`;
+      }
+    }
+
+    function renderUserDashboard() {
+      if (!currentUser || !liveSheetData || !liveSheetData.teammates) return;
+      const userName = currentUser.name;
+      document.getElementById("userNameHeader").innerText = `👤 ${userName}`;
+
+      document.getElementById("managerPanel").style.display = currentUser.role === "manager" ? "block" : "none";
+
+      const s = liveSheetData.teammates[userName] || { dailyTs: 0, dailyHb: 0, dailyHm: 0, dailyCust: 0, dailyCommission: 0, mtdTs: 0, mtdHb: 0, mtdHm: 0, mtdCust: 0, mtdCommission: 0, tsTarget: 43030, hbTarget: 22334, hmTarget: 4303 };
+
+      document.getElementById("valTS").innerText = "RM " + (s.dailyTs || 0).toFixed(2);
+      document.getElementById("valHB").innerText = "RM " + (s.dailyHb || 0).toFixed(2);
+      document.getElementById("valHM").innerText = "RM " + (s.dailyHm || 0).toFixed(2);
+      document.getElementById("valCust").innerText = s.dailyCust || 0;
+
+      const tsRem = Math.max(0, s.tsTarget - (s.mtdTs || 0));
+      const hbRem = Math.max(0, s.hbTarget - (s.mtdHb || 0));
+      const hmRem = Math.max(0, s.hmTarget - (s.mtdHm || 0));
+
+      document.getElementById("valRemainingTarget").innerHTML = `
+        • TS Target Left: <b>RM ${tsRem.toFixed(2)}</b> (Target: RM ${s.tsTarget.toLocaleString()})<br>
+        • HB Target Left: <b>RM ${hbRem.toFixed(2)}</b> (Target: RM ${s.hbTarget.toLocaleString()})<br>
+        • HM Target Left: <b>RM ${hmRem.toFixed(2)}</b> (Target: RM ${s.hmTarget.toLocaleString()})
+      `;
+
+      const day = (liveSheetData.dailySummary && liveSheetData.dailySummary.dayOfMonth) || 7;
+      const expectedPace = (s.tsTarget / 30) * day;
+      const pacingDiff = (s.mtdTs || 0) - expectedPace;
+
+      if (pacingDiff >= 500) {
+        document.getElementById("valPersonalPacing").innerHTML = `<span class="status-badge badge-ahead">🚀 AHEAD OF PACE (+RM ${pacingDiff.toFixed(0)} above Day ${day} target)</span>`;
+      } else if (pacingDiff >= -250) {
+        document.getElementById("valPersonalPacing").innerHTML = `<span class="status-badge badge-ontrack">🟢 ON TRACK (On pace for Day ${day})</span>`;
+      } else {
+        document.getElementById("valPersonalPacing").innerHTML = `<span class="status-badge badge-behind">⚡ PUSH NEEDED (-RM ${Math.abs(pacingDiff).toFixed(0)} vs Day ${day} target)</span>`;
+      }
+
+      document.getElementById("valDailyCommission").innerText = "RM " + (s.dailyCommission || 0).toFixed(2);
+      document.getElementById("valMtdCommission").innerText = "RM " + (s.mtdCommission || 0).toFixed(2);
+
+      const rec = (liveSheetData.recommendations && liveSheetData.recommendations[userName]) || "Focus on pairing routine OTC transactions with House Brand supplements.";
+      document.getElementById("valPersonalRec").innerText = rec;
+    }
+
+    function renderCongratsPreview() {
+      if (!liveSheetData || !liveSheetData.teammates) return;
+      let html = "";
+      for (const [name, val] of Object.entries(liveSheetData.teammates)) {
+        let hits = [];
+        if (val.dailyTs >= val.dailyTsTarget) hits.push("TS");
+        if (val.dailyHb >= val.dailyHbTarget) hits.push("HB");
+        if (val.dailyHm >= val.dailyHmTarget) hits.push("HM");
+        if (hits.length > 0) {
+          html += `• <b>${name.split(" ")[0]}</b> - Hit target for: ${hits.join(", ")}<br>`;
+        }
+      }
+      document.getElementById("congratsPreview").innerHTML = html || "No target hits recorded today.";
+    }
+
+    function renderTeammatesTable() {
+      if (!liveSheetData || !liveSheetData.teammates) return;
+      const tbody = document.querySelector("#teammatesTable tbody");
+      tbody.innerHTML = "";
+      for (const [name, val] of Object.entries(liveSheetData.teammates)) {
+        const mtdTs = val.mtdTs || 0;
+        const mtdHb = val.mtdHb || 0;
+        const mtdCust = val.mtdCust || 0;
+        tbody.innerHTML += `<tr>
+          <td>${name.split(" ")[0]}</td>
+          <td>${mtdTs.toFixed(0)}</td>
+          <td>${mtdHb.toFixed(0)}</td>
+          <td>${((mtdHb / (mtdTs || 1)) * 100).toFixed(0)}%</td>
+          <td>${mtdCust}</td>
+        </tr>`;
+      }
+    }
+
+    function copyWhatsAppBriefing() {
+      if (!liveSheetData) return;
+      const s = liveSheetData.dailySummary || {};
+
+      let mtdTs = s.mtdTotalSales || 0;
+      let mtdHb = s.mtdHbSales || 0;
+      let mtdHm = s.mtdHmSales || 0;
+
+      if (mtdTs <= 0 && liveSheetData.teammates) {
+        mtdTs = Object.values(liveSheetData.teammates).reduce((acc, tm) => acc + (tm.mtdTs || 0), 0);
+      }
+      if (mtdHb <= 0 && liveSheetData.teammates) {
+        mtdHb = Object.values(liveSheetData.teammates).reduce((acc, tm) => acc + (tm.mtdHb || 0), 0);
+      }
+      if (mtdHm <= 0 && liveSheetData.teammates) {
+        mtdHm = Object.values(liveSheetData.teammates).reduce((acc, tm) => acc + (tm.mtdHm || 0), 0);
+      }
+
+      const tsPct = ((mtdTs / 331000) * 100).toFixed(1);
+      const hbPct = ((mtdHb / 171800) * 100).toFixed(1);
+      const hmPct = ((mtdHm / 33100) * 100).toFixed(1);
+
+      let text = `Date of briefing: ${s.date || '07-Sep-2026'}\n\n`;
+      text += `Target achievement:\n`;
+      text += `TS: RM ${mtdTs.toFixed(2)} / RM 331,000 (${tsPct}%) - ON TRACK 🟢\n`;
+      text += `HB: RM ${mtdHb.toFixed(2)} / RM 171,800 (${hbPct}%) - ON TRACK 🟢\n`;
+      text += `HM: RM ${mtdHm.toFixed(2)} / RM 33,100 (${hmPct}%) - AHEAD OF TRACK 🚀\n\n`;
+
+      text += `Personal target per day:\n`;
+      text += `Pharmacist & Assistant BM:\n`;
+      text += `TS: RM 1544.67 - 1655.00 | HB: RM 801.73 - 859.00 | HM: RM 154.47 - 165.50\n\n`;
+
+      text += `Pharmacist Assistants:\n`;
+      text += `TS: RM 1434.33 | HB: RM 744.47 | HM: RM 143.43\n\n`;
+
+      text += `🏆 Congratulation board (for those who hit personal target)\n`;
+      for (const [name, val] of Object.entries(liveSheetData.teammates)) {
+        let hits = [];
+        if (val.dailyTs >= val.dailyTsTarget) hits.push("TS");
+        if (val.dailyHb >= val.dailyHbTarget) hits.push("HB");
+        if (val.dailyHm >= val.dailyHmTarget) hits.push("HM");
+        if (hits.length > 0) {
+          text += `• ${name.split(" ")[0]} - Hit target for: ${hits.join(", ")}\n`;
+        }
+      }
+      text += `\n`;
+
+      text += `🎯 Outlet Strategic Priorities & Action Plans:\n`;
+      if (liveSheetData.tacticalActionPlans) {
+        liveSheetData.tacticalActionPlans.forEach((plan, idx) => {
+          text += `${idx + 1}. ${plan}\n`;
+        });
+      }
+      text += `\n`;
+
+      text += `👤 Individual Teammate Priorities:\n\n`;
+      for (const [name, tip] of Object.entries(liveSheetData.recommendations)) {
+        text += `• *${name.split(" ")[0]}:* ${tip}\n\n`;
+      }
+
+      text += `Let's have a great and productive week ahead!`;
+
+      navigator.clipboard.writeText(text);
+      alert("WhatsApp Daily Briefing copied to clipboard!");
+    }
+
+    window.onload = () => {
+      const savedPin = localStorage.getItem("pmg_auth_pin");
+      if (savedPin && USER_CONFIGS[savedPin]) {
+        currentUser = USER_CONFIGS[savedPin];
+        document.getElementById("pinOverlay").style.display = "none";
+        try { startBgm(); } catch(e) {}
+        loadPetData();
+        loadFarmData();
+        loadData();
+      }
+    };
+  </script>
