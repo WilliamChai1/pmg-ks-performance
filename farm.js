@@ -15,12 +15,12 @@ const FARM_DECORATIONS = [
   { id: "sunflowers", name: "Sunflower Fence", icon: "🌻", price: 200, desc: "Bright and cheerful" }
 ];
 
-let selectedCropSeed = 'ginkgo';
-let currentFarm = null;
-let farmTimerInterval = null;
+var selectedCropSeed = "ginkgo";
+var currentFarm = (typeof currentFarm !== "undefined" && currentFarm) ? currentFarm : null;
+var farmTimerInterval = null;
 
 function getFarmStorageKey() {
-  const name = currentUser ? currentUser.name : "guest";
+  const name = (typeof currentUser !== "undefined" && currentUser) ? currentUser.name : "guest";
   return "ks_farm_" + name.replace(/[^a-zA-Z0-9]/g, "_");
 }
 
@@ -92,14 +92,14 @@ function handlePlotClick(plotIdx) {
         plot.cropId = null;
         plot.plantedAt = 0;
 
-        if (currentPet) {
+        if (typeof currentPet !== 'undefined' && currentPet) {
           currentPet.hunger = Math.min(100, currentPet.hunger + 15);
-          savePetData();
+          if (typeof savePetData === 'function') savePetData();
         }
 
         saveFarmData();
         refreshFarmUI();
-        refreshAllCoinDisplays();
+        if (typeof refreshAllCoinDisplays === 'function') refreshAllCoinDisplays();
       });
     } else {
       alert(`🌱 Still growing! Ready in ${Math.round(def.growTimeSec - elapsed)} seconds.`);
@@ -109,7 +109,7 @@ function handlePlotClick(plotIdx) {
 
 function refreshFarmUI() {
   if (!currentFarm) return;
-  refreshAllCoinDisplays();
+  if (typeof refreshAllCoinDisplays === 'function') refreshAllCoinDisplays();
   setSafeText('farmHarvestCount', currentFarm.harvestCount);
 
   const terrace = document.getElementById('farmDecorTerrace');
