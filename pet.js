@@ -7,9 +7,9 @@ const CREATURE_ROSTER = [
     category: "Demon Slayer Anime",
     species: "Demon Slayer Tanjiro",
     stages: [
-      { minLvl: 4, name: "Tanjiro (Apprentice Swordsman)", sprite: "⚔️", subIcon: "🌊", badge: "Water Breathing" },
-      { minLvl: 8, name: "Tanjiro (Hinokami Sun Halo)", sprite: "🔥⚔️", subIcon: "☀️", badge: "Sun Breathing" },
-      { minLvl: 14, name: "Demon Slayer Pillar Legend", sprite: "👑⚔️", subIcon: "⚡", badge: "Hashira Rank" }
+      { minLvl: 4, name: "Tanjiro (Apprentice Swordsman)", sprite: "⚔️", imageSrc: "tanjiro.png", subIcon: "🌊", badge: "Water Breathing" },
+      { minLvl: 8, name: "Tanjiro (Hinokami Sun Halo)", sprite: "🔥⚔️", imageSrc: "tanjiro.png", subIcon: "☀️", badge: "Sun Breathing" },
+      { minLvl: 14, name: "Demon Slayer Pillar Legend", sprite: "👑⚔️", imageSrc: "tanjiro.png", subIcon: "⚡", badge: "Hashira Rank" }
     ],
     actionDialogue: "Water Breathing: First Form - Water Surface Slash! 🌊⚔️",
     actionClass: "act-slash"
