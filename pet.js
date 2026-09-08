@@ -53,10 +53,10 @@ const PET_ACCESSORIES = [
   { id: "wizard_wand", name: "Magic Wand", icon: "🪄", price: 250, desc: "Pure wizardry power" }
 ];
 
-let currentPet = null;
+var currentPet = (typeof currentPet !== "undefined" && currentPet) ? currentPet : null;
 
 function getPetStorageKey() {
-  const name = currentUser ? currentUser.name : "guest";
+  const name = (typeof currentUser !== "undefined" && currentUser) ? currentUser.name : "guest";
   return "ks_pet_" + name.replace(/[^a-zA-Z0-9]/g, "_");
 }
 
@@ -72,7 +72,7 @@ function loadPetData() {
 
     if (!currentPet) {
       currentPet = {
-        name: (currentUser ? currentUser.name.split(" ")[0] : "My") + "'s Buddy",
+        name: ((typeof currentUser !== "undefined" && currentUser) ? currentUser.name.split(" ")[0] : "My") + "'s Buddy",
         realm: "anime",
         level: 1,
         exp: 0,
@@ -137,7 +137,7 @@ function addPetExp(pts) {
 
 function refreshPetUI() {
   if (!currentPet) return;
-  refreshAllCoinDisplays();
+  if (typeof refreshAllCoinDisplays === 'function') refreshAllCoinDisplays();
 
   const stage = getPetStageData(currentPet.realm || 'anime', currentPet.level);
 
@@ -200,7 +200,7 @@ function sleepPet() {
 }
 
 function checkDailyTargetFeast() {
-  if (!currentPet || !currentUser || !liveSheetData || !liveSheetData.teammates) return;
+  if (!currentPet || (typeof currentUser === 'undefined' || !currentUser) || !liveSheetData || !liveSheetData.teammates) return;
   const todayDate = (liveSheetData.dailySummary && liveSheetData.dailySummary.date) || "Today";
   const s = liveSheetData.teammates[currentUser.name];
   const btn = document.getElementById('btnClaimFeast');
