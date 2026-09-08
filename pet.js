@@ -1,6 +1,5 @@
 // --- KS LIVING BUDDY & AUTONOMOUS ROAMING ENGINE ---
 
-// Master Creature Roster (Anime, Pokemon, Dinosaurs, Animals, Mythic)
 const CREATURE_ROSTER = [
   // 1. Anime Champions
   {
@@ -8,9 +7,9 @@ const CREATURE_ROSTER = [
     category: "Demon Slayer Anime",
     species: "Demon Slayer Tanjiro",
     stages: [
-      { minLvl: 4, name: "Tanjiro (Apprentice Swordsman)", sprite: "🦓", subIcon: "🌊", badge: "Water Breathing" },
-      { minLvl: 8, name: "Tanjiro (Hinokami Sun Halo)", sprite: "🐎", subIcon: "☀️", badge: "Sun Breathing" },
-      { minLvl: 14, name: "Demon Slayer Pillar Legend", sprite: "🏇", subIcon: "⚡", badge: "Hashira Rank" }
+      { minLvl: 4, name: "Tanjiro (Apprentice Swordsman)", sprite: "⚔️", subIcon: "🌊", badge: "Water Breathing" },
+      { minLvl: 8, name: "Tanjiro (Hinokami Sun Halo)", sprite: "🔥⚔️", subIcon: "☀️", badge: "Sun Breathing" },
+      { minLvl: 14, name: "Demon Slayer Pillar Legend", sprite: "👑⚔️", subIcon: "⚡", badge: "Hashira Rank" }
     ],
     actionDialogue: "Water Breathing: First Form - Water Surface Slash! 🌊⚔️",
     actionClass: "act-slash"
@@ -20,9 +19,9 @@ const CREATURE_ROSTER = [
     category: "Demon Slayer Anime",
     species: "Nezuko Kamado",
     stages: [
-      { minLvl: 4, name: "Chibi Nezuko (Bamboo Muzzle)", sprite: "🐶", subIcon: "🌸", badge: "Demon Girl" },
-      { minLvl: 8, name: "Awakened Nezuko (Horn Form)", sprite: "🐩", subIcon: "🔥", badge: "Blood Burst" },
-      { minLvl: 14, name: "Sun-Immune Sovereign Nezuko", sprite: "🦮", subIcon: "✨", badge: "Sun Conqueror" }
+      { minLvl: 4, name: "Chibi Nezuko (Blood Demon Art)", sprite: "🎋", imageSrc: "./nezuko.png", subIcon: "🌸", badge: "Demon Girl" },
+      { minLvl: 8, name: "Awakened Nezuko (Blood Burst)", sprite: "👹🎋", imageSrc: "./nezuko.png", subIcon: "🔥", badge: "Blood Burst" },
+      { minLvl: 14, name: "Sun-Immune Sovereign Nezuko", sprite: "☀️💖", imageSrc: "./nezuko.png", subIcon: "✨", badge: "Sun Conqueror" }
     ],
     actionDialogue: "Mmm-hmm! Blood Demon Art - Pyrokinesis! 🌸🔥",
     actionClass: "act-fire"
@@ -32,9 +31,9 @@ const CREATURE_ROSTER = [
     category: "One Piece Anime",
     species: "Monkey D. Luffy",
     stages: [
-      { minLvl: 4, name: "Straw Hat Luffy", sprite: "🐛", subIcon: "🍖", badge: "Rookie Pirate" },
-      { minLvl: 8, name: "Gear 2nd Steam Luffy", sprite: "🦋", subIcon: "👊", badge: "Gear Second" },
-      { minLvl: 14, name: "Sun God Nika (Gear 5th)", sprite: "🦅", subIcon: "🥁", badge: "Warrior of Liberation" }
+      { minLvl: 4, name: "Straw Hat Luffy", sprite: "👒", subIcon: "🍖", badge: "Rookie Pirate" },
+      { minLvl: 8, name: "Gear 2nd Steam Luffy", sprite: "💨👒", subIcon: "👊", badge: "Gear Second" },
+      { minLvl: 14, name: "Sun God Nika (Gear 5th)", sprite: "⚡☁️", subIcon: "🥁", badge: "Warrior of Liberation" }
     ],
     actionDialogue: "Gomu Gomu no Pistol! 👊💥 I'm gonna be King of the Pirates!",
     actionClass: "act-punch"
@@ -195,15 +194,13 @@ function loadPetData() {
     if (!currentPet) {
       currentPet = createNewPetEgg();
     } else if (!currentPet.creatureId) {
-      // Backward compatibility: map previous session realm to species
       if (currentPet.realm === "mythic") currentPet.creatureId = "unicorn";
-      else if (currentPet.realm === "anime") currentPet.creatureId = "tanjiro";
+      else if (currentPet.realm === "anime") currentPet.creatureId = "nezuko";
       else if (currentPet.realm === "dino") currentPet.creatureId = "trex";
       else if (currentPet.realm === "movie") currentPet.creatureId = "panda";
-      else currentPet.creatureId = "unicorn";
+      else currentPet.creatureId = "nezuko";
     }
 
-    // Decay over time
     const elapsedHours = (now - (currentPet.lastUpdated || now)) / (1000 * 60 * 60);
     if (elapsedHours > 0.5) {
       const decaySteps = Math.floor(elapsedHours / 2);
@@ -244,7 +241,7 @@ function getActiveCreatureData(creatureId, level) {
     };
   }
 
-  const creature = CREATURE_ROSTER.find(c => c.id === creatureId) || CREATURE_ROSTER[0];
+  const creature = CREATURE_ROSTER.find(c => c.id === creatureId) || CREATURE_ROSTER;
   let currentStage = creature.stages[0];
   for (let s of creature.stages) {
     if (level >= s.minLvl) currentStage = s;
@@ -255,6 +252,7 @@ function getActiveCreatureData(creatureId, level) {
     species: creature.species,
     name: currentStage.name,
     sprite: currentStage.sprite,
+    imageSrc: currentStage.imageSrc || null,
     subIcon: currentStage.subIcon,
     badge: currentStage.badge,
     actionDialogue: creature.actionDialogue,
@@ -262,7 +260,6 @@ function getActiveCreatureData(creatureId, level) {
   };
 }
 
-// Autonomous Roaming: Walking smoothly back and forth across the habitat
 function startPetRoaming() {
   if (petRoamInterval) clearInterval(petRoamInterval);
 
@@ -273,11 +270,9 @@ function startPetRoaming() {
     const figure = document.getElementById("petAvatar") || document.getElementById("petFigure");
     if (!actor || !figure) return;
 
-    // Move to random spot between 12% and 82%
     const targetX = Math.floor(Math.random() * 70) + 12;
     const isMovingRight = targetX >= petCurrentPosX;
 
-    // Flip horizontally to face walking direction
     actor.style.transform = isMovingRight ? "scaleX(1)" : "scaleX(-1)";
     figure.classList.add("walking-bob");
 
@@ -291,7 +286,6 @@ function startPetRoaming() {
   }, 4500);
 }
 
-// Signature Action Trigger
 function triggerSignatureAction() {
   if (!currentPet) return;
   const actor = document.getElementById("petActor");
@@ -319,7 +313,6 @@ function triggerSignatureAction() {
   }, 1400);
 }
 
-// TAPPING DIRECTLY ON PET = PLAY WITH IT!
 function handlePetDirectTap() {
   if (!currentPet) return;
   if (currentPet.isSleeping) {
@@ -327,7 +320,6 @@ function handlePetDirectTap() {
     return;
   }
   
-  // If Level 1-3 Egg, tap to pet and wobble
   if (currentPet.level < 4) {
     triggerSignatureAction();
     showPetSpeech("🥚 Wiggle! The egg is warm and happy! Feed & care to hatch!");
@@ -335,7 +327,6 @@ function handlePetDirectTap() {
     savePetData();
     refreshPetUI();
   } else {
-    // Hatched buddy: tapping directly opens Play & Quiz!
     triggerPetCare('play');
   }
 }
@@ -379,8 +370,15 @@ function refreshPetUI() {
   const figureEl = document.getElementById('petAvatar') || document.getElementById('petFigure');
   const sleepBtn = document.getElementById('btnSleep');
   if (figureEl) {
-    figureEl.innerText = currentPet.isSleeping ? "💤" : data.sprite;
+    if (currentPet.isSleeping) {
+      figureEl.innerHTML = "💤";
+    } else if (data.imageSrc) {
+      figureEl.innerHTML = `<img src="${data.imageSrc}" class="pet-img-sprite" alt="${data.name}" onerror="this.outerHTML='${data.sprite}'">`;
+    } else {
+      figureEl.innerText = data.sprite;
+    }
   }
+
   if (sleepBtn) {
     sleepBtn.innerHTML = currentPet.isSleeping ? "☀️<br>Wake Up<br><span style='font-size:0.6rem; color:#888;'>Active</span>" : "💤<br>Sleep / Rest<br><span style='font-size:0.6rem; color:#888;'>Energy</span>";
   }
