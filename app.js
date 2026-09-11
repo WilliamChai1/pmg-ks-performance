@@ -3,6 +3,7 @@ const API_URL = "https://script.google.com/macros/s/AKfycbyDXiyZZuYYDN4e6w16HyoT
 
 const USER_CONFIGS = {
   "6688": { name: "Chai Yee Sian (William)", role: "manager" },
+  "8899": { name: "Ting Kwang Yu", role: "manager" },
   "1003": { name: "Haniesha Louna", role: "staff" },
   "1007": { name: "Kenix Ling", role: "staff" },
   "1004": { name: "Daniela Janet", role: "staff" },
