@@ -3,7 +3,7 @@ const API_URL = "https://script.google.com/macros/s/AKfycbyDXiyZZuYYDN4e6w16HyoT
 
 const USER_CONFIGS = {
   "6688": { name: "Chai Yee Sian (William)", role: "manager" },
-  "8899": { name: "Ting Kwang Yu", role: "manager" },
+  "4885": { name: "Ting Kwang Yu", role: "manager" },
   "1003": { name: "Haniesha Louna", role: "staff" },
   "1007": { name: "Kenix Ling", role: "staff" },
   "1004": { name: "Daniela Janet", role: "staff" },
@@ -109,6 +109,12 @@ const BASELINE_FEED = {
       mtdTs: 8520.10, mtdHb: 3274.90, mtdHm: 780.30, mtdCust: 310, mtdCommission: 114.62,
       role: "Pharmacist Assistant", tsTarget: 43030.0, hbTarget: 22334.0, hmTarget: 4303.0,
       dailyTsTarget: 1434.33, dailyHbTarget: 744.47, dailyHmTarget: 143.43, isOnTrack: false
+    },
+    "Ting Kwang Yu": {
+      dailyTs: 0.00, dailyHb: 0.00, dailyHm: 0.00, dailyCust: 0, dailyCommission: 0.00,
+      mtdTs: 0.00, mtdHb: 0.00, mtdHm: 0.00, mtdCust: 0, mtdCommission: 0.00,
+      role: "Branch Manager", tsTarget: 46340.0, hbTarget: 24052.0, hmTarget: 4634.0,
+      dailyTsTarget: 1655.0, dailyHbTarget: 859.0, dailyHmTarget: 165.5, isOnTrack: true
     },
     "Kenix Ling": {
       dailyTs: 0.0, dailyHb: 0.0, dailyHm: 0.0, dailyCust: 0, dailyCommission: 0.0,
