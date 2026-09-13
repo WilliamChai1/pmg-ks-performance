@@ -1,71 +1,41 @@
-<!-- Personal Dashboard --
-    <div class="card">
-      <h2>
-        <span id="userNameHeader">👤 Personal Profile</span>
-        <button class="btn btn-logout" onclick="logout()">Lock 🔒</button>
-      </h2>
 
-      <div style="font-size:0.78rem; font-weight:800; color:var(--primary); margin-top:2px;" id="dailyLabelText">📅 TODAY'S PERFORMANCE (DAILY):</div>
-      <div class="metric-grid">
-        <div class="metric-box"><div class="label">TODAY TS</div><div class="val" id="valTS">RM 0.00</div></div>
-        <div class="metric-box"><div class="label">TODAY HB</div><div class="val" id="valHB">RM 0.00</div></div>
-        <div class="metric-box"><div class="label">TODAY HM</div><div class="val" id="valHM">RM 0.00</div></div>
-        <div class="metric-box"><div class="label">CUSTOMERS</div><div class="val" id="valCust">0</div></div>
-      </div>
-
-      <!-- MTD Cumulative Grid (Always Visible) -->
-      <div style="font-size:0.78rem; font-weight:800; color:#4a148c; margin-top:10px;">📊 YOUR MTD ACCUMULATED SALES (SEP 2026):</div>
-      <div class="metric-grid">
-        <div class="metric-box" style="background:#f3e5f5;"><div class="label">MTD TOTAL SALES</div><div class="val" id="valMtdTS" style="color:var(--primary-dark);">RM 0.00</div></div>
-        <div class="metric-box" style="background:#f3e5f5;"><div class="label">MTD HOUSE BRAND</div><div class="val" id="valMtdHB" style="color:#00796b;">RM 0.00</div></div>
-        <div class="metric-box" style="background:#f3e5f5;"><div class="label">MTD HIGH MARGIN</div><div class="val" id="valMtdHM">RM 0.00</div></div>
-        <div class="metric-box" style="background:#f3e5f5;"><div class="label">MTD PATIENTS</div><div class="val" id="valMtdCust">0</div></div>
-      </div>
-
-      <div class="gap-banner">
-        <b>🎯 Monthly Target Remaining (Sep 2026 MTD):</b>
-        <div id="valRemainingTarget" style="margin-top:4px;">Enter PIN to view</div>
-        <div id="valPersonalPacing" style="margin-top:6px;"></div>
-      </div>
-
-      <div class="commission-banner">
-        <div style="font-weight: 800; font-size: 0.88rem; margin-bottom: 6px; color: var(--primary-dark);">
-          💰 House Brand Commission Tracker (~3.5% Avg):
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-          <div style="background: white; padding: 8px; border-radius: 10px; text-align: center; border: 1px solid #ce93d8;">
-            <div style="font-size: 0.65rem; color: #7b1fa2; font-weight: 800;">TODAY'S EARNINGS</div>
-            <div style="font-size: 1.15rem; font-weight: 800; color: #00796b; margin-top: 2px;" id="valDailyCommission">RM 0.00</div>
-          </div>
-          <div style="background: white; padding: 8px; border-radius: 10px; text-align: center; border: 1px solid #ce93d8;">
-            <div style="font-size: 0.65rem; color: #7b1fa2; font-weight: 800;">MTD ACCUMULATED</div>
-            <div style="font-size: 1.15rem; font-weight: 800; color: var(--primary); margin-top: 2px;" id="valMtdCommission">RM 0.00</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="personal-rec">
-        <b>💡 Your Personal Clinical Focus Today:</b>
-        <div id="valPersonalRec" style="margin-top:4px;">Focus on dual house brand recommendation at checkout.</div>
-      </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KS Pulse</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --text: #1e293b;
+        }
+        body {
+            font-family: system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+        h1 { color: var(--primary); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>KS Pulse</h1>
+        <p>Index Page Content</p>
     </div>
+</body>
+</html>
 
-    <!-- Manager Control Panel (Strictly PIN 6688 & 8899 Only) -->
-    <div id="managerPanel" class="card" style="border: 1px solid #ab47bc;">
-      <h2 style="color: #6a1b9a;">🔒 Manager Report & Screenshot Hub</h2>
-      <button class="btn btn-copy" onclick="copyWhatsAppBriefing()">📋 Copy WhatsApp Briefing</button>
-      <a id="btnDlDirector" class="btn btn-image" href="https://drive.google.com/file/d/1alsC_x48Utgf08wULdSPdMUDK6qfErcD/view?usp=drivesdk" target="_blank">📸 Download Directors 7-Day Screenshot (Ultra-HD)</a>
-      <a id="btnDlTeammate" class="btn btn-image" style="background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%);" href="https://drive.google.com/file/d/1iaCPp3BJ5z9obrEsPMaW_4rIZAgWPoS-/view?usp=drivesdk" target="_blank">📸 Download Teammates Gap Screenshot (Ultra-HD)</a>
-
-      <div class="congrats-card" style="margin-top:12px;">
-        <b>🏆 Today's Congratulation Board:</b>
-        <div id="congratsPreview" style="margin-top:4px;">Loading achievers...</div>
-      </div>
-
-      <div style="overflow-x:auto; margin-top:12px;">
-        <table id="teammatesTable">
-          <thead><tr><th>Name</th><th>Today TS</th><th>Today HB</th><th>MTD TS</th><th>MTD HB</th><th>MTD Cust</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
