@@ -203,6 +203,12 @@ function executeLogin(pin) {
     renderTeammatesTable();
     renderCongratsPreview();
     
+    // Wire up download button URLs directly
+    const bDir = document.getElementById("btnDlDirector");
+    if (bDir) bDir.href = (liveSheetData && liveSheetData.directorsReportDriveUrl) || "https://drive.google.com/file/d/1alsC_x48Utgf08wULdSPdMUDK6qfErcD/view?usp=drivesdk";
+    const bTm = document.getElementById("btnDlTeammate");
+    if (bTm) bTm.href = (liveSheetData && liveSheetData.teammatesGapDriveUrl) || "https://drive.google.com/file/d/1iaCPp3BJ5z9obrEsPMaW_4rIZAgWPoS-/view?usp=drivesdk";
+
     // Initialize games
     try { if (typeof loadPetData === 'function') loadPetData(); } catch(e) {}
     try { if (typeof loadFarmData === 'function') loadFarmData(); } catch(e) {}
@@ -244,6 +250,10 @@ function logout() {
   setSafeText("valHB", "RM 0.00");
   setSafeText("valHM", "RM 0.00");
   setSafeText("valCust", "0");
+  setSafeText("valMtdTS", "RM 0.00");
+  setSafeText("valMtdHB", "RM 0.00");
+  setSafeText("valMtdHM", "RM 0.00");
+  setSafeText("valMtdCust", "0");
   setSafeText("valDailyCommission", "RM 0.00");
   setSafeText("valMtdCommission", "RM 0.00");
   setSafeHtml("valRemainingTarget", "Enter PIN to view");
@@ -275,6 +285,15 @@ async function loadData() {
       
       setSafeText("lastUpdated", `Live Sheet Data • Updated: ${liveSheetData.updatedAt || 'Today'}`);
       
+      const bDir = document.getElementById("btnDlDirector");
+      if (bDir) bDir.href = (liveSheetData && liveSheetData.directorsReportDriveUrl) || "https://drive.google.com/file/d/1alsC_x48Utgf08wULdSPdMUDK6qfErcD/view?usp=drivesdk";
+      const bTm = document.getElementById("btnDlTeammate");
+      if (bTm) bTm.href = (liveSheetData && liveSheetData.teammatesGapDriveUrl) || "https://drive.google.com/file/d/1iaCPp3BJ5z9obrEsPMaW_4rIZAgWPoS-/view?usp=drivesdk";
+
+      if (liveSheetData.hbQuizBank && liveSheetData.hbQuizBank.length > 0 && typeof sanitizeQuizItem === 'function') {
+        HB_QUIZ_BANK = liveSheetData.hbQuizBank.map(sanitizeQuizItem);
+      }
+
       renderOutletMission();
       renderUserDashboard();
       renderTeammatesTable();
@@ -378,44 +397,59 @@ function renderUserDashboard() {
   const userName = currentUser.name;
   setSafeText("userNameHeader", `👤 ${userName}`);
 
+  const mP = document.getElementById("managerPanel");
+  if (mP) mP.style.display = (currentUser.role === "manager") ? "block" : "none";
+
   const s = liveSheetData.teammates[userName] || { dailyTs: 0, dailyHb: 0, dailyHm: 0, dailyCust: 0, dailyCommission: 0, mtdTs: 0, mtdHb: 0, mtdHm: 0, mtdCust: 0, mtdCommission: 0, tsTarget: 43030, hbTarget: 22334, hmTarget: 4303 };
 
-  setSafeText("valTS", `RM ${Number(s.dailyTs || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`);
-  setSafeText("valHB", `RM ${Number(s.dailyHb || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`);
-  setSafeText("valHM", `RM ${Number(s.dailyHm || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`);
+  // 1. Daily Performance Grid
+  const isOffToday = (Number(s.dailyTs || 0) === 0 && Number(s.dailyCust || 0) === 0);
+  setSafeText("dailyLabelText", isOffToday ? "📅 TODAY'S PERFORMANCE (OFF / REST DAY):" : "📅 TODAY'S PERFORMANCE (DAILY):");
+  setSafeText("valTS", "RM " + Number(s.dailyTs || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}));
+  setSafeText("valHB", "RM " + Number(s.dailyHb || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}));
+  setSafeText("valHM", "RM " + Number(s.dailyHm || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}));
   setSafeText("valCust", String(s.dailyCust || 0));
 
-  setSafeText("valDailyCommission", `RM ${Number(s.dailyCommission || 0).toFixed(2)}`);
-  setSafeText("valMtdCommission", `RM ${Number(s.mtdCommission || 0).toFixed(2)}`);
+  // 2. MTD Accumulated Performance Grid (Always Visible!)
+  setSafeText("valMtdTS", "RM " + Number(s.mtdTs || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}));
+  const mtdHbPct = s.mtdTs > 0 ? ((s.mtdHb / s.mtdTs) * 100).toFixed(1) : "0.0";
+  setSafeText("valMtdHB", "RM " + Number(s.mtdHb || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}) + ` (${mtdHbPct}%)`);
+  setSafeText("valMtdHM", "RM " + Number(s.mtdHm || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}));
+  setSafeText("valMtdCust", String(s.mtdCust || 0));
 
-  const tsRem = Math.max(0, (s.tsTarget || 43030) - (s.mtdTs || 0));
-  const hbRem = Math.max(0, (s.hbTarget || 22334) - (s.mtdHb || 0));
-  const hmRem = Math.max(0, (s.hmTarget || 4303) - (s.mtdHm || 0));
+  // 3. Targets Remaining & Pacing
+  const tsRem = Math.max(0, s.tsTarget - (s.mtdTs || 0));
+  const hbRem = Math.max(0, s.hbTarget - (s.mtdHb || 0));
+  const hmRem = Math.max(0, s.hmTarget - (s.mtdHm || 0));
 
   setSafeHtml("valRemainingTarget", `
-    TS: <b>RM ${tsRem.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</b> | 
-    HB: <b>RM ${hbRem.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</b> | 
-    HM: <b>RM ${hmRem.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</b>
+    • TS Target Left: <b>RM ${tsRem.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</b> (Target: RM ${Number(s.tsTarget || 0).toLocaleString()})<br>
+    • HB Target Left: <b>RM ${hbRem.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</b> (Target: RM ${Number(s.hbTarget || 0).toLocaleString()})<br>
+    • HM Target Left: <b>RM ${hmRem.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</b> (Target: RM ${Number(s.hmTarget || 0).toLocaleString()})
   `);
 
   const day = (liveSheetData.dailySummary && liveSheetData.dailySummary.dayOfMonth) || 13;
-  const expTs = ((s.tsTarget || 43030) / 30) * day;
-  const expHb = ((s.hbTarget || 22334) / 30) * day;
-  const pacingEl = document.getElementById("valPersonalPacing");
-  if (pacingEl) {
-    let diffTs = (s.mtdTs || 0) - expTs;
-    let diffHb = (s.mtdHb || 0) - expHb;
-    if (diffTs >= 0 && diffHb >= 0) {
-      pacingEl.innerHTML = `<span class="status-badge badge-ahead">🟢 TS & HB On Track (+RM ${Math.round(diffTs)} TS / +RM ${Math.round(diffHb)} HB)</span>`;
-    } else if (diffTs >= 0) {
-      pacingEl.innerHTML = `<span class="status-badge badge-ontrack">🟡 TS Ahead (+RM ${Math.round(diffTs)}), HB Push Needed</span>`;
-    } else {
-      pacingEl.innerHTML = `<span class="status-badge badge-behind">🔴 Catch-Up Needed (-RM ${Math.round(Math.abs(diffTs))} TS)</span>`;
-    }
+  const expectedPace = (s.tsTarget / 30) * day;
+  const pacingDiff = (s.mtdTs || 0) - expectedPace;
+
+  const pEl = document.getElementById("valPersonalPacing");
+  if (pEl) {
+    if (pacingDiff >= 500) pEl.innerHTML = `<span class="status-badge badge-ahead">🚀 AHEAD OF PACE (+RM ${Math.round(pacingDiff)} above Day ${day} target)</span>`;
+    else if (pacingDiff >= -250) pEl.innerHTML = `<span class="status-badge badge-ontrack">🟢 ON TRACK (On pace for Day ${day})</span>`;
+    else pEl.innerHTML = `<span class="status-badge badge-behind">⚡ PUSH NEEDED (-RM ${Math.round(Math.abs(pacingDiff))} vs Day ${day} target)</span>`;
   }
+
+  setSafeText("valDailyCommission", "RM " + Number(s.dailyCommission || 0).toFixed(2));
+  setSafeText("valMtdCommission", "RM " + Number(s.mtdCommission || 0).toFixed(2));
 
   const rec = (liveSheetData.recommendations && liveSheetData.recommendations[userName]) || "Focus on pairing routine OTC transactions with House Brand supplements.";
   setSafeText("valPersonalRec", rec);
+
+  // 4. Always ensure download buttons point to the latest Ultra-HD reports
+  const bDir = document.getElementById("btnDlDirector");
+  if (bDir) bDir.href = (liveSheetData && liveSheetData.directorsReportDriveUrl) || "https://drive.google.com/file/d/1alsC_x48Utgf08wULdSPdMUDK6qfErcD/view?usp=drivesdk";
+  const bTm = document.getElementById("btnDlTeammate");
+  if (bTm) bTm.href = (liveSheetData && liveSheetData.teammatesGapDriveUrl) || "https://drive.google.com/file/d/1iaCPp3BJ5z9obrEsPMaW_4rIZAgWPoS-/view?usp=drivesdk";
 }
 
 function renderCongratsPreview() {
@@ -448,14 +482,18 @@ function renderTeammatesTable() {
   tbody.innerHTML = "";
 
   for (const [name, val] of Object.entries(liveSheetData.teammates)) {
+    const todayTsText = (Number(val.dailyTs || 0) > 0) ? `RM ${Number(val.dailyTs).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}` : `<span style="color:#888;">Off (RM 0)</span>`;
+    const todayHbText = (Number(val.dailyHb || 0) > 0) ? `RM ${Number(val.dailyHb).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}` : `<span style="color:#888;">-</span>`;
+    const mtdHbPct = val.mtdTs > 0 ? ((val.mtdHb / val.mtdTs) * 100).toFixed(0) + "%" : "0%";
+    
     const row = document.createElement("tr");
-    const hbPct = val.dailyTs > 0 ? ((val.dailyHb / val.dailyTs) * 100).toFixed(1) + "%" : "0.0%";
     row.innerHTML = `
       <td><b>${name}</b><br><span style="font-size:0.65rem; color:#666;">${val.role || 'Staff'}</span></td>
-      <td>RM ${Number(val.dailyTs || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
-      <td>RM ${Number(val.dailyHb || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
-      <td>${hbPct}</td>
-      <td>${val.dailyCust || 0}</td>
+      <td>${todayTsText}</td>
+      <td>${todayHbText}</td>
+      <td style="font-weight:700; color:var(--primary-dark);">RM ${Number(val.mtdTs || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+      <td style="font-weight:700; color:#00796b;">RM ${Number(val.mtdHb || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}<br><span style="font-size:0.65rem; color:#666;">${mtdHbPct}</span></td>
+      <td>${val.mtdCust || 0}</td>
     `;
     tbody.appendChild(row);
   }
