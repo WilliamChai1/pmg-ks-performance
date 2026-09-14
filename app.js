@@ -268,6 +268,18 @@ async function loadData() {
     const sheetJson = await res.json();
     
     if (sheetJson && sheetJson.teammates && sheetJson.dailySummary) {
+      // Smart Merge Guard: Prevent incoming zero/blank MTD from wiping valid data
+      for (const tmName in sheetJson.teammates) {
+        const incoming = sheetJson.teammates[tmName];
+        const existing = (liveSheetData && liveSheetData.teammates && liveSheetData.teammates[tmName]) || (BASELINE_FEED.teammates && BASELINE_FEED.teammates[tmName]) || {};
+        if (Number(incoming.mtdTs || 0) <= 0 && Number(existing.mtdTs || 0) > 0) {
+          incoming.mtdTs = existing.mtdTs;
+          incoming.mtdHb = existing.mtdHb;
+          incoming.mtdHm = existing.mtdHm;
+          incoming.mtdCust = existing.mtdCust;
+          incoming.mtdCommission = existing.mtdCommission;
+        }
+      }
       liveSheetData = sheetJson;
       try {
         localStorage.setItem("pmg_live_feed_cache", JSON.stringify(sheetJson));
