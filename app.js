@@ -1,4 +1,3 @@
-
 // KS Pulse Portal app.js
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS2p3I4_vR6oH4F_K-t_J9Z8lC/pub?output=csv";
 const POLL_INTERVAL = 30000; // 30 seconds
