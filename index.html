@@ -1,39 +1,657 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KS Pulse</title>
-    <style>
-        :root {
-            --primary: #2563eb;
-            --bg: #f8fafc;
-            --text: #1e293b;
-        }
-        body {
-            font-family: system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .container {
-            text-align: center;
-            padding: 2rem;
-            background: white;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-        }
-        h1 { color: var(--primary); }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#7b1fa2">
+  <title>KS Pulse - Performance, Pet & Farm</title>
+  
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/png" href="./icon-192.png">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="KS Pulse">
+
+  <style>
+:root { 
+  --primary: #7b1fa2; 
+  --primary-dark: #4a148c; 
+  --primary-light: #9c27b0;
+  --primary-gradient: linear-gradient(135deg, #7b1fa2 0%, #ba68c8 100%);
+  --gold-gradient: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
+  --farm-gradient: linear-gradient(180deg, #e8f5e9 0%, #c8e6c9 100%);
+  --pet-gradient: linear-gradient(180deg, #f3e5f5 0%, #ede7f6 100%);
+  --bg: #f9f8fc; 
+  --card: #ffffff; 
+  --text: #211a2c; 
+  --accent-blue: #1976d2; 
+  --gap-green: #00796b;
+}
+
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; padding-bottom: 85px; }
+
+#pinOverlay { position: fixed; inset: 0; background: rgba(26, 9, 51, 0.92); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 2000; }
+.pin-box { background: white; border-radius: 20px; padding: 24px 20px; text-align: center; width: 88%; max-width: 310px; box-shadow: 0 10px 30px rgba(123,31,162,0.3); }
+.pin-input { font-size: 1.6rem; letter-spacing: 10px; text-align: center; width: 80%; padding: 8px; border: 2px solid #e1bee7; border-radius: 10px; margin: 12px 0; outline: none; }
+.pin-input:focus { border-color: var(--primary); }
+
+.btn { background: var(--primary-gradient); color: white; border: none; border-radius: 10px; padding: 11px 14px; font-size: 0.9rem; font-weight: 700; cursor: pointer; width: 100%; box-sizing: border-box; margin-top: 8px; text-align: center; text-decoration: none; display: block; box-shadow: 0 2px 6px rgba(123,31,162,0.25); }
+.btn:active { opacity: 0.9; }
+.btn-image { background: linear-gradient(135deg, #f57c00 0%, #ffb74d 100%); }
+.btn-copy { background: linear-gradient(135deg, #00897b 0%, #4db6ac 100%); }
+.btn-logout { background: #616161; padding: 6px 12px; font-size: 0.75rem; width: auto; margin: 0; box-shadow: none; color: white; border-radius: 8px; border: none; cursor: pointer; }
+
+.card { background: var(--card); border-radius: 14px; padding: 14px; box-shadow: 0 2px 8px rgba(123,31,162,0.06); margin-bottom: 12px; border: 1px solid #f3e5f5; }
+.card h2 { font-size: 0.95rem; color: var(--primary); margin: 0 0 10px; display: flex; justify-content: space-between; align-items: center; }
+
+.metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.metric-box { background: #fbf9fd; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid #f3e5f5; }
+.metric-box .label { font-size: 0.68rem; color: #7b1fa2; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+.metric-box .val { font-size: 1.08rem; font-weight: 800; color: var(--text); margin-top: 2px; }
+
+.gap-banner { background: #fff8e1; border-left: 4px solid #ffa000; padding: 10px; border-radius: 8px; font-size: 0.82rem; line-height: 1.5; margin-top: 8px; }
+.commission-banner { background: #f3e5f5; border-left: 4px solid var(--primary); padding: 10px; border-radius: 8px; font-size: 0.85rem; line-height: 1.4; margin-top: 8px; color: var(--primary-dark); }
+.personal-rec { background: #ede7f6; border-left: 4px solid #5e35b1; padding: 10px; border-radius: 8px; font-size: 0.82rem; line-height: 1.4; color: #311b92; margin-top: 8px; }
+.congrats-card { background: #fce4ec; border-left: 4px solid #c2185b; padding: 10px; border-radius: 8px; font-size: 0.82rem; line-height: 1.5; margin-top: 8px; }
+
+.status-badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; margin-top: 4px; }
+.badge-ahead { background: #e0f2f1; color: #00796b; border: 1px solid #a7ffeb; }
+.badge-ontrack { background: #e8f5e9; color: #2e7d32; border: 1px solid #b9f6ca; }
+.badge-behind { background: #fce4ec; color: #c2185b; border: 1px solid #ff80ab; }
+
+.reward-ladder { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 10px; }
+.tier-box { background: #fafafa; border: 2px solid #e0e0e0; border-radius: 10px; padding: 8px 4px; text-align: center; }
+.tier-box.active { border-color: #ffd700; background: #fffde7; box-shadow: 0 2px 8px rgba(255,193,7,0.3); }
+.tier-box.unlocked { border-color: #00897b; background: #e0f2f1; }
+.tier-title { font-size: 0.72rem; font-weight: 800; color: #424242; }
+.tier-reward { font-size: 0.95rem; font-weight: 800; color: var(--primary-dark); margin: 3px 0; }
+.tier-target { font-size: 0.65rem; color: #616161; }
+.tier-badge { display: inline-block; font-size: 0.58rem; font-weight: 800; padding: 2px 6px; border-radius: 10px; margin-top: 4px; }
+.badge-locked { background: #eeeeee; color: #757575; }
+.badge-unlocked { background: #00897b; color: white; }
+
+.progress-bar-bg { background: #ede7f6; border-radius: 6px; height: 10px; overflow: hidden; margin: 6px 0; }
+.progress-bar-fill { background: var(--primary-gradient); height: 100%; width: 0%; transition: width 0.6s ease; }
+.progress-bar-fill.gold { background: var(--gold-gradient); }
+
+#managerPanel { display: none; }
+table { width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-top: 8px; }
+th, td { padding: 6px 4px; text-align: right; border-bottom: 1px solid #f3e5f5; }
+th:first-child, td:first-child { text-align: left; }
+
+.coin-pill { background: #fff9c4; border: 1.5px solid #fbc02d; color: #f57f17; border-radius: 20px; padding: 4px 10px; font-size: 0.78rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; }
+
+/* --- TAMAGOTCHI HABITAT & ROAMING ENGINE --- */
+#petView { display: none; }
+.pet-habitat { 
+  background: radial-gradient(circle at 50% 30%, #fbf5fc 0%, #ede7f6 100%);
+  border: 2px solid #ce93d8; 
+  border-radius: 20px; 
+  padding: 14px 10px; 
+  text-align: center; 
+  position: relative; 
+  overflow: hidden; 
+  height: 195px;
+  box-shadow: inset 0 2px 10px rgba(123,31,162,0.08); 
+  margin-bottom: 12px; 
+}
+
+.pet-habitat-floor {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 38px;
+  background: linear-gradient(180deg, #e1bee7 0%, #d1c4e9 100%);
+  border-top: 2px solid #ba68c8;
+}
+
+.pet-speech { 
+  background: white; 
+  border: 1.5px solid #ce93d8; 
+  border-radius: 14px; 
+  padding: 6px 14px; 
+  font-size: 0.78rem; 
+  font-weight: 700; 
+  color: var(--primary-dark); 
+  display: inline-block; 
+  margin-bottom: 8px; 
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06); 
+  position: relative;
+  z-index: 10;
+  transition: transform 0.2s ease;
+  max-width: 90%;
+}
+
+.pet-roam-track {
+  position: absolute;
+  bottom: 15px;
+  left: 10px;
+  right: 10px;
+  height: 110px;
+  pointer-events: none;
+}
+
+.pet-actor {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: left 2.2s cubic-bezier(0.25, 1, 0.5, 1), transform 0.25s ease;
+  pointer-events: auto;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pet-figure {
+  font-size: 4.6rem;
+  line-height: 1;
+  display: inline-block;
+  user-select: none;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.18));
+}
+
+/* Walking Bobbing Effect */
+.walking-bob {
+  animation: walkRocking 0.35s infinite alternate ease-in-out;
+}
+@keyframes walkRocking {
+  0% { transform: translateY(0) rotate(-4deg); }
+  100% { transform: translateY(-8px) rotate(4deg); }
+}
+
+/* Action Attack & Animation FX */
+.act-slash {
+  animation: swordSlashAnim 0.7s ease-in-out;
+}
+@keyframes swordSlashAnim {
+  0% { transform: scale(1) rotate(0); }
+  30% { transform: scale(1.25) rotate(-20deg) translateX(-10px); }
+  60% { transform: scale(1.35) rotate(35deg) translateX(15px); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+.act-shock {
+  animation: thunderShockAnim 0.8s ease-in-out;
+}
+@keyframes thunderShockAnim {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 gold); }
+  20%, 60% { transform: scale(1.3) translateX(-6px); filter: drop-shadow(0 0 15px #ffd700); }
+  40%, 80% { transform: scale(1.3) translateX(6px); filter: drop-shadow(0 0 20px #ffeb3b); }
+}
+
+.act-roar {
+  animation: dinosaurRoarAnim 0.9s ease-in-out;
+}
+@keyframes dinosaurRoarAnim {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.4) translateY(-10px); }
+  50% { transform: scale(1.45) translateY(2px) rotate(5deg); }
+  75% { transform: scale(1.4) translateY(-4px) rotate(-5deg); }
+}
+
+.act-punch {
+  animation: rubberPunchAnim 0.7s ease-in-out;
+}
+@keyframes rubberPunchAnim {
+  0% { transform: scale(1); }
+  40% { transform: scale(0.85) translateX(-15px); }
+  70% { transform: scale(1.4) translateX(25px); }
+  100% { transform: scale(1); }
+}
+
+.act-pounce {
+  animation: raptorPounceAnim 0.75s ease-in-out;
+}
+@keyframes raptorPounceAnim {
+  0% { transform: translateY(0); }
+  40% { transform: translateY(-35px) scale(1.25); }
+  75% { transform: translateY(0) scale(1.15); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+.act-magic {
+  animation: magicStarAnim 0.8s ease-in-out;
+}
+@keyframes magicStarAnim {
+  0% { transform: rotate(0) scale(1); }
+  50% { transform: rotate(360deg) scale(1.35); filter: drop-shadow(0 0 16px #e040fb); }
+  100% { transform: rotate(720deg) scale(1); }
+}
+
+.act-fire {
+  animation: dragonFireAnim 0.8s ease-in-out;
+}
+@keyframes dragonFireAnim {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.3) rotate(-8deg); filter: drop-shadow(0 0 15px #ff5722); }
+  70% { transform: scale(1.35) rotate(8deg); filter: drop-shadow(0 0 20px #f44336); }
+  100% { transform: scale(1); }
+}
+
+.act-egg {
+  animation: eggWobble 0.6s infinite ease-in-out;
+}
+@keyframes eggWobble {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-10deg) scale(1.05); }
+  75% { transform: rotate(10deg) scale(1.05); }
+}
+
+/* Action Particle FX */
+.action-effect-badge {
+  position: absolute;
+  top: -24px;
+  font-size: 2.2rem;
+  display: none;
+  animation: effectFadePop 0.8s forwards ease-out;
+}
+@keyframes effectFadePop {
+  0% { opacity: 0; transform: translateY(10px) scale(0.5); }
+  50% { opacity: 1; transform: translateY(-15px) scale(1.4); }
+  100% { opacity: 0; transform: translateY(-25px) scale(1.8); }
+}
+
+.equipped-badge { position: absolute; font-size: 1.6rem; top: -6px; right: -8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25)); }
+.poop-item { font-size: 2.2rem; position: absolute; right: 28px; bottom: 24px; animation: poopWiggle 1.5s infinite; cursor: pointer; z-index: 15; }
+@keyframes poopWiggle { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(12deg) scale(1.1); } }
+
+.pet-meters { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
+.meter-card { background: white; border-radius: 12px; padding: 8px 6px; text-align: center; border: 1px solid #e1bee7; }
+.meter-label { font-size: 0.65rem; font-weight: 800; color: #6a1b9a; margin-bottom: 4px; }
+.meter-bar-bg { background: #f3e5f5; border-radius: 6px; height: 8px; overflow: hidden; }
+.meter-bar-fill { height: 100%; border-radius: 6px; transition: width 0.4s ease; }
+.fill-hunger { background: linear-gradient(90deg, #ff5252, #ff7675); }
+.fill-happy { background: linear-gradient(90deg, #ffb300, #fed330); }
+.fill-clean { background: linear-gradient(90deg, #00b894, #55efc4); }
+
+.pet-actions { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
+.btn-pet { background: white; border: 2px solid #ba68c8; color: var(--primary-dark); border-radius: 14px; padding: 10px 4px; font-size: 0.72rem; font-weight: 800; cursor: pointer; text-align: center; box-shadow: 0 2px 6px rgba(123,31,162,0.1); transition: all 0.15s ease; }
+.btn-pet:active { transform: scale(0.92); background: #f3e5f5; }
+
+#farmView { display: none; }
+.farm-header-box { display: flex; justify-content: space-between; align-items: center; background: #e8f5e9; border: 1.5px solid #81c784; border-radius: 12px; padding: 8px 12px; margin-bottom: 12px; font-weight: 800; font-size: 0.85rem; color: #1b5e20; }
+.decor-terrace { display: flex; gap: 8px; overflow-x: auto; padding: 6px 0; min-height: 38px; align-items: center; }
+.decor-badge { font-size: 1.8rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15)); }
+.farm-plots-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+.plot-card { background: #efebe9; border: 2px dashed #a1887f; border-radius: 16px; padding: 14px 8px; text-align: center; cursor: pointer; transition: all 0.2s ease; position: relative; }
+.plot-card.growing { background: #fffde7; border: 2px solid #fbc02d; }
+.plot-card.ready { background: #e8f5e9; border: 2px solid #2e7d32; box-shadow: 0 0 10px rgba(46,125,50,0.3); animation: readyPulse 1.8s infinite; }
+@keyframes readyPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+.crop-icon { font-size: 2.8rem; margin-bottom: 4px; display: block; }
+
+.seed-tray { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-top: 10px; }
+.seed-btn { background: white; border: 1.5px solid #81c784; border-radius: 10px; padding: 8px 4px; text-align: center; cursor: pointer; font-size: 0.7rem; font-weight: 700; color: #1b5e20; }
+.seed-btn.active { border-color: #2e7d32; background: #c8e6c9; }
+
+.shop-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 3500; align-items: center; justify-content: center; }
+.shop-card { background: white; border-radius: 20px; padding: 18px; width: 90%; max-width: 360px; max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+.shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.shop-item-card { border: 1.5px solid #e0e0e0; border-radius: 12px; padding: 8px; text-align: center; font-size: 0.72rem; }
+.shop-item-icon { font-size: 2.2rem; margin-bottom: 4px; }
+
+#quizModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.82); backdrop-filter: blur(4px); z-index: 4000; align-items: center; justify-content: center; }
+.quiz-card { background: white; border-radius: 20px; padding: 20px; width: 88%; max-width: 340px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; }
+.quiz-sku-badge { background: #f3e5f5; color: var(--primary-dark); font-weight: 800; font-size: 0.72rem; padding: 4px 10px; border-radius: 12px; display: inline-block; margin-bottom: 8px; border: 1px solid #ce93d8; }
+.quiz-question { font-size: 0.90rem; font-weight: 800; color: var(--text); margin-bottom: 14px; line-height: 1.4; text-align: left; }
+.quiz-options { display: flex; flex-direction: column; gap: 8px; }
+.quiz-opt-btn { background: #fbf9fd; border: 1.5px solid #e1bee7; border-radius: 10px; padding: 10px; font-size: 0.80rem; font-weight: 700; color: var(--text); cursor: pointer; text-align: left; transition: all 0.15s ease; line-height: 1.3; }
+.quiz-opt-btn:active { background: #f3e5f5; border-color: var(--primary); }
+.quiz-feedback { margin-top: 10px; font-size: 0.78rem; font-weight: 700; display: none; padding: 8px; border-radius: 8px; line-height: 1.4; text-align: left; }
+.feedback-correct { background: #e8f5e9; color: #1b5e20; border: 1px solid #a5d6a7; }
+.feedback-wrong { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
+
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #ffffff; border-top: 1.5px solid #e1bee7; display: flex; justify-content: space-around; padding: 6px 0; z-index: 900; box-shadow: 0 -4px 14px rgba(123,31,162,0.08); }
+.nav-tab { background: none; border: none; color: #757575; font-size: 0.72rem; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; width: 30%; padding: 4px 0; border-radius: 10px; }
+.nav-tab.active { color: var(--primary); background: #f3e5f5; }
+.nav-tab .tab-icon { font-size: 1.25rem; }
+
+.pet-img-sprite {
+  height: 105px;
+  width: auto;
+  max-width: 130px;
+  object-fit: contain;
+  display: block;
+  user-select: none;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.25));
+  pointer-events: auto;
+  transition: transform 0.2s ease;
+}
+
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>KS Pulse</h1>
-        <p>Index Page Content</p>
+
+  <audio id="bgmAudio" loop preload="auto">
+    <source src="./bgm.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Confidential PIN Shield (Strict Personal Auth) -->
+  <div id="pinOverlay" style="position:fixed; inset:0; background:rgba(26,9,51,0.92); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; z-index:2000;">
+    <div class="pin-box">
+      <img src="./icon-192.png" style="width:58px; height:58px; border-radius:14px; margin-bottom:4px; box-shadow: 0 4px 12px rgba(123,31,162,0.2);">
+      <h2 style="margin:0; color:var(--primary); font-size:1.15rem; font-weight:800;">KS Pulse Portal</h2>
+      <p style="font-size:0.75rem; color:#616161; margin:4px 0 10px;">Enter Your 4-Digit Personal PIN</p>
+      
+      <input type="password" id="pinCode" class="pin-input" maxlength="4" placeholder="••••" autofocus onkeydown="if(event.key==='Enter') verifyPin()">
+      <button class="btn" onclick="verifyPin()">Unlock Portal ⚡</button>
+
+      <p id="pinError" style="color:#d32f2f; font-size:0.75rem; margin-top:8px; display:none;">Invalid PIN. Please try again.</p>
+      
+      <button class="btn-logout" style="margin-top:14px; width:100%; background:#eeeeee; color:#777; font-size:0.7rem;" onclick="clearAppCache()">🗑️ Reset Cache & Reload</button>
     </div>
+  </div>
+
+  <!-- Header -->
+  <div style="text-align:center; margin:4px 0 10px;">
+    <h1 style="font-size:1.25rem; color:var(--primary); margin:0; font-weight:800;">⚡ KS Pulse Hub</h1>
+    <div style="display:flex; justify-content:center; align-items:center; gap:8px; margin-top:4px;">
+      <span class="coin-pill">🪙 <span id="globalHbCoinsText">0</span> HB Coins</span>
+      <button class="btn-logout" id="musicToggleBtn" onclick="toggleMusic()" style="background:#f3e5f5; color:var(--primary-dark); font-weight:800; border-radius:14px; border:1px solid #ab47bc;">🎵 BGM: OFF</button>
+    </div>
+    <!-- Live Automation Sync Bar -->
+    <div style="display:flex; justify-content:center; align-items:center; gap:6px; margin-top:6px; font-size:0.72rem; color:#616161;">
+      <span id="lastUpdated">Checking live sheet data...</span>
+      <button onclick="refreshLiveData()" style="background:#f3e5f5; border:1px solid #ce93d8; border-radius:12px; padding:2px 8px; font-size:0.7rem; font-weight:700; color:var(--primary); cursor:pointer;" title="Sync live with Google Sheet">🔄 Sync</button>
+    </div>
+  </div>
+
+  <!-- TAB 1: PERFORMANCE DASHBOARD -->
+  <div id="performanceView">
+    <div class="card" style="border: 2px solid var(--primary); background: linear-gradient(180deg, #ffffff 0%, #faf7fc 100%);">
+      <h2 style="color: var(--primary); margin-bottom: 6px;">
+        <span>🏆 Kota Sentosa Mission & HQ Rewards</span>
+        <span style="font-size: 0.72rem; color: #7b1fa2; font-weight: 800;">Q1 FY2027</span>
+      </h2>
+
+      <div style="margin-top: 8px;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700;">
+          <span>STORE TOTAL SALES (MTD)</span>
+          <span id="outletTsProgressText">Loading...</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="outletTsBar"></div></div>
+        <div id="outletTsPacingBadge"></div>
+      </div>
+
+      <div style="margin-top: 8px;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700;">
+          <span>HOUSE BRAND (PORTION B TIER 3)</span>
+          <span id="outletHbProgressText">Loading...</span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill gold" id="outletHbBar"></div></div>
+        <div id="outletHbPacingBadge"></div>
+      </div>
+
+      <div style="font-size: 0.78rem; font-weight: 800; color: var(--primary-dark); margin-top: 12px;">
+        🎁 HQ TEAM INCENTIVE REWARD TIERS:
+      </div>
+      <div class="reward-ladder">
+        <div class="tier-box" id="tier1Box">
+          <div class="tier-title">TIER 1</div>
+          <div class="tier-reward">+RM 250</div>
+          <div class="tier-target">Target: RM 152.8k</div>
+          <span class="tier-badge badge-locked" id="tier1Badge">LOCKED</span>
+        </div>
+        <div class="tier-box" id="tier2Box">
+          <div class="tier-title">TIER 2</div>
+          <div class="tier-reward">+RM 375</div>
+          <div class="tier-target">Target: RM 161.9k</div>
+          <span class="tier-badge badge-locked" id="tier2Badge">LOCKED</span>
+        </div>
+        <div class="tier-box" id="tier3Box">
+          <div class="tier-title">TIER 3 (MAX)</div>
+          <div class="tier-reward">+RM 500</div>
+          <div class="tier-target">Target: RM 171.8k</div>
+          <span class="tier-badge badge-locked" id="tier3Badge">LOCKED</span>
+        </div>
+      </div>
+
+      <div id="rewardStatusBanner" style="background: #f3e5f5; border-left: 4px solid var(--primary); padding: 8px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #4a148c;">
+        Calculating reward progress...
+      </div>
+    </div>
+
+    <!-- Personal Dashboard -->
+    <div class="card">
+      <h2>
+        <span id="userNameHeader">👤 Personal Profile</span>
+        <button class="btn btn-logout" onclick="logout()">Lock 🔒</button>
+      </h2>
+
+      <div style="font-size:0.78rem; font-weight:800; color:var(--primary); margin-top:2px;" id="dailyLabelText">📅 TODAY'S PERFORMANCE (DAILY):</div>
+      <div class="metric-grid">
+        <div class="metric-box"><div class="label">TODAY TS</div><div class="val" id="valTS">RM 0.00</div></div>
+        <div class="metric-box"><div class="label">TODAY HB</div><div class="val" id="valHB">RM 0.00</div></div>
+        <div class="metric-box"><div class="label">TODAY HM</div><div class="val" id="valHM">RM 0.00</div></div>
+        <div class="metric-box"><div class="label">CUSTOMERS</div><div class="val" id="valCust">0</div></div>
+      </div>
+
+      <div style="font-size:0.78rem; font-weight:800; color:#4a148c; margin-top:10px;">📊 YOUR MTD ACCUMULATED SALES (SEP 2026):</div>
+      <div class="metric-grid">
+        <div class="metric-box" style="background:#f3e5f5;"><div class="label">MTD TOTAL SALES</div><div class="val" id="valMtdTS" style="color:var(--primary-dark);">RM 0.00</div></div>
+        <div class="metric-box" style="background:#f3e5f5;"><div class="label">MTD HOUSE BRAND</div><div class="val" id="valMtdHB" style="color:#00796b;">RM 0.00</div></div>
+        <div class="metric-box" style="background:#f3e5f5;"><div class="label">MTD HIGH MARGIN</div><div class="val" id="valMtdHM">RM 0.00</div></div>
+        <div class="metric-box" style="background:#f3e5f5;"><div class="label">MTD PATIENTS</div><div class="val" id="valMtdCust">0</div></div>
+      </div>
+
+      <div class="gap-banner">
+        <b>🎯 Monthly Target Remaining (Sep 2026 MTD):</b>
+        <div id="valRemainingTarget" style="margin-top:4px;">Enter PIN to view</div>
+        <div id="valPersonalPacing" style="margin-top:6px;"></div>
+      </div>
+
+      <div class="commission-banner">
+        <div style="font-weight: 800; font-size: 0.88rem; margin-bottom: 6px; color: var(--primary-dark);">
+          💰 House Brand Commission Tracker (~3.5% Avg):
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div style="background: white; padding: 8px; border-radius: 10px; text-align: center; border: 1px solid #ce93d8;">
+            <div style="font-size: 0.65rem; color: #7b1fa2; font-weight: 800;">TODAY'S EARNINGS</div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: #00796b; margin-top: 2px;" id="valDailyCommission">RM 0.00</div>
+          </div>
+          <div style="background: white; padding: 8px; border-radius: 10px; text-align: center; border: 1px solid #ce93d8;">
+            <div style="font-size: 0.65rem; color: #7b1fa2; font-weight: 800;">MTD ACCUMULATED</div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: var(--primary); margin-top: 2px;" id="valMtdCommission">RM 0.00</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="personal-rec">
+        <b>💡 Your Personal Clinical Focus Today:</b>
+        <div id="valPersonalRec" style="margin-top:4px;">Focus on dual house brand recommendation at checkout.</div>
+      </div>
+    </div>
+
+    <!-- Manager Control Panel (Strictly PIN 6688 Only) -->
+    <div id="managerPanel" class="card" style="display:none; border:1px solid #ab47bc;">
+      <h2 style="color: #6a1b9a;">🔒 Manager Report & Screenshot Hub</h2>
+      <button class="btn btn-copy" onclick="copyWhatsAppBriefing()">📋 Copy WhatsApp Briefing</button>
+      <a id="btnDlDirector" class="btn btn-image" href="https://drive.google.com/file/d/1alsC_x48Utgf08wULdSPdMUDK6qfErcD/view?usp=drivesdk" target="_blank">📸 Download Directors 7-Day Screenshot (Ultra-HD)</a>
+      <a id="btnDlTeammate" class="btn btn-image" style="background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%);" href="https://drive.google.com/file/d/1iaCPp3BJ5z9obrEsPMaW_4rIZAgWPoS-/view?usp=drivesdk" target="_blank">📸 Download Teammates Gap Screenshot (Ultra-HD)</a>
+
+      <div class="congrats-card" style="margin-top:12px;">
+        <b>🏆 Today's Congratulation Board:</b>
+        <div id="congratsPreview" style="margin-top:4px;">Loading achievers...</div>
+      </div>
+
+      <div style="overflow-x:auto; margin-top:12px;">
+        <table id="teammatesTable">
+          <thead><tr><th>Name</th><th>Today TS</th><th>Today HB</th><th>MTD TS</th><th>MTD HB</th><th>MTD Cust</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: VIRTUAL PET -->
+  <div id="petView" style="display:none;">
+    <div class="card">
+      <h2>
+        <span>🐾 <span id="petNameTitle">My KS Buddy</span></span>
+        <button class="btn-logout" style="background:#ffcdd2; color:#b71c1c; font-weight:800;" onclick="resetPetToEgg()">🥚 Re-hatch (Reset)</button>
+      </h2>
+
+      <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:800; margin-bottom:4px;">
+        <span id="petStageBadge" style="color:var(--primary);">Baby Hatchling</span>
+        <span id="petLevelText">Level 1</span>
+        <span id="petExpText">EXP: 0 / 50</span>
+      </div>
+      <div class="progress-bar-bg" style="margin-bottom:12px;">
+        <div class="progress-bar-fill" id="petExpBar" style="width:0%;"></div>
+      </div>
+
+      <div class="pet-habitat" id="petRoom">
+        <div class="pet-speech" id="petSpeechBubble">Answer a House Brand quiz to care for me! 🌟</div>
+        <div class="pet-habitat-floor"></div>
+
+        <div class="pet-roam-track">
+          <div class="pet-actor" id="petActor" onclick="triggerSignatureAction()">
+            <div class="action-effect-badge" id="petActionEffect">✨</div>
+            <div class="pet-figure" id="petFigure">🥚</div>
+            <div class="equipped-badge" id="petEquippedAccessory"></div>
+          </div>
+        </div>
+
+        <div class="poop-item" id="poopElement" style="display:none;" onclick="triggerPetCare('clean')" title="Tap to clean poop!">💩</div>
+      </div>
+
+      <button class="btn" style="background:linear-gradient(135deg, #ab47bc 0%, #ce93d8 100%); margin-bottom:10px;" onclick="openPetWardrobeModal()">🛍️ Anime & Movie Wardrobe</button>
+
+      <div class="pet-meters">
+        <div class="meter-card">
+          <div class="meter-label">HUNGER ❤️</div>
+          <div class="meter-bar-bg"><div class="meter-bar-fill fill-hunger" id="meterHunger" style="width:80%;"></div></div>
+          <div style="font-size:0.65rem; color:#555; margin-top:2px;" id="textHunger">80%</div>
+        </div>
+        <div class="meter-card">
+          <div class="meter-label">HAPPY ⭐</div>
+          <div class="meter-bar-bg"><div class="meter-bar-fill fill-happy" id="meterHappy" style="width:80%;"></div></div>
+          <div style="font-size:0.65rem; color:#555; margin-top:2px;" id="textHappy">80%</div>
+        </div>
+        <div class="meter-card">
+          <div class="meter-label">CLEAN ✨</div>
+          <div class="meter-bar-bg"><div class="meter-bar-fill fill-clean" id="meterClean" style="width:100%;"></div></div>
+          <div style="font-size:0.65rem; color:#555; margin-top:2px;" id="textClean">100%</div>
+        </div>
+      </div>
+
+      <div class="pet-actions">
+        <button class="btn-pet" onclick="triggerPetCare('feed')">🍎<br>Feed Snack<br><span style="font-size:0.6rem; color:#888;">Quiz & Eat</span></button>
+        <button class="btn-pet" onclick="triggerPetCare('play')">🎾<br>Play Ball<br><span style="font-size:0.6rem; color:#888;">Quiz & Play</span></button>
+        <button class="btn-pet" onclick="triggerPetCare('clean')">🧹<br>Clean Room<br><span style="font-size:0.6rem; color:#888;">Quiz & Clean</span></button>
+        <button class="btn-pet" onclick="sleepPet()" id="btnSleep">💤<br>Sleep / Rest<br><span style="font-size:0.6rem; color:#888;">Energy</span></button>
+      </div>
+
+      <div id="petSalesFeastBox" style="background:#e8f5e9; border:1.5px solid #2e7d32; border-radius:12px; padding:10px; margin-top:14px; display:flex; align-items:center; justify-content:space-between;">
+        <div>
+          <div style="font-size:0.75rem; font-weight:800; color:#1b5e20;">🌟 DAILY TARGET PET FEAST</div>
+          <div style="font-size:0.68rem; color:#2e7d32;">Hit TS, HB, or HM today to unlock +50 Bonus EXP!</div>
+        </div>
+        <button class="btn" id="btnClaimFeast" style="width:auto; margin:0; padding:6px 10px; font-size:0.72rem; background:#2e7d32;" onclick="claimTargetFeast()">Claim 🎁</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: KS HERBAL FARM -->
+  <div id="farmView" style="display:none;">
+    <div class="card" style="border: 2px solid #81c784;">
+      <h2>
+        <span>🌾 <span id="farmTitleName">Kota Sentosa Herbal Farm</span></span>
+        <button class="btn-logout" style="background:#c8e6c9; color:#1b5e20; font-weight:800;" onclick="openFarmDecorModal()">🏪 Decor Shop</button>
+      </h2>
+
+      <div class="farm-header-box">
+        <span>🪙 HB Coins: <span id="farmGoldText">0</span></span>
+        <span>🌾 Harvested: <span id="farmHarvestCount">0</span></span>
+      </div>
+
+      <div class="decor-terrace" id="farmDecorTerrace"></div>
+
+      <div style="font-size:0.75rem; font-weight:800; color:#2e7d32; margin-top:6px;">SELECT HERBAL SEED TO PLANT:</div>
+      <div class="seed-tray">
+        <div class="seed-btn active" id="seed_ginkgo" onclick="selectCropSeed('ginkgo')">🌿<br>Ginkgo<br><span style="font-size:0.6rem; color:#666;">1 min</span></div>
+        <div class="seed-btn" id="seed_ginger" onclick="selectCropSeed('ginger')">🫚<br>Ginger<br><span style="font-size:0.6rem; color:#666;">3 mins</span></div>
+        <div class="seed-btn" id="seed_bilberry" onclick="selectCropSeed('bilberry')">🫐<br>Bilberry<br><span style="font-size:0.6rem; color:#666;">5 mins</span></div>
+        <div class="seed-btn" id="seed_cordyceps" onclick="selectCropSeed('cordyceps')">🌾<br>Cordyceps<br><span style="font-size:0.6rem; color:#666;">10 mins</span></div>
+      </div>
+
+      <div class="farm-plots-grid">
+        <div class="plot-card" id="plot_0" onclick="handlePlotClick(0)"><span class="crop-icon" id="plotIcon_0">🕳️</span><div style="font-weight:800; font-size:0.75rem;" id="plotName_0">Empty Plot</div><div style="font-size:0.65rem; color:#777;" id="plotTime_0">Tap to Plant</div></div>
+        <div class="plot-card" id="plot_1" onclick="handlePlotClick(1)"><span class="crop-icon" id="plotIcon_1">🕳️</span><div style="font-weight:800; font-size:0.75rem;" id="plotName_1">Empty Plot</div><div style="font-size:0.65rem; color:#777;" id="plotTime_1">Tap to Plant</div></div>
+        <div class="plot-card" id="plot_2" onclick="handlePlotClick(2)"><span class="crop-icon" id="plotIcon_2">🕳️</span><div style="font-weight:800; font-size:0.75rem;" id="plotName_2">Empty Plot</div><div style="font-size:0.65rem; color:#777;" id="plotTime_2">Tap to Plant</div></div>
+        <div class="plot-card" id="plot_3" onclick="handlePlotClick(3)"><span class="crop-icon" id="plotIcon_3">🕳️</span><div style="font-weight:800; font-size:0.75rem;" id="plotName_3">Empty Plot</div><div style="font-size:0.65rem; color:#777;" id="plotTime_3">Tap to Plant</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WARDROBE MODAL -->
+  <div class="shop-modal" id="wardrobeModal">
+    <div class="shop-card">
+      <h3 style="margin-top:0; color:var(--primary); display:flex; justify-content:space-between;">
+        <span>🛍️ Anime & Movie Wardrobe</span>
+        <button style="background:none; border:none; font-size:1.2rem; cursor:pointer;" onclick="closeShopModals()">✕</button>
+      </h3>
+      <div style="font-size:0.75rem; color:#555;">Spend your earned HB Commission Coins to dress up your pet!</div>
+      <div class="shop-grid" id="wardrobeShopGrid"></div>
+    </div>
+  </div>
+
+  <!-- FARM DECOR MODAL -->
+  <div class="shop-modal" id="decorModal">
+    <div class="shop-card">
+      <h3 style="margin-top:0; color:#2e7d32; display:flex; justify-content:space-between;">
+        <span>🏪 Farm Decoration Shop</span>
+        <button style="background:none; border:none; font-size:1.2rem; cursor:pointer;" onclick="closeShopModals()">✕</button>
+      </h3>
+      <div style="font-size:0.75rem; color:#555;">Decorate your herbal farm with items bought from HB sales!</div>
+      <div class="shop-grid" id="decorShopGrid"></div>
+    </div>
+  </div>
+
+  <!-- REALM SELECTOR MODAL -->
+  <div class="shop-modal" id="realmModal">
+    <div class="shop-card" style="text-align:center;">
+      <h3 style="margin-top:0; color:var(--primary);">✨ Choose Your Evolution Realm</h3>
+      <div style="font-size:0.75rem; color:#555; margin-bottom:12px;">Choose which species lineage your pet evolves into!</div>
+      <button class="btn" style="background:#ab47bc; margin-bottom:8px;" onclick="setPetRealm('anime')">⚡ Anime Legends (Demon Slayer, Pikachu)</button>
+      <button class="btn" style="background:#e65100; margin-bottom:8px;" onclick="setPetRealm('dino')">🦖 Prehistoric Dinosaurs (Raptor, T-Rex)</button>
+      <button class="btn" style="background:#1565c0; margin-bottom:8px;" onclick="setPetRealm('movie')">🦸 Movie & Pop Heroes (Panda, Sorcerer)</button>
+      <button class="btn" style="background:#00897b; margin-bottom:8px;" onclick="setPetRealm('mythic')">🦄 Mythical Beasts (Unicorn, Phoenix, Dragon)</button>
+      <button class="btn-logout" style="margin-top:8px;" onclick="closeShopModals()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- QUIZ MODAL -->
+  <div id="quizModal">
+    <div class="quiz-card">
+      <div class="quiz-sku-badge" id="quizSkuBadge">House Brand Quiz</div>
+      <div class="quiz-question" id="quizQuestionText">Loading Question...</div>
+      <div class="quiz-options" id="quizOptionsContainer"></div>
+      <div class="quiz-feedback" id="quizFeedbackBox"></div>
+      <button class="btn" id="quizActionBtn" style="margin-top:12px; display:none;" onclick="closeQuizModal()">Continue</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAVIGATION -->
+  <div class="bottom-nav">
+    <button class="nav-tab active" id="tabNavPerf" onclick="switchAppTab('perf')">
+      <span class="tab-icon">📊</span><span>Performance</span>
+    </button>
+    <button class="nav-tab" id="tabNavPet" onclick="switchAppTab('pet')">
+      <span class="tab-icon">🐾</span><span>My Pet</span>
+    </button>
+    <button class="nav-tab" id="tabNavFarm" onclick="switchAppTab('farm')">
+      <span class="tab-icon">🌾</span><span>KS Farm</span>
+    </button>
+  </div>
+
+    <!-- Modular Scripts -->
+  <script src="./app.js"></script>
+  <script src="./quiz-bank.js"></script>
+  <script src="./pet.js"></script>
+  <script src="./farm.js"></script>
 </body>
 </html>
